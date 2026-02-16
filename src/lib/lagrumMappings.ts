@@ -88,6 +88,46 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Ekonomisk brottslighet",
     primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
   },
+  "grovt sabotage mot blåljusverksamhet": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 5 c §"],
+  },
+  "folkrättsbrott, grovt brott": {
+    sakomrade: "Brott mot internationell rätt (folkrätt)",
+    primart_lagrum: ["BrB 22 kap. 6 § (grovt brott)"],
+  },
+  "grovt bokföringsbrott": {
+    sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
+    primart_lagrum: ["BrB 11 kap. 5 § (grovt bokföringsbrott)"],
+    alternativa_lagrum: ["BrB 11 kap. 5 § (bokföringsbrott)"],
+  },
+  "bokföringsbrott": {
+    sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
+    primart_lagrum: ["BrB 11 kap. 5 §"],
+    alternativa_lagrum: ["BrB 11 kap. 5 § (ringa bokföringsbrott)"],
+  },
+  "människorov": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 1 §"],
+  },
+  "tillgrepp av fortskaffningsmedel": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 7 §"],
+    alternativa_lagrum: ["BrB 8 kap. 7 § (ringa)", "BrB 8 kap. 7 § (grovt)"],
+  },
+  "olovligt förande av vattenskoter": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Lag (2021:626) om förarbevis för vattenskoter 27 §"],
+  },
+  "djurplågeri": {
+    sakomrade: "Brott mot allmän ordning (brott mot djur)",
+    primart_lagrum: ["BrB 16 kap. 13 §"],
+  },
+  "grovt olovligt förfogande": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 10 kap. 4 § (grovt olovligt förfogande)"],
+    alternativa_lagrum: ["BrB 10 kap. 4 § (olovligt förfogande)"],
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
