@@ -80,6 +80,25 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276)"],
   },
+  "brott mot förordningen om vilotider vid vissa vägtransporter inom landet": {
+    sakomrade: "Trafik- och näringsregleringsbrott",
+    primart_lagrum: ["Förordning (2004:865) om kör- och vilotider m.m."],
+    kommentar: "Straffbestämmelser och sanktionsregler är kopplade till vägtransportregelverket.",
+  },
+  "brott mot lagen om estetiska kirurgiska ingrepp och estetiska injektionsbehandlingar": {
+    sakomrade: "Hälso- och sjukvårdsreglering",
+    primart_lagrum: ["Lag (2021:363) om estetiska kirurgiska ingrepp och estetiska injektionsbehandlingar 12 §"],
+    kommentar: "Straffbestämmelser finns i samma lag.",
+  },
+  "överklagande av polisens beslag - självständigt förverkande": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["RB 27 kap.", "BrB 36 kap."],
+    kommentar: "Avser processuell prövning av beslag och självständigt förverkande.",
+  },
+  "olaga taxitrafik": {
+    sakomrade: "Trafik- och näringsregleringsbrott",
+    primart_lagrum: ["Yrkestrafiklagen (2012:210) 5 kap. 1 §"],
+  },
   "brott mot trafikförordning": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276)"],
@@ -94,6 +113,15 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 11 §"],
   },
+  "köp av sexuella tjänster": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 11 §"],
+    kommentar: "Lagteknisk benämning är 'köp av sexuell tjänst'.",
+  },
+  "ohörsamhet mot ordningsmakten": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 16 kap. 3 §"],
+  },
   "koppleri": {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 12 §"],
@@ -106,9 +134,47 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Ekonomisk brottslighet",
     primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
   },
+  "penningtvättbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
+    alternativa_lagrum: ["Lag (2014:307) 4 § (grovt brott)"],
+  },
+  "allmänfarlig vårdslöshet": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 6 §"],
+    alternativa_lagrum: ["BrB 13 kap. 6 § (grovt brott)"],
+  },
+  "grov allmänfarlig ödeläggelse": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 3 §"],
+  },
   "grovt sabotage mot blåljusverksamhet": {
     sakomrade: "Allmänfarliga brott",
     primart_lagrum: ["BrB 13 kap. 5 c §"],
+  },
+  "utpressning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 9 kap. 4 §"],
+    alternativa_lagrum: ["BrB 9 kap. 4 § (grov utpressning)"],
+  },
+  "övergrepp i rättssak": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 17 kap. 10 §"],
+  },
+  "olovligt förfogande": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 10 kap. 4 §"],
+    alternativa_lagrum: ["BrB 10 kap. 4 § (grovt brott)"],
+  },
+  "brott mot lagen om fartygssäkerhet": {
+    sakomrade: "Sjöfartsreglering",
+    primart_lagrum: ["Fartygssäkerhetslagen (2003:364) 8 kap."],
+    kommentar: "Exakt paragraf beror på överträdelsens art.",
+  },
+  "brott mot sjötrafikförordningen": {
+    sakomrade: "Sjötrafikbrott",
+    primart_lagrum: ["Sjötrafikförordningen (1986:300)"],
+    kommentar: "Exakt paragraf beror på överträdelsens art.",
   },
   "folkrättsbrott, grovt brott": {
     sakomrade: "Brott mot internationell rätt (folkrätt)",
