@@ -5,11 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
 interface HearingsTabProps {
   hearings: Hearing[];
+  onFetchAll?: () => void;
 }
 
 type SortKey = "datetime" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
@@ -26,7 +28,7 @@ const typeBadgeVariant = (type: string) => {
   }
 };
 
-export default function HearingsTab({ hearings }: HearingsTabProps) {
+export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
@@ -127,28 +129,36 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
         <Info className="h-10 w-10 text-muted-foreground mb-4" />
         <h3 className="font-semibold text-lg">Ingen data hämtad</h3>
         <p className="text-sm text-muted-foreground mt-1 max-w-md">
-          Gå till fliken "Laddning av data" och klicka på "Hämta data" för att ladda förhandlingar från domstol.se.
+          Klicka på "Hämta alla" för att ladda förhandlingar från domstol.se, eller gå till fliken "Laddning av data" för att hämta enskilda tingsrätter.
         </p>
+        {onFetchAll && (
+          <Button onClick={onFetchAll} className="mt-4">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Hämta alla
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
-        <div className="space-y-1.5">
-          <Label>Sök</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Målnummer, saken..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+      {/* Search */}
+      <div className="space-y-1.5">
+        <Label>Sök</Label>
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Målnummer, parter, tingsrätt, saken..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
         </div>
+      </div>
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="space-y-1.5">
           <Label>Tingsrätt</Label>
           <Select value={courtFilter} onValueChange={setCourtFilter}>
