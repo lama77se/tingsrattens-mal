@@ -83,7 +83,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   const timeRegex = /\b(\d{1,2}:\d{2})\b/;
 
   // Room/Sal: "Sal 3", "sal 12"
-  const roomRegex = /\b[Ss]al\s+(\S+)/;
+  const roomRegex = /(?:Tings)?[Ss]al\s+(\S+)/;
 
   // Hearing types — most specific first, generic "Förhandling" last
   const hearingTypes = [
@@ -166,12 +166,14 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     let room = "";
     const roomMatch = line.match(roomRegex);
     if (roomMatch) {
-      room = `Sal ${roomMatch[1]}`;
+      const prefix = roomMatch[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+      room = `${prefix} ${roomMatch[1]}`;
     } else {
       for (let j = Math.max(0, i - 2); j <= Math.min(lines.length - 1, i + 2); j++) {
         const rm = lines[j].match(roomRegex);
         if (rm) {
-          room = `Sal ${rm[1]}`;
+          const prefix = rm[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+          room = `${prefix} ${rm[1]}`;
           break;
         }
       }
@@ -213,7 +215,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     if (afterCase.length > 2) {
       saken = afterCase
         .replace(roomRegex, "")
-        .replace(/\s*[Ss]al\s+\S+\s*$/, "")
+        .replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "")
         .replace(timeRangeRegex, "")
         .replace(timeRegex, "")
         .trim();
@@ -228,7 +230,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     if (!saken && i + 1 < lines.length) {
       const nextLine = lines[i + 1].trim();
       if (nextLine.length > 1 && !nextLine.match(caseNumberRegex) && !nextLine.match(shortDateRegex) && !nextLine.match(isoDateRegex)) {
-        saken = nextLine.replace(/\s*[Ss]al\s+\S+\s*$/, "").trim();
+        saken = nextLine.replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
         sakenFromNextLine = true;
       }
     }
