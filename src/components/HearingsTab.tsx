@@ -38,7 +38,8 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     const matchesSearch = search === "" ||
       h.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
       h.parties.toLowerCase().includes(search.toLowerCase()) ||
-      h.court.toLowerCase().includes(search.toLowerCase());
+      h.court.toLowerCase().includes(search.toLowerCase()) ||
+      h.saken.toLowerCase().includes(search.toLowerCase());
     const matchesCourt = courtFilter === "Alla" || h.court === courtFilter;
     const matchesType = typeFilter === "Alla" || h.type === typeFilter;
     return matchesSearch && matchesCourt && matchesType;
@@ -107,6 +108,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
               <TableHead>Tingsrätt</TableHead>
               <TableHead>Målnummer</TableHead>
               <TableHead>Typ</TableHead>
+              <TableHead>Saken</TableHead>
               <TableHead>Sal</TableHead>
               <TableHead>Parter</TableHead>
             </TableRow>
@@ -114,7 +116,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   Inga förhandlingar matchar filtren.
                 </TableCell>
               </TableRow>
@@ -128,6 +130,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
                   <TableCell>
                     <Badge variant={typeBadgeVariant(h.type) as any}>{h.type}</Badge>
                   </TableCell>
+                  <TableCell>{h.saken}</TableCell>
                   <TableCell>{h.room}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{h.parties}</TableCell>
                 </TableRow>
