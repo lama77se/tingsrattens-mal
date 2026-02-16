@@ -1,43 +1,34 @@
 
+# Fix: Saktext ihopklistrad med malnummer-suffix
 
-# Fix: Forbearbeta Blekinges ihopklistrade PDF-text
+## Problem
+PDF-texten saknar mellanslag mellan malnumrets artal och sakbeskrivningen, t.ex.:
+- `K 2940-25ansökan om konkurs` -- `\b` matchar INTE mellan `5` och `a` (bada ar `\w`)
+- `T 3535-24äktenskapsskillnad` -- `\b` matchar mellan `4` och `ä` (ä ar inte `\w`)
 
-## Bakgrund
-
-Biblioteket `pdf-parse` extraherar text baserat pa PDF:ens interna textlager. Nar man tittar pa en PDF i webblasaren laggs visuella mellanslag till av renderaren baserat pa textfragmentens koordinater, men `pdf-parse` far inte alltid med dessa som faktiska mellanslagstecken. Loggen visar den faktiska strangen som parsern jobbar med, sa `HuvudforhandlingT 3535-24` ar verkligen vad koden ser.
+Darfor parsas bara forhandlingar dar saken borjar med ett icke-ASCII-tecken (a, o, a).
 
 ## Losning
 
-Lagg till ett forbearbetningssteg i `parseCourtPdf` som infogar mellanslag fore malnummerprefix nar de ar ihopklistrade med foregaende text.
-
-### Andring i `src/lib/parseCourtPdf.ts`
-
-**Rad 54** (efter `lines` skapas): Lagg till en rad som normaliserar varje rad:
+Lagg till ytterligare en `.replace()` i `processedLines`-preprocessningen (rad 58-60) som infogar mellanslag efter malnummermonstret nar det foljs direkt av en bokstav:
 
 ```typescript
-const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-
-// Pre-process: insert space before case number prefixes glued to text
-// e.g. "HuvudförhandlingT 3535-24" -> "Huvudförhandling T 3535-24"
 const processedLines = lines.map(line =>
-  line.replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+  line
+    .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+    .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
 );
 ```
 
-**Rad 103** (for-loopen): Byt `lines` till `processedLines`:
+Den nya regexen `(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])` matchar:
+- Tva siffror, bindestreck, tva siffror (slutet av ett malnummer)
+- Direkt foljt av en bokstav (borjan av saktext)
 
-```typescript
-for (let i = 0; i < processedLines.length; i++) {
-  const line = processedLines[i];
-```
+Och infogar ett mellanslag emellan. T.ex.:
+- `K 2940-25ansökan` blir `K 2940-25 ansökan`
+- `B 1267-24misshandel` blir `B 1267-24 misshandel`
 
-**Alla ovriga referenser till `lines[i-1]`, `lines[i+1]` etc** (rad 139, 155, 159, 173, 193, 203, 231-233, 241-246): Byt till `processedLines[...]`.
-
-Regexen `([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})` ar precis och riskfri:
-- Den triggas bara nar en bokstav direkt foljs av ett malnummermonstret (T/B/FT/K/A + siffror + bindestreck + 2 siffror)
-- Om texten redan har mellanslag handlar ingenting
-- Den paverkar inte nagon annan domstols data
+Redan separerade rader paverkas inte.
 
 ### Fil som andras
-- `src/lib/parseCourtPdf.ts`
-
+- `src/lib/parseCourtPdf.ts` -- lagg till en andra `.replace()` i processedLines (rad 58-60)
