@@ -103,6 +103,8 @@ export function preprocessLines(text: string): string[] {
     .map((line) =>
       line
         // pdf-parse gluing fixes: insert spaces at known boundaries
+        // Day abbreviation glued to date: to2026 → to 2026
+        .replace(/((?:må|ti|on|to|fr|lö|sö))(\d{4})/gi, "$1 $2")
         // Date glued to time: 2026-02-1609:00 → 2026-02-16 09:00
         .replace(/(\d{4}-\d{2}-\d{2})(\d{1,2}:\d{2})/g, "$1 $2")
         // Time glued to text: 09:45Huvudförhandling → 09:45 Huvudförhandling
@@ -111,6 +113,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
         // Case number glued to text
         .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
+        // Text glued to Sal: knivlagenSal → knivlagen Sal
+        .replace(/([a-zA-ZåäöÅÄÖ.,])(Sal)/g, "$1 $2")
     );
 }
 

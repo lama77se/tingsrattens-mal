@@ -99,6 +99,13 @@ export const COURTS: CourtConfig[] = [
     buildUrl: () => "",
   },
   {
+    id: "halmstads_tingsratt",
+    name: "Halmstads tingsrätt",
+    formatFamily: "standard",
+    buildUrl: (week, year) =>
+      `${BASE}/halmstads_tingsratt/veckans-forhandlingar/${year}/vecka-${week}.pdf`,
+  },
+  {
     id: "goteborgs_tingsratt",
     name: "Göteborgs tingsrätt",
     formatFamily: "standard",
