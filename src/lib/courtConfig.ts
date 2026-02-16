@@ -170,9 +170,8 @@ export const COURTS: CourtConfig[] = [
     id: "haparanda_tingsratt",
     name: "Haparanda tingsrätt",
     formatFamily: "schema",
-    singleUrl: true,
     buildUrl: (week, year) => {
-      const base = `${BASE}/haparanda_tingsratt/schema/vecka`;
+      const base = `${BASE}/haparanda_tingsratt/veckans-forhandlingar/huvudforhandlingar-vecka`;
       const prev = week - 1;
       const next = week + 1;
       return [
