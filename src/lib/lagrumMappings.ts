@@ -128,6 +128,86 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 10 kap. 4 § (grovt olovligt förfogande)"],
     alternativa_lagrum: ["BrB 10 kap. 4 § (olovligt förfogande)"],
   },
+  "hot mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 1 §"],
+    kommentar: "Hot mot tjänsteman regleras tillsammans med våld mot tjänsteman i samma bestämmelse.",
+  },
+  "angrepp mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 1 §"],
+    kommentar: "Begreppet används ibland generellt; straffbestämmelsen är normalt 17 kap. 1 § BrB.",
+  },
+  "grov fridskränkning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 a §"],
+  },
+  "olaga förföljelse": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 b §"],
+  },
+  "förvandling av böter": {
+    sakomrade: "Straffverkställighet",
+    primart_lagrum: ["BrB 25 kap. 8 §"],
+    kommentar: "Avser omvandling av obetalda böter till fängelse.",
+  },
+  "undanröjande av strafföreläggande": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["RB 59 kap. 6 §"],
+    kommentar: "Processuell fråga enligt rättegångsbalken.",
+  },
+  "bidragsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Bidragsbrottslagen (2007:612) 2 §"],
+    alternativa_lagrum: ["4 § (grovt bidragsbrott)"],
+  },
+  "brukande av falsk urkund": {
+    sakomrade: "Urkundsbrott",
+    primart_lagrum: ["BrB 14 kap. 10 §"],
+  },
+  "urkundsförfalskning": {
+    sakomrade: "Urkundsbrott",
+    primart_lagrum: ["BrB 14 kap. 1 §"],
+    alternativa_lagrum: ["BrB 14 kap. 3 § (grov urkundsförfalskning)"],
+  },
+  "brott mot lagen om förbud beträffande knivar och andra farliga föremål, grovt brott": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) 1 § (grovt brott)"],
+  },
+  "brott mot lagen om förbud beträffande knivar och andra farliga föremål": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) 1 §"],
+    kommentar: "Straffbestämmelsen återfinns i samma lag.",
+  },
+  "brott mot lagen om brandfarliga och explosiva varor": {
+    sakomrade: "Allmänfarliga brott / särskild straffrätt",
+    primart_lagrum: ["Lag (2010:1011) om brandfarliga och explosiva varor 29 §"],
+    kommentar: "Exakt paragraf beror på typ av överträdelse.",
+  },
+  "europeisk utredningsorder": {
+    sakomrade: "Internationellt straffprocessuellt samarbete",
+    primart_lagrum: ["Lag (2017:1000) om en europeisk utredningsorder"],
+    kommentar: "Processuell fråga, inte materiellt brott.",
+  },
+  "bilbältesförseelse": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 4 kap. 10 §"],
+    kommentar: "Straff enligt trafikförordningens sanktionsbestämmelser.",
+  },
+  "grov vårdslöshet i trafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 1 §"],
+  },
+  "olaga yrkesmässig trafik": {
+    sakomrade: "Trafik- och näringsregleringsbrott",
+    primart_lagrum: ["Yrkestrafiklagen (2012:210) 5 kap. 1 §"],
+    kommentar: "Exakt bestämmelse kan variera beroende på gärningens art.",
+  },
+  "hastighetsöverträdelse": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 3 kap. 17 §"],
+    kommentar: "Straff enligt 14 kap. trafikförordningen.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
