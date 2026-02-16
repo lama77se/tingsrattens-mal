@@ -1,4 +1,4 @@
-export type FormatFamily = "standard" | "tabular" | "gavle" | "formatC" | "formatD" | "formatE";
+export type FormatFamily = "standard" | "tabular" | "gavle" | "schema" | "formatD" | "formatE";
 
 export interface RawHearing {
   date: string;
@@ -8,6 +8,8 @@ export interface RawHearing {
   room: string;
   saken: string;
   parties: string;
+  /** Physical hearing location (e.g. sub-court "Kalix tingshus") — used by schema format. */
+  location?: string;
 }
 
 export interface Hearing {

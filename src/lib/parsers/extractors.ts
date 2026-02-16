@@ -115,6 +115,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
         // Text glued to Sal: knivlagenSal → knivlagen Sal
         .replace(/([a-zA-ZåäöÅÄÖ.,])(Sal)/g, "$1 $2")
+        // Case number space before dash: B 784 -25 → B 784-25
+        .replace(/([TBFTKÄ]\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
     );
 }
 

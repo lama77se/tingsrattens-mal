@@ -167,6 +167,27 @@ export const COURTS: CourtConfig[] = [
     },
   },
   {
+    id: "haparanda_tingsratt",
+    name: "Haparanda tingsrätt",
+    formatFamily: "schema",
+    singleUrl: true,
+    buildUrl: (week, year) => {
+      const base = `${BASE}/haparanda_tingsratt/schema/vecka`;
+      const prev = week - 1;
+      const next = week + 1;
+      return [
+        `${base}-${week}-och-${next}.pdf`,
+        `${base}-${prev}-och-${week}.pdf`,
+        `${base}-${week}-och-vecka-${next}.pdf`,
+        `${base}-${prev}-och-vecka-${week}.pdf`,
+        `${base}-${week}-och-${next}-${year}.pdf`,
+        `${base}-${prev}-och-${week}-${year}.pdf`,
+        `${base}-${week}-och-vecka-${next}-${year}.pdf`,
+        `${base}-${prev}-och-vecka-${week}-${year}.pdf`,
+      ];
+    },
+  },
+  {
     id: "gotlands_tingsratt",
     name: "Gotlands tingsrätt",
     formatFamily: "standard",
