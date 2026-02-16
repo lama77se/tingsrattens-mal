@@ -105,22 +105,35 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
   ): Promise<CourtPdfResult | undefined> => {
     // Step 0: Beräknar URL
     updateStep(court.id, weekIndex, 0, { status: "active" });
-    const url = court.buildUrl(week, year);
+    const urlOrUrls = court.buildUrl(week, year);
+    const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
     await delay(300);
-    updateStep(court.id, weekIndex, 0, { status: "done", detail: url });
+    updateStep(court.id, weekIndex, 0, {
+      status: "done",
+      detail: urls.length > 1 ? `${urls.length} URL-varianter` : urls[0],
+    });
 
-    // Step 1: Hämtar PDF
+    // Step 1: Hämtar PDF — try each candidate URL in order
     updateStep(court.id, weekIndex, 1, { status: "active" });
-    const result = await fetchCourtPdf(url, week, year);
+    let result: CourtPdfResult | undefined;
+    for (const url of urls) {
+      const attempt = await fetchCourtPdf(url, week, year);
+      if (attempt.success) {
+        result = attempt;
+        break;
+      }
+      // Keep last failure for error reporting
+      result = attempt;
+    }
 
-    if (!result.success) {
-      updateStep(court.id, weekIndex, 1, { status: "error", detail: result.error });
+    if (!result || !result.success) {
+      updateStep(court.id, weekIndex, 1, { status: "error", detail: result?.error });
       updateStep(court.id, weekIndex, 2, { status: "idle" });
       updateStep(court.id, weekIndex, 3, {
         status: "error",
-        detail: result.notFound ? "PDF inte publicerad ännu" : result.error,
+        detail: result?.notFound ? "PDF inte publicerad ännu" : result?.error,
       });
-      setResult(court.id, weekIndex, result);
+      if (result) setResult(court.id, weekIndex, result);
       return undefined;
     }
 
@@ -152,13 +165,19 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
     await delay(50);
 
     const hearings: Hearing[] = [];
+    const seen = new Set<string>();
     for (let i = 0; i < weeks.length; i++) {
       const w = weeks[i];
       const result = await fetchWeek(court, i, w.week, w.year);
       if (result?.success && result.text) {
         const parsed = parseCourtPdf(result.text, court);
-        parsed.forEach((h, j) => { h.id = `${court.id}-w${i}-${j}`; });
-        hearings.push(...parsed);
+        for (const h of parsed) {
+          const key = `${h.caseNumber}|${h.date}|${h.time}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          h.id = `${court.id}-w${i}-${hearings.length}`;
+          hearings.push(h);
+        }
       }
     }
     return hearings;
@@ -181,24 +200,33 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
   };
 
   const handleFetchAll = async () => {
+    const BATCH_SIZE = 5;
     setIsFetchingAll(true);
     setCourtWeeks(initAllCourts());
     hearingsRef.current = {};
     await delay(50);
 
-    for (const court of COURTS) {
-      setFetchingCourts((prev) => new Set(prev).add(court.id));
-      const hearings = await fetchCourt(court);
-      hearingsRef.current[court.id] = hearings;
-      setFetchingCourts((prev) => {
-        const next = new Set(prev);
-        next.delete(court.id);
-        return next;
-      });
+    for (let i = 0; i < COURTS.length; i += BATCH_SIZE) {
+      const batch = COURTS.slice(i, i + BATCH_SIZE);
+
+      await Promise.all(
+        batch.map(async (court) => {
+          setFetchingCourts((prev) => new Set(prev).add(court.id));
+          const hearings = await fetchCourt(court);
+          hearingsRef.current[court.id] = hearings;
+          setFetchingCourts((prev) => {
+            const next = new Set(prev);
+            next.delete(court.id);
+            return next;
+          });
+        })
+      );
+
+      // Publish results after each batch so UI updates progressively
+      const allHearings = Object.values(hearingsRef.current).flat();
+      onHearingsFetched(allHearings);
     }
 
-    const allHearings = Object.values(hearingsRef.current).flat();
-    onHearingsFetched(allHearings);
     setIsFetchingAll(false);
   };
 
