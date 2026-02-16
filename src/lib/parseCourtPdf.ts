@@ -8,6 +8,8 @@ export interface Hearing {
   room: string;
   saken: string;
   parties: string;
+  lagrum: string;
+  fleraSakfragor: boolean;
 }
 
 /**
@@ -249,8 +251,12 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     }
     parties = parties.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "");
 
+    // Detect "flera sakfrågor" from saken field
+    const fleraSakfragorRegex = /\bm\s*\.?\s*m\s*\.?\b/i;
+    const fleraSakfragor = fleraSakfragorRegex.test(saken);
+
     idCounter++;
-    const hearing = {
+    const hearing: Hearing = {
       id: `parsed-${idCounter}`,
       date: currentDate || "Okänt datum",
       time: time || "–",
@@ -260,6 +266,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       room: room || "–",
       saken: saken || "–",
       parties: parties || "–",
+      lagrum: "",
+      fleraSakfragor,
     };
     console.log("Parsed hearing:", hearing);
     hearings.push(hearing);
