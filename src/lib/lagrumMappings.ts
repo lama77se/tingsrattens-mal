@@ -378,6 +378,47 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 13 kap. 5 c §"],
     alternativa_lagrum: ["BrB 13 kap. 5 c § (grovt brott)"],
   },
+  "barnfridsbrott": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 3 §"],
+    alternativa_lagrum: ["BrB 4 kap. 3 § (grovt barnfridsbrott)"],
+  },
+  "brott mot ordningslagen": {
+    sakomrade: "Ordningsbrott",
+    primart_lagrum: ["Ordningslagen (1993:1617) 3 kap."],
+    kommentar: "Exakt paragraf beror på överträdelsens art (t.ex. offentlig tillställning, alkoholförtäring m.m.).",
+  },
+  "försök till utpressning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: [
+      "BrB 9 kap. 4 §",
+      "BrB 23 kap. 1 §",
+    ],
+    kommentar: "Försök regleras i 23 kap. BrB i kombination med straffbudet för utpressning.",
+  },
+  "involverande av underårig i brottslighet": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 16 kap. 5 a §"],
+  },
+  "falskt larm": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 6 §"],
+  },
+  "olaga frihetsberövande": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 2 §"],
+    alternativa_lagrum: ["BrB 4 kap. 2 § (grovt brott)"],
+  },
+  "överträdelse av kontaktförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (1988:688) om kontaktförbud 24 §"],
+    kommentar: "Straffbestämmelsen finns i samma lag.",
+  },
+  "utnyttjande av barn för sexuell posering": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 8 §"],
+    alternativa_lagrum: ["BrB 6 kap. 8 § (grovt brott)"],
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
@@ -389,8 +430,9 @@ export function matchLagrum(
 ): { lagrum: string; sakomrade: string } {
   const empty = { lagrum: "", sakomrade: "" };
 
-  // Only enrich B-mål (criminal cases)
-  if (!caseNumber.trim().toUpperCase().startsWith("B")) return empty;
+  // Only enrich B-mål (criminal cases), or when case number is unknown
+  const trimmedCase = caseNumber.trim().toUpperCase();
+  if (trimmedCase && !trimmedCase.startsWith("B")) return empty;
 
   // Clean saken: lowercase + strip trailing "m m" / "m.m."
   const cleanSaken = saken

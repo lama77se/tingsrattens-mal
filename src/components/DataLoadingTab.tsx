@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle2, AlertCircle, Circle, FileText } from "lucide-react";
+import { RefreshCw, CheckCircle2, AlertCircle, Circle, FileText, Ban } from "lucide-react";
 import { getPreviousWeek, getCurrentWeek, getNextWeek } from "@/lib/weekUtils";
 import { COURTS, CourtConfig } from "@/lib/courtConfig";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
@@ -60,9 +60,12 @@ const stepIcon = (status: StepStatus) => {
 type CourtWeeksState = Record<string, WeekFetch[]>;
 
 function initAllCourts(): CourtWeeksState {
+  const current = getCurrentWeek();
   const state: CourtWeeksState = {};
   for (const court of COURTS) {
-    state[court.id] = createWeeksForCourt();
+    state[court.id] = court.singleUrl
+      ? [{ week: current.week, year: current.year, steps: createInitialSteps() }]
+      : createWeeksForCourt();
   }
   return state;
 }
@@ -169,7 +172,10 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
   };
 
   const fetchCourt = async (court: CourtConfig): Promise<Hearing[]> => {
-    const weeks = createWeeksForCourt();
+    const current = getCurrentWeek();
+    const weeks = court.singleUrl
+      ? [{ week: current.week, year: current.year, steps: createInitialSteps() }]
+      : createWeeksForCourt();
     setCourtWeeks((prev) => ({ ...prev, [court.id]: weeks }));
     await delay(50);
 
@@ -215,8 +221,9 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
     hearingsRef.current = {};
     await delay(50);
 
-    for (let i = 0; i < COURTS.length; i += BATCH_SIZE) {
-      const batch = COURTS.slice(i, i + BATCH_SIZE);
+    const fetchable = COURTS.filter((c) => !c.disabled);
+    for (let i = 0; i < fetchable.length; i += BATCH_SIZE) {
+      const batch = fetchable.slice(i, i + BATCH_SIZE);
 
       await Promise.all(
         batch.map(async (court) => {
@@ -257,6 +264,22 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
       </div>
 
       {[...COURTS].sort((a, b) => a.name.localeCompare(b.name, "sv")).map((court) => {
+        if (court.disabled) {
+          return (
+            <div key={court.id} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium text-sm text-muted-foreground">{court.name}</h4>
+                  <Ban className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+              </div>
+              {court.note && (
+                <p className="text-sm text-muted-foreground italic">{court.note}</p>
+              )}
+            </div>
+          );
+        }
+
         const weeks = courtWeeks[court.id] || [];
         const isCourtFetching = fetchingCourts.has(court.id);
 
@@ -282,9 +305,10 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
                     <CardTitle className="text-base flex items-center gap-2">
                       <FileText className="h-4 w-4" />
                       Vecka {w.week}, {w.year}
-                      {wi === 0 && <Badge variant="outline" className="text-xs">Föregående</Badge>}
-                      {wi === 1 && <Badge variant="secondary" className="text-xs">Nuvarande</Badge>}
-                      {wi === 2 && <Badge variant="outline" className="text-xs">Nästa</Badge>}
+                      {weeks.length > 1 && wi === 0 && <Badge variant="outline" className="text-xs">Föregående</Badge>}
+                      {weeks.length > 1 && wi === 1 && <Badge variant="secondary" className="text-xs">Nuvarande</Badge>}
+                      {weeks.length > 1 && wi === 2 && <Badge variant="outline" className="text-xs">Nästa</Badge>}
+                      {weeks.length === 1 && <Badge variant="secondary" className="text-xs">Aktuell vecka</Badge>}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">

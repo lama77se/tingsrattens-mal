@@ -92,4 +92,13 @@ describe("parseCourtPdf dispatcher", () => {
     expect(result[0].saken).toBe("–");
     expect(result[0].parties).toBe("–");
   });
+
+  it("enriches lagrum for tabular format (no case number)", () => {
+    const text = "2026-02-17 09:00 - 16:00 Huvudförhandling narkotikabrott Sal 1";
+    const result = parseCourtPdf(text, { name: "Eksjö tingsrätt", formatFamily: "tabular" });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("–");
+    expect(result[0].lagrum).toContain("Narkotikastrafflagen");
+    expect(result[0].sakomrade).toBe("Narkotikabrott");
+  });
 });
