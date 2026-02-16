@@ -47,6 +47,7 @@ export const HEARING_TYPES = [
   "Häktningsförhandling",
   "Konkursförhandling",
   "Muntlig förberedelse",
+  "Borgenärssammanträde",
   "Edgångssammanträde",
   "Sammanträde",
   "Tredskodom",
