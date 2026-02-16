@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scale, Database } from "lucide-react";
 import HearingsTab from "@/components/HearingsTab";
 import DataLoadingTab from "@/components/DataLoadingTab";
-import { Hearing } from "@/lib/parseSolnaPdf";
+import { Hearing } from "@/lib/parseCourtPdf";
 
 const Index = () => {
   const [hearings, setHearings] = useState<Hearing[]>([]);

@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Info } from "lucide-react";
-import { Hearing } from "@/lib/parseSolnaPdf";
+import { Hearing } from "@/lib/parseCourtPdf";
 
 interface HearingsTabProps {
   hearings: Hearing[];
