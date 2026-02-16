@@ -12,6 +12,26 @@ import {
 const HEARING_LINE_REGEX = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
 
 /**
+ * Regex matching a time-only line (no date): HH:MM - HH:MM <rest>
+ */
+const TIME_ONLY_REGEX = /^(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
+
+/**
+ * Regex matching a date-only line (possibly with day abbreviation): "må 2026-02-09"
+ */
+const DATE_ONLY_REGEX = /(\d{4}-\d{2}-\d{2})\s*$/;
+
+/**
+ * Regex matching (dag X/Y) annotations for multi-day hearings.
+ */
+const DAG_REGEX = /^\(dag\s+\d+\/\d+\)/i;
+
+/**
+ * Regex matching page headers to skip.
+ */
+const HEADER_REGEX = /^(uppropslista|datum\s+tid)/i;
+
+/**
  * Day abbreviations (Swedish) — standalone lines to skip.
  * Includes common PDF encoding variants (må → mö, etc.)
  */
@@ -26,17 +46,37 @@ const TYPE_ALIASES: Record<string, string> = {
   "muntlig förberedelse och ev hf": "Muntlig förberedelse",
 };
 
+// Pre-sorted aliases longest first for correct prefix matching
+const SORTED_ALIASES = Object.entries(TYPE_ALIASES)
+  .map(([alias, canonical]) => ({ alias, canonical, normalizedAlias: normalize(alias) }))
+  .sort((a, b) => b.normalizedAlias.length - a.normalizedAlias.length);
+
 // Pre-sorted longest first so "Muntlig förberedelse" matches before partial hits
 const SORTED_TYPES = [...NORMALIZED_TYPES].sort(
   (a, b) => b.normalized.length - a.normalized.length
 );
 
+/**
+ * Alias suffixes for cleaning up cross-line alias fragments.
+ * E.g., "Muntlig förberedelse och ev\nhf" → type "Muntlig förberedelse", saken starts with "och ev hf"
+ */
+const ALIAS_SUFFIXES: { canonical: string; normalizedSuffix: string }[] = [];
+for (const { canonical, normalizedAlias } of SORTED_ALIASES) {
+  const nCanonical = normalize(canonical);
+  if (normalizedAlias.startsWith(nCanonical) && normalizedAlias.length > nCanonical.length) {
+    ALIAS_SUFFIXES.push({
+      canonical,
+      normalizedSuffix: normalizedAlias.substring(nCanonical.length).trim(),
+    });
+  }
+}
+ALIAS_SUFFIXES.sort((a, b) => b.normalizedSuffix.length - a.normalizedSuffix.length);
+
 function extractTypeFromText(text: string): { type: string; remainder: string } {
   const normalized = normalize(text);
 
   // Check aliases first (longest alias first)
-  for (const [alias, canonical] of Object.entries(TYPE_ALIASES)) {
-    const normalizedAlias = normalize(alias);
+  for (const { alias, canonical, normalizedAlias } of SORTED_ALIASES) {
     if (normalized.startsWith(normalizedAlias)) {
       return { type: canonical, remainder: text.substring(alias.length).trim() };
     }
@@ -64,10 +104,25 @@ function stripRoom(text: string): string {
 }
 
 /**
- * Tabular format parser — for courts like Eksjö that publish table-style PDFs
- * with columns: Dag, Datum, Tid, Mötestyp, Saken, Sal.
+ * Check if a line should stop the continuation loop.
+ */
+function isContinuationBreak(line: string): boolean {
+  return (
+    !!line.match(HEARING_LINE_REGEX) ||
+    DAY_ABBREV_REGEX.test(line) ||
+    DATE_ONLY_REGEX.test(line) ||
+    !!line.match(TIME_ONLY_REGEX) ||
+    HEADER_REGEX.test(line)
+  );
+}
+
+/**
+ * Tabular format parser — for courts like Eksjö and Hässleholm that publish
+ * table-style PDFs with columns: Dag, Datum, Tid, Mötestyp, Saken, Sal/Lokal.
  *
  * No case numbers or parties in this format.
+ * Handles both single-line entries and multi-line entries where date, (dag X/Y),
+ * and time are on separate lines.
  */
 export const formatTabular: ParserStrategy = {
   name: "Tabular",
@@ -77,18 +132,45 @@ export const formatTabular: ParserStrategy = {
     const { text } = ctx;
     if (!text || text.trim().length === 0) return [];
 
-    console.log("PDF text first 500 chars:", text.substring(0, 500));
-
     const lines = preprocessLines(text);
     const hearings: RawHearing[] = [];
+    let currentDate = "";
 
     for (let i = 0; i < lines.length; i++) {
-      const match = lines[i].match(HEARING_LINE_REGEX);
-      if (!match) continue;
+      const line = lines[i];
 
-      const date = match[1];
-      const time = `${match[2]} - ${match[3]}`;
-      const rest = match[4].trim();
+      // Skip (dag X/Y) annotations and header lines
+      if (DAG_REGEX.test(line) || HEADER_REGEX.test(line)) continue;
+
+      // Check for date-only line (day abbrev + ISO date, no time)
+      const dateOnly = line.match(DATE_ONLY_REGEX);
+      if (dateOnly && !line.match(HEARING_LINE_REGEX)) {
+        currentDate = dateOnly[1];
+        continue;
+      }
+
+      let date: string;
+      let time: string;
+      let rest: string;
+
+      // Check for full hearing line (date + time on same line)
+      const fullMatch = line.match(HEARING_LINE_REGEX);
+      if (fullMatch) {
+        date = fullMatch[1];
+        time = `${fullMatch[2]} - ${fullMatch[3]}`;
+        rest = fullMatch[4].trim();
+        currentDate = date;
+      } else {
+        // Check for time-only line (needs tracked date)
+        const timeMatch = line.match(TIME_ONLY_REGEX);
+        if (timeMatch && currentDate) {
+          date = currentDate;
+          time = `${timeMatch[1]} - ${timeMatch[2]}`;
+          rest = timeMatch[3].trim();
+        } else {
+          continue;
+        }
+      }
 
       // Extract hearing type from the text after the time range
       const { type, remainder } = extractTypeFromText(rest);
@@ -100,14 +182,25 @@ export const formatTabular: ParserStrategy = {
       // Always check subsequent lines for continuation text
       for (let j = i + 1; j < lines.length; j++) {
         const nextLine = lines[j];
-        // Stop at the next hearing line, day abbreviation, or header
-        if (nextLine.match(HEARING_LINE_REGEX) || DAY_ABBREV_REGEX.test(nextLine)) break;
+        if (isContinuationBreak(nextLine)) break;
+        // Skip (dag X/Y) annotations in continuation
+        if (DAG_REGEX.test(nextLine)) continue;
         if (nextLine.length > 1) {
           if (!room) room = extractRoomFromText(nextLine);
           const cleaned = stripRoom(nextLine);
           if (cleaned && !DAY_ABBREV_REGEX.test(cleaned)) {
             saken = saken ? `${saken} ${cleaned}` : cleaned;
           }
+        }
+      }
+
+      // Strip alias suffixes that span across lines
+      // e.g., "Muntlig förberedelse och ev\nhf" → type "Muntlig förberedelse", saken "och ev hf ..."
+      const nSaken = normalize(saken);
+      for (const { canonical, normalizedSuffix } of ALIAS_SUFFIXES) {
+        if (type === canonical && nSaken.startsWith(normalizedSuffix)) {
+          saken = saken.substring(normalizedSuffix.length).trim();
+          break;
         }
       }
 
