@@ -148,17 +148,23 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
 
     const r1 = await fetchWeek(0, previous.week, previous.year);
     if (r1?.success && r1.text) {
-      allHearings.push(...parseCourtPdf(r1.text, "Solna tingsrätt"));
+      const parsed = parseCourtPdf(r1.text, "Solna tingsrätt");
+      parsed.forEach((h, i) => { h.id = `w0-${i}`; });
+      allHearings.push(...parsed);
     }
 
     const r2 = await fetchWeek(1, current.week, current.year);
     if (r2?.success && r2.text) {
-      allHearings.push(...parseCourtPdf(r2.text, "Solna tingsrätt"));
+      const parsed = parseCourtPdf(r2.text, "Solna tingsrätt");
+      parsed.forEach((h, i) => { h.id = `w1-${i}`; });
+      allHearings.push(...parsed);
     }
 
     const r3 = await fetchWeek(2, next.week, next.year);
     if (r3?.success && r3.text) {
-      allHearings.push(...parseCourtPdf(r3.text, "Solna tingsrätt"));
+      const parsed = parseCourtPdf(r3.text, "Solna tingsrätt");
+      parsed.forEach((h, i) => { h.id = `w2-${i}`; });
+      allHearings.push(...parsed);
     }
 
     onHearingsFetched(allHearings);
