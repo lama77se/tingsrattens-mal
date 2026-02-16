@@ -13,12 +13,12 @@ export interface CourtPdfResult {
 }
 
 export async function fetchCourtPdf(
-  courtId: string,
-  weekNumber: number,
-  year: number
+  pdfUrl: string,
+  weekNumber?: number,
+  year?: number
 ): Promise<CourtPdfResult> {
   const { data, error } = await supabase.functions.invoke("fetch-court-pdf", {
-    body: { courtId, weekNumber, year },
+    body: { pdfUrl, weekNumber, year },
   });
 
   if (error) {
