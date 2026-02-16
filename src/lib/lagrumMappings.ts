@@ -144,6 +144,24 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
     alternativa_lagrum: ["Lag (2014:307) 4 § (grovt brott)"],
   },
+  "penningtvätt": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
+    alternativa_lagrum: ["Lag (2014:307) 4 § (grovt penningtvättsbrott)", "Lag (2014:307) 5 § (penningtvättsförseelse)"],
+  },
+  "trolöshet mot huvudman": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 10 kap. 5 §"],
+    alternativa_lagrum: ["BrB 10 kap. 5 § (grov trolöshet mot huvudman)"],
+  },
+  "brott om djurskyddslagen": {
+    sakomrade: "Djurskyddsbrott",
+    primart_lagrum: ["Djurskyddslagen (2018:1192) 10 kap."],
+  },
+  "olovlig befattning med falska pengar, ringa brott": {
+    sakomrade: "Penning- och urkundsbrott",
+    primart_lagrum: ["BrB 14 kap. 10 § (ringa brott)"],
+  },
   "allmänfarlig vårdslöshet": {
     sakomrade: "Allmänfarliga brott",
     primart_lagrum: ["BrB 13 kap. 6 §"],
