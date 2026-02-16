@@ -196,4 +196,20 @@ describe("formatSchema", () => {
     expect(result[1].time).toBe("09:30 - 15:00");
     expect(result[1].room).toBe("Sal 1");
   });
+
+  it("does not split on case number references inside parentheses", () => {
+    const text = [
+      "Tisdag 24 februari 2026",
+      "kl. 15:15 - 16:00",
+      "Kalix tingshus, sal 1",
+      "B 110-26, Huvudförhandling",
+      "angående undanröjande av ungdomstjänst (B 512-25)",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("B 110-26");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("undanröjande av ungdomstjänst (B 512-25)");
+  });
 });
