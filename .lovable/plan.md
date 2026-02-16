@@ -1,64 +1,52 @@
 
-# Ta bort Sal/Parter, lagg till Lagrum och Flera sakfragor
 
-## Oversikt
-- Ta bort kolumnerna "Sal" och "Parter" fran tabellen (behall i parsern, dold i UI)
-- Lagg till nytt falt "Primart tillamligt lagrum" (tomt for nu, mappningar kommer senare)
-- Lagg till nytt falt "Flera sakfragor forekommer" (checkbox, sant om saken innehaller "mm", "m.m." eller "m m")
-- Lagg till filter for lagrum och checkbox-filter for flera sakfragor
+# Fix "Flera sakfragor"-detektionen
 
-## Andringar
+## Problem
+Regex `/\bm\s*\.?\s*m\s*\.?\b/i` matchar inte "m m" i saken-faltet. Trolig orsak: PDF-extraktionen kan infoga osynliga Unicode-tecken (t.ex. non-breaking spaces, zero-width chars) som bryter `\b` word boundary-matchningen.
 
-### 1. `src/lib/parseCourtPdf.ts`
-- Utoka `Hearing`-interfacet med tva nya falt:
-  - `lagrum: string` (tomt for nu, satt till `""`)
-  - `fleraSakfragor: boolean` (sant om saken matchar `/\bm\.?\s*m\.?\b/i` dvs "mm", "m.m.", "m m")
-- Berakna `fleraSakfragor` vid parsning baserat pa `saken`-faltet
-- Behall `room` och `parties` i interfacet (ignoreras bara i UI)
+## Losning
 
-### 2. `src/components/HearingsTab.tsx`
-- **Ta bort kolumner**: Ta bort "Sal" och "Parter" fran tabellhuvud och tabellrader (6 kolumner kvar + 2 nya = 8 kolumner)
-- **Lagg till kolumner**: "Primart tillamplit lagrum" och "Flera sakfragor" i tabellen
-- "Flera sakfragor" visas som en kryssruta (read-only Checkbox-komponent)
-- **Nytt filter**: Dropdown for lagrum (tom for nu, bara "Alla" tills mappningar finns)
-- **Nytt filter**: Checkbox-filter "Visa bara med flera sakfragor" som filtrerar pa `fleraSakfragor === true`
-- Uppdatera `filtered`-logiken med de nya filtren
-- Uppdatera grid fran `lg:grid-cols-4` till `lg:grid-cols-5` for att fa plats med det nya filtret
+### Andring i `src/lib/parseCourtPdf.ts`
+
+1. **Byt till en enklare, mer robust regex** som inte forlitar sig pa `\b` word boundaries:
+
+```typescript
+const fleraSakfragorRegex = /m\s*\.?\s*m\s*\.?\s*$/i;
+```
+Denna matchar "m m", "m.m.", "m.m", "mm" etc. i **slutet** av stringen (dar det typiskt forekommer i sakbeskrivningar).
+
+2. **Lagg aven till en fallback-check** som normaliserar bort osynliga tecken fore matchning:
+
+```typescript
+const cleanedSaken = saken.replace(/[^\w\s.,åäöÅÄÖ]/g, "").trim();
+const fleraSakfragor = fleraSakfragorRegex.test(saken) || fleraSakfragorRegex.test(cleanedSaken);
+```
+
+3. **Lagg till debug-loggning** for att kunna verifiera matchningen:
+
+```typescript
+console.log("Saken for fleraSakfragor check:", JSON.stringify(saken), "->", fleraSakfragor);
+```
+
+`JSON.stringify` visar exakt vilka tecken som finns i strangen, inklusive dolda Unicode-tecken.
 
 ## Tekniska detaljer
 
-**`Hearing`-interface (parseCourtPdf.ts):**
-```typescript
-export interface Hearing {
-  id: string;
-  date: string;
-  time: string;
-  court: string;
-  caseNumber: string;
-  type: string;
-  room: string;
-  saken: string;
-  parties: string;
-  lagrum: string;
-  fleraSakfragor: boolean;
-}
-```
+Alla andringar i en fil: `src/lib/parseCourtPdf.ts`, raderna 254-256.
 
-**Flera sakfragor-detektion (parseCourtPdf.ts):**
+Byt fran:
 ```typescript
 const fleraSakfragorRegex = /\bm\s*\.?\s*m\s*\.?\b/i;
 const fleraSakfragor = fleraSakfragorRegex.test(saken);
 ```
 
-**Nytt filter i HearingsTab.tsx:**
+Till:
 ```typescript
-const [fleraSakfragorFilter, setFleraSakfragorFilter] = useState(false);
-// I filtered:
-const matchesFleraSakfragor = !fleraSakfragorFilter || h.fleraSakfragor;
+const fleraSakfragorRegex = /m\s*\.?\s*m\s*\.?\s*$/i;
+const cleanedSaken = saken.replace(/[^\w\s.,åäöÅÄÖ]/g, "").trim();
+const fleraSakfragor = fleraSakfragorRegex.test(saken) || fleraSakfragorRegex.test(cleanedSaken);
+console.log("Saken for fleraSakfragor check:", JSON.stringify(saken), "->", fleraSakfragor);
 ```
 
-**Tabell-kolumner (HearingsTab.tsx):**
-- Datum, Tid, Tingsratt, Malnummer, Typ, Saken, Lagrum, Flera sakfragor
-- Sal och Parter tas bort fran renderingen
-
-Inga andringar i andra filer.
+Inga andra filer andras.
