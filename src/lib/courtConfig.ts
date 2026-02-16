@@ -106,6 +106,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/helsingborgs_tingsratt/kommande-rattegangar/kommande-rattegangar-vecka-${week}.pdf`,
   },
   {
+    id: "halsinglands_tingsratt",
+    name: "Hälsinglands tingsrätt",
+    formatFamily: "standard",
+    buildUrl: (week) =>
+      `${BASE}/halsinglands_tingsratt/block/forhandlingar-v${week}.pdf`,
+  },
+  {
     id: "halmstads_tingsratt",
     name: "Halmstads tingsrätt",
     formatFamily: "standard",
