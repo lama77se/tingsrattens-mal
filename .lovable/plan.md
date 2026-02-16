@@ -1,44 +1,48 @@
 
 
-# Fixa PDF-parsern for formatet "må 16-feb 09:00 - 11:00 Huvudförhandling B 1626-25 ..."
+# Fixa datum, typ och lagg till "Saken"-kolumn
 
 ## Problem
-Raden `må 16-feb 09:00 - 11:00 Huvudförhandling B 1626-25 Grov olovlig körning` parsas fel pa tre satt:
-1. **Datum**: `16-feb` kanns inte igen — parsern hanterar bara ISO-datum (`2026-02-16`) och fullstandiga svenska datum (`16 februari 2026`), inte forkortat format med bindestreck
-2. **Tid**: Bara en av tiderna fangas, borde vara `09:00 - 11:00`
-3. **Forhandlingstyp**: "Huvudforhandling" tappas och faller tillbaka till default "Forhandling"
+Raden `ma 16-feb 09:00 - 11:00 Huvudforhandling B 1626-25 Grov olovlig korning` parsas fel:
+- **A) Datum** visar `2026-02-12` istallet for `2026-02-16`
+- **B) Typ** visar "Forhandling" istallet for "Huvudforhandling"
+- **C) Saken** saknas som eget falt — "Grov olovlig korning" hamnar i "Parter"-kolumnen
 
-## Losning — uppdatera `src/lib/parseCourtPdf.ts`
+## Losning
 
-### 1. Lagg till stod for forkortat datumformat `dd-mmm`
-Lagg till en ny regex och en `shortMonthMap` for att matcha `16-feb`, `3-mar`, etc:
-```
-shortMonthMap: jan->01, feb->02, mar->03, apr->04, maj->05, jun->06, jul->07, aug->08, sep->09, okt->10, nov->11, dec->12
-```
-Regex: `(\d{1,2})-(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)`
-Aret hamleds fran nuvarande ar (eller fran kontexten i dokumentet om det finns).
+### 1. Robust datum-parsning (`parseCourtPdf.ts`)
+Datumet `16-feb` borde fångas av `shortDateRegex` men det verkar finnas ett problem med matchningsordningen eller med att ISO-regexen falskt matchar nagot pa raden. Fix:
+- Flytta short date-matchningen FORE den generella logiken sa att `dd-mmm` format alltid fangas
+- Gor matchningen mer explicit med en combined regex som testar alla datumformat i ratt ordning
+- Lagg till loggning/fallback sa att om shortDateRegex matchar, den ALLTID anvands oavsett andra matchningar
 
-### 2. Fanga tidsintervall
-Andra fran att bara fanga forsta tiden till att fanga hela intervallet `09:00 - 11:00`:
-```
-timeRangeRegex: /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/
-```
-Om tidsintervall hittas, spara som `"09:00 - 11:00"`. Om bara en tid hittas, anvand den.
+### 2. Robust typ-detektion (`parseCourtPdf.ts`)
+"Huvudforhandling" matchas inte, troligen for att PDF-extraherad text kan ha annorlunda tecken (t.ex. ligatures eller specialtecken for o, a). Fix:
+- Normalisera bade raden och hearing types innan jamforelse (ersatt accenterade tecken)
+- Alternativt: anvand en regex per typ som tillater valfri variant av svenska tecken
 
-### 3. Forhandlingstyp — kontrollera hela raden forst
-Flytta typdetekteringen sa att den kor pa hela raden innan vi extraherar case number. Nuvarande logik fungerar i princip, men vi behover sakerstalla att "Huvudforhandling" matchas fore "Forhandling" genom att satta "Forhandling" sist i listan (den ar en substring av "Huvudforhandling").
+### 3. Nytt falt "saken" i Hearing-interfacet
+Lagg till `saken: string` i `Hearing`-interfacet. I PDF-formatet ar "Saken" texten som beskriver brottet/tvisten, t.ex. "Grov olovlig korning". Parsern ska extrahera detta fran texten efter malnumret (och skilja det fran "parter" som ar namnen pa parterna).
 
-### 4. Forbattra parties-extraktionen
-Rensa bort forhandlingstyp och tidsintervall fran parties-strangen sa att bara "Grov olovlig korning" blir kvar.
+### 4. Visa "Saken" i tabellen (`HearingsTab.tsx`)
+Lagg till en ny kolumn "Saken" i tabellen mellan "Typ" och "Sal".
 
 ## Tekniska detaljer
 
-Alla andringar sker i `src/lib/parseCourtPdf.ts`:
-- Ny `shortMonthMap` for `jan`-`dec`
-- Ny regex for `dd-mmm` datumformat
-- Ny regex for tidsintervall (`HH:MM - HH:MM`)
-- Flytta "Forhandling" till sist i `hearingTypes`-listan sa att mer specifika typer matchas forst
-- Rensa parties fran typ- och tidsdata
+### Filandringar
 
-Inga andringar i andra filer behovs.
+**`src/lib/parseCourtPdf.ts`**:
+- Lagg till `saken: string` i `Hearing`-interfacet
+- Refaktorera datumextraktionen: testa `shortDateRegex` forst pa raden INNAN ISO/svenska datum, eftersom formatet `dd-mmm` ar vanligt och entydigt
+- For typ-detektion: normalisera strangarna genom att gora case-insensitive jamforelse och hantera potentiella encoding-skillnader fran PDF-text
+- Extrahera "saken" fran texten efter malnumret. I formatet `B 1626-25 Grov olovlig korning` ar "Grov olovlig korning" saken. Nuvarande logik laggar detta i `parties` — det ska istallet ga till `saken`
+- `parties` hamtas fran nasta rad eller annan kontext (om tillgangligt)
+
+**`src/components/HearingsTab.tsx`**:
+- Lagg till kolumnhuvud "Saken" i tabellen
+- Visa `h.saken` i en ny cell
+- Uppdatera sokfiltret att aven soka i `saken`-faltet
+- Uppdatera `colSpan` fran 7 till 8 for tom-raden
+
+**`src/pages/Index.tsx`**: Inga andringar behovs (Hearing-typen importeras redan fran parseCourtPdf).
 
