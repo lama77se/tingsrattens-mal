@@ -5,7 +5,8 @@ export interface CourtConfig {
   id: string;
   name: string;
   formatFamily: FormatFamily;
-  buildUrl: (week: number, year: number) => string;
+  /** Return a single URL or an array of candidate URLs to try in order. */
+  buildUrl: (week: number, year: number) => string | string[];
 }
 
 const BASE = "https://www.domstol.se/globalassets/filer/domstol";
@@ -49,5 +50,15 @@ export const COURTS: CourtConfig[] = [
     formatFamily: "standard",
     buildUrl: (week, year) =>
       `${BASE}/solna_tingsratt/veckans-forhandlingar/v${week}.${year}.pdf`,
+  },
+  {
+    id: "boras_tingsratt",
+    name: "Borås tingsrätt",
+    formatFamily: "standard",
+    buildUrl: (week) => [
+      `${BASE}/boras_tingsratt/veckans_forhandlingar/veckans-forhandlingar-vecka-${week}.pdf`,
+      `${BASE}/boras_tingsratt/veckans_forhandlingar/veckans-forhandlingar-vecka-${week - 1}-${week}.pdf`,
+      `${BASE}/boras_tingsratt/veckans_forhandlingar/veckans-forhandlingar-vecka-${week}-${week + 1}.pdf`,
+    ],
   },
 ];
