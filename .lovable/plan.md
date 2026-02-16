@@ -1,62 +1,35 @@
 
+# Lagg till 17 nya brottstyper i lagrumMappings
 
-# Fix: Filter fungerar inte (duplikat-nycklar)
+## Oversikt
+Lagg till 17 nya poster i `src/lib/lagrumMappings.ts`. Inga duplikater finns mot befintliga 28 poster.
 
-## Problem
-Filtren (datum, sakområde, typ, tingsrätt) verkar inte fungera -- listan uppdateras inte visuellt när man väljer ett filtervärde.
+## Nya poster
 
-## Grundorsak
-Funktionen `parseCourtPdf` anropas tre gånger (en per vecka) och varje anrop börjar sin `idCounter` på 0. Det innebär att flera förhandlingar får samma ID (t.ex. `parsed-1` förekommer tre gånger). React använder `key={h.id}` för att hålla reda på rader i tabellen, och med duplicerade nycklar kan React inte korrekt uppdatera vilka rader som ska visas/döljas vid filtrering.
-
-Konsolloggarna bekräftar: *"Encountered two children with the same key: parsed-49"*.
-
-## Lösning
-
-### Ändring i `src/components/DataLoadingTab.tsx`
-Ge varje förhandling ett globalt unikt ID genom att lägga till ett prefix baserat på veckoindex när resultaten samlas ihop:
-
-```typescript
-if (r1?.success && r1.text) {
-  const parsed = parseCourtPdf(r1.text, "Solna tingsrätt");
-  parsed.forEach((h, i) => { h.id = `w0-${i}`; });
-  allHearings.push(...parsed);
-}
-// Samma för r2 (w1-) och r3 (w2-)
-```
-
-Alternativt kan man generera ett unikt ID direkt i `parseCourtPdf` med `crypto.randomUUID()` eller en kombination av datum+tid+målnummer, men den enklaste fixen är att prefixa med veckoindex i DataLoadingTab.
-
-### Ingen ändring behövs i HearingsTab
-Filtreringslogiken är redan korrekt. Problemet är enbart att React inte kan spåra raderna p.g.a. duplicerade nycklar.
+| Nyckel | Sakomrade |
+|--------|-----------|
+| hot mot tjänsteman | Brott mot allman verksamhet |
+| angrepp mot tjänsteman | Brott mot allman verksamhet |
+| grov fridskrankning | Brott mot frihet och frid |
+| olaga forfoljelse | Brott mot frihet och frid |
+| forvandling av boter | Straffverkstallighet |
+| undanrojande av strafforelaggande | Straffprocessuella fragor |
+| bidragsbrott | Ekonomisk brottslighet |
+| brukande av falsk urkund | Urkundsbrott |
+| urkundsforfalkning | Urkundsbrott |
+| brott mot lagen om forbud betraffande knivar och andra farliga foremal | Vapen- och ordningsbrott |
+| brott mot lagen om forbud betraffande knivar och andra farliga foremal, grovt brott | Vapen- och ordningsbrott |
+| brott mot lagen om brandfarliga och explosiva varor | Allmanfarliga brott / sarskild straffrätt |
+| europeisk utredningsorder | Internationellt straffprocessuellt samarbete |
+| bilbaltesforselse | Trafikbrott |
+| grov vardslöshet i trafik | Trafikbrott |
+| olaga yrkesmassig trafik | Trafik- och naringsregleringsbrott |
+| hastighetsoverträdelse | Trafikbrott |
 
 ## Tekniska detaljer
 
-**Fil som ändras:** `src/components/DataLoadingTab.tsx` (rad 147-163)
+**Fil som andras:** `src/lib/lagrumMappings.ts`
 
-Ersätt den nuvarande insamlingen av hearings med version som ger unika ID:n per vecka. Tre block ändras:
+De 17 posterna laggs till i `mappings`-objektet fore den avslutande `};` (rad 131). Ingen annan fil behover andras -- matchningslogiken och UI:t fungerar redan generiskt.
 
-```typescript
-const allHearings: Hearing[] = [];
-
-const r1 = await fetchWeek(0, previous.week, previous.year);
-if (r1?.success && r1.text) {
-  const parsed = parseCourtPdf(r1.text, "Solna tingsrätt");
-  parsed.forEach((h, i) => { h.id = `w0-${i}`; });
-  allHearings.push(...parsed);
-}
-
-const r2 = await fetchWeek(1, current.week, current.year);
-if (r2?.success && r2.text) {
-  const parsed = parseCourtPdf(r2.text, "Solna tingsrätt");
-  parsed.forEach((h, i) => { h.id = `w1-${i}`; });
-  allHearings.push(...parsed);
-}
-
-const r3 = await fetchWeek(2, next.week, next.year);
-if (r3?.success && r3.text) {
-  const parsed = parseCourtPdf(r3.text, "Solna tingsrätt");
-  parsed.forEach((h, i) => { h.id = `w2-${i}`; });
-  allHearings.push(...parsed);
-}
-```
-
+Langre nycklar som "brott mot lagen om forbud betraffande knivar och andra farliga foremal, grovt brott" hamnar automatiskt fore kortare varianter tack vare `sortedKeys`-sorteringen.
