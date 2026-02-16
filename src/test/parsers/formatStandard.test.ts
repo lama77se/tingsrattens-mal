@@ -162,4 +162,29 @@ describe("formatStandard", () => {
     expect(result[0].date).toBe("2026-02-19");
     expect(result[1].date).toBe("2026-02-20");
   });
+
+  it("handles Helsingborg-style 3-line format with bare sal number", () => {
+    const text = [
+      "ma16-feb09:00 - 09:15Edgangssmtr",
+      "K 7484-25",
+      "Konkurs21",
+      "ti17-feb10:30 - 16:00Huvudforhandling",
+      "B 9642-24",
+      "misshandel1",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Helsingborgs tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].time).toBe("09:00 - 09:15");
+    expect(result[0].caseNumber).toBe("K 7484-25");
+    expect(result[0].saken).toBe("Konkurs");
+    expect(result[0].room).toBe("Sal 21");
+
+    expect(result[1].date).toBe("2026-02-17");
+    expect(result[1].caseNumber).toBe("B 9642-24");
+    expect(result[1].saken).toBe("misshandel");
+    expect(result[1].room).toBe("Sal 1");
+  });
 });

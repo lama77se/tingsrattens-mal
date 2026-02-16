@@ -59,6 +59,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Narkotikastrafflagen (1968:64) 1 §"],
     alternativa_lagrum: ["2 § (grovt narkotikabrott)"],
   },
+  "narkotika brott": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Narkotikastrafflagen (1968:64) 1 §"],
+    alternativa_lagrum: ["2 § (grovt narkotikabrott)"],
+  },
   "grovt rattfylleri": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 4 a §"],
