@@ -1,0 +1,95 @@
+import { describe, it, expect } from "vitest";
+import { parseCourtPdf } from "@/lib/parseCourtPdf";
+
+describe("parseCourtPdf dispatcher", () => {
+  const sampleText = [
+    "16-feb",
+    "09:00 - 11:00 Sal 3",
+    "Huvudförhandling B 1234-25 Stöld",
+    "John Doe",
+  ].join("\n");
+
+  it("accepts a string court name (backward compat)", () => {
+    const result = parseCourtPdf(sampleText, "Alingsås tingsrätt");
+    expect(result).toHaveLength(1);
+    expect(result[0].court).toBe("Alingsås tingsrätt");
+    expect(result[0].caseNumber).toBe("B 1234-25");
+  });
+
+  it("accepts a CourtConfig-like object with formatFamily", () => {
+    const result = parseCourtPdf(sampleText, {
+      name: "Blekinge tingsrätt",
+      formatFamily: "standard",
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].court).toBe("Blekinge tingsrätt");
+  });
+
+  it("defaults to standard when formatFamily is omitted from object", () => {
+    const result = parseCourtPdf(sampleText, { name: "Test tingsrätt" });
+    expect(result).toHaveLength(1);
+    expect(result[0].court).toBe("Test tingsrätt");
+  });
+
+  it("returns empty array for empty text", () => {
+    expect(parseCourtPdf("", "Test")).toEqual([]);
+    expect(parseCourtPdf("   ", "Test")).toEqual([]);
+  });
+
+  it("enriches with maltyp for B-mål", () => {
+    const result = parseCourtPdf(sampleText, "Test");
+    expect(result[0].maltyp).toBe("Brottmål");
+  });
+
+  it("enriches with lagrum for known crimes", () => {
+    const result = parseCourtPdf(sampleText, "Test");
+    expect(result[0].lagrum).toContain("BrB 8 kap.");
+    expect(result[0].sakomrade).toBe("Förmögenhetsbrott");
+  });
+
+  it("detects fleraSakfragor from 'm.m.'", () => {
+    const text = [
+      "16-feb",
+      "09:00 Sal 1 Huvudförhandling B 1234-25 Stöld m.m.",
+      "Kalle Anka",
+    ].join("\n");
+    const result = parseCourtPdf(text, "Test");
+    expect(result[0].fleraSakfragor).toBe(true);
+  });
+
+  it("detects court in saken", () => {
+    const text = [
+      "16-feb",
+      "09:00 Sal 1 Huvudförhandling B 1234-25 Uppsala tingsrätt - Mord",
+      "Parter",
+    ].join("\n");
+    const result = parseCourtPdf(text, "Test tingsrätt");
+    expect(result[0].court).toBe("Uppsala tingsrätt (plats: Test tingsrätt)");
+    expect(result[0].saken).toBe("Mord");
+  });
+
+  it("assigns sequential ids", () => {
+    const text = [
+      "16-feb",
+      "09:00 Sal 1 B 1001-25 Stöld",
+      "A",
+      "10:00 Sal 2 B 1002-25 Misshandel",
+      "B",
+    ].join("\n");
+    const result = parseCourtPdf(text, "Test");
+    expect(result[0].id).toBe("parsed-1");
+    expect(result[1].id).toBe("parsed-2");
+  });
+
+  it("fills missing fields with defaults", () => {
+    // No date, no room, minimal data
+    const text = "B 9999-25";
+    const result = parseCourtPdf(text, "Test");
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("Okänt datum");
+    expect(result[0].time).toBe("–");
+    expect(result[0].room).toBe("–");
+    expect(result[0].saken).toBe("–");
+    expect(result[0].parties).toBe("–");
+  });
+});
