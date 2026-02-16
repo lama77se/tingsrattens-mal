@@ -45,6 +45,7 @@ export const ROOM_REGEX = /(?:Tings)?[Ss]al\s+(\S+)/;
 export const HEARING_TYPES = [
   "Huvudförhandling",
   "Häktningsförhandling",
+  "Konkursförhandling",
   "Muntlig förberedelse",
   "Edgångssammanträde",
   "Sammanträde",
