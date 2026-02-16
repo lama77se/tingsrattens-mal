@@ -252,8 +252,10 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     parties = parties.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "");
 
     // Detect "flera sakfrågor" from saken field
-    const fleraSakfragorRegex = /\bm\s*\.?\s*m\s*\.?\b/i;
-    const fleraSakfragor = fleraSakfragorRegex.test(saken);
+    const fleraSakfragorRegex = /m\s*\.?\s*m\s*\.?\s*$/i;
+    const cleanedSaken = saken.replace(/[^\w\s.,åäöÅÄÖ]/g, "").trim();
+    const fleraSakfragor = fleraSakfragorRegex.test(saken) || fleraSakfragorRegex.test(cleanedSaken);
+    console.log("Saken for fleraSakfragor check:", JSON.stringify(saken), "->", fleraSakfragor);
 
     idCounter++;
     const hearing: Hearing = {
