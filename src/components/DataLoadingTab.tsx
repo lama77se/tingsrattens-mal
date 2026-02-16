@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,7 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
   const [courtWeeks, setCourtWeeks] = useState<CourtWeeksState>(initAllCourts);
   const [fetchingCourts, setFetchingCourts] = useState<Set<string>>(new Set());
   const [isFetchingAll, setIsFetchingAll] = useState(false);
+  const hearingsRef = useRef<Record<string, Hearing[]>>({});
 
   const updateStep = useCallback(
     (courtId: string, weekIndex: number, stepIndex: number, update: Partial<FetchStep>) => {
@@ -167,29 +168,10 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
     setFetchingCourts((prev) => new Set(prev).add(court.id));
     const courtHearings = await fetchCourt(court);
 
-    // Merge with hearings from other courts
-    setCourtWeeks((prev) => {
-      // Collect hearings from all OTHER courts that already have results
-      const allHearings: Hearing[] = [];
-      for (const c of COURTS) {
-        if (c.id === court.id) {
-          allHearings.push(...courtHearings);
-          continue;
-        }
-        const cWeeks = prev[c.id];
-        if (!cWeeks) continue;
-        for (let i = 0; i < cWeeks.length; i++) {
-          const w = cWeeks[i];
-          if (w.result?.success && w.result.text) {
-            const parsed = parseCourtPdf(w.result.text, c.name);
-            parsed.forEach((h, j) => { h.id = `${c.id}-w${i}-${j}`; });
-            allHearings.push(...parsed);
-          }
-        }
-      }
-      onHearingsFetched(allHearings);
-      return prev;
-    });
+    // Store in ref and merge all courts
+    hearingsRef.current[court.id] = courtHearings;
+    const allHearings = Object.values(hearingsRef.current).flat();
+    onHearingsFetched(allHearings);
 
     setFetchingCourts((prev) => {
       const next = new Set(prev);
@@ -201,13 +183,13 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
   const handleFetchAll = async () => {
     setIsFetchingAll(true);
     setCourtWeeks(initAllCourts());
+    hearingsRef.current = {};
     await delay(50);
 
-    const allHearings: Hearing[] = [];
     for (const court of COURTS) {
       setFetchingCourts((prev) => new Set(prev).add(court.id));
       const hearings = await fetchCourt(court);
-      allHearings.push(...hearings);
+      hearingsRef.current[court.id] = hearings;
       setFetchingCourts((prev) => {
         const next = new Set(prev);
         next.delete(court.id);
@@ -215,6 +197,7 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
       });
     }
 
+    const allHearings = Object.values(hearingsRef.current).flat();
     onHearingsFetched(allHearings);
     setIsFetchingAll(false);
   };
