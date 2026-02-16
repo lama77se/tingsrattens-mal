@@ -119,4 +119,43 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("undanröjande av ungdomsvård");
     expect(result[0].type).toBe("Sammanträde");
   });
+
+  it("continues saken from same line across continuation lines", () => {
+    const text = [
+      "2026-02-18 13:00 - 13:45 Huvudförhandling brott mot lagen om förbud Sal 1",
+      "beträffande knivar och",
+      "andra farliga föremål, grovt",
+      "brott",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].saken).toBe(
+      "brott mot lagen om förbud beträffande knivar och andra farliga föremål, grovt brott"
+    );
+    expect(result[0].room).toBe("Sal 1");
+  });
+
+  it("stops continuation at next hearing line", () => {
+    const text = [
+      "2026-02-18 13:00 - 13:45 Huvudförhandling brott mot lagen om förbud Sal 1",
+      "beträffande knivar och",
+      "2026-02-18 14:00 - 14:45 Sammanträde undanröjande av ungdomsvård",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("brott mot lagen om förbud beträffande knivar och");
+    expect(result[1].saken).toBe("undanröjande av ungdomsvård");
+  });
+
+  it("skips standalone Sal lines during continuation", () => {
+    const text = [
+      "2026-02-17 09:00 - 10:00 Huvudförhandling förolämpning mot Sal 3",
+      "Sal 1",
+      "tjänsteman",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].saken).toBe("förolämpning mot tjänsteman");
+    expect(result[0].room).toBe("Sal 3");
+  });
 });
