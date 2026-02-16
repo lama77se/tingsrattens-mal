@@ -59,6 +59,14 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Narkotikastrafflagen (1968:64) 1 §"],
     alternativa_lagrum: ["2 § (grovt narkotikabrott)"],
   },
+  "grovt rattfylleri": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 4 a §"],
+  },
+  "grov rattfylleri": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 4 a §"],
+  },
   "rattfylleri": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 4 §"],
@@ -71,6 +79,16 @@ const mappings: Record<string, LagrumEntry> = {
   "brott mot trafikförordningen": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276)"],
+  },
+  "brott mot trafikförordning": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276)"],
+    kommentar: "Exakt paragraf beror på överträdelsens art (t.ex. hastighet, bälte, stopplikt). Straffbestämmelser återfinns i 14 kap. trafikförordningen.",
+  },
+  "förolämpning mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 3 §"],
+    kommentar: "Förolämpning mot tjänsteman regleras särskilt i 17 kap. BrB och skiljer sig från allmän förolämpning (5 kap. 3 § BrB).",
   },
   "köp av sexuell tjänst": {
     sakomrade: "Sexualbrott",
