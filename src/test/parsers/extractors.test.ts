@@ -86,8 +86,8 @@ describe("extractSwedishDate", () => {
 
 describe("preprocessLines", () => {
   it("splits, trims, and filters empty lines", () => {
-    const result = preprocessLines("  line1  \n\n  line2  \n");
-    expect(result).toEqual(["line1", "line2"]);
+    const result = preprocessLines("  hello  \n\n  world  \n");
+    expect(result).toEqual(["hello", "world"]);
   });
 
   it("inserts space before glued case number prefix", () => {
@@ -98,6 +98,27 @@ describe("preprocessLines", () => {
   it("inserts space after case number glued to text", () => {
     const result = preprocessLines("T 3535-24Stöld");
     expect(result).toEqual(["T 3535-24 Stöld"]);
+  });
+
+  it("inserts Sal before bare trailing digits (Helsingborg-style)", () => {
+    expect(preprocessLines("Konkurs21")).toEqual(["Konkurs Sal 21"]);
+    expect(preprocessLines("misshandel1")).toEqual(["misshandel Sal 1"]);
+    expect(preprocessLines("fordran4")).toEqual(["fordran Sal 4"]);
+  });
+
+  it("does not insert Sal when digits are preceded by non-letter", () => {
+    expect(preprocessLines("B 1234-25")).toEqual(["B 1234-25"]);
+    expect(preprocessLines("Sal 5")).toEqual(["Sal 5"]);
+  });
+
+  it("splits de-accented day abbreviation from date digits", () => {
+    expect(preprocessLines("ma16-feb09:00 - 09:15Edgangssmtr")).toEqual([
+      "ma 16-feb 09:00 - 09:15 Edgangssmtr",
+    ]);
+  });
+
+  it("splits month abbreviation glued to time", () => {
+    expect(preprocessLines("16-feb09:00")).toEqual(["16-feb 09:00"]);
   });
 });
 
