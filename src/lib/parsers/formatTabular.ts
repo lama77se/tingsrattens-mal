@@ -29,7 +29,7 @@ const DAG_REGEX = /^\(dag\s+\d+\/\d+\)/i;
 /**
  * Regex matching page headers to skip.
  */
-const HEADER_REGEX = /^(uppropslista|datum\s+tid)/i;
+const HEADER_REGEX = /^(uppropslista|datum\s+tid|förhandlingar i|listan\s|dagdatum)/i;
 
 /**
  * Day abbreviations (Swedish) — standalone lines to skip.
@@ -44,6 +44,7 @@ const TYPE_ALIASES: Record<string, string> = {
   "fortsatt hf": "Huvudförhandling",
   "fortsatt muntlig förb": "Muntlig förberedelse",
   "muntlig förberedelse och ev hf": "Muntlig förberedelse",
+  "edgångssmtr": "Edgångssammanträde",
 };
 
 // Pre-sorted aliases longest first for correct prefix matching

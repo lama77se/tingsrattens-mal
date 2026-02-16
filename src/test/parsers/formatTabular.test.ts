@@ -303,4 +303,28 @@ describe("formatTabular", () => {
     expect(result[2].saken).toBe("misshandel mm");
     expect(result[3].saken).toBe("olovligt innehav och försäljning av alkohol");
   });
+
+  it("maps 'Edgångssmtr' to Edgångssammanträde", () => {
+    const text = "ti2026-02-17  09:00 - 10:00   EdgångssmtrkonkursSal 3";
+    const result = formatTabular.parse({ courtName: "Kristianstads tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Edgångssammanträde");
+    expect(result[0].saken).toBe("konkurs");
+    expect(result[0].room).toBe("Sal 3");
+  });
+
+  it("skips Kristianstad-style headers in continuation", () => {
+    const text = [
+      "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",
+      "Förhandlingar i Kristianstads tingsrätt 2026-02-16 --28",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel.",
+      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
+      "to2026-02-19  09:00 - 12:00   HuvudförhandlingstöldSal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Kristianstads tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("misshandel");
+    expect(result[1].saken).toBe("stöld");
+  });
 });
