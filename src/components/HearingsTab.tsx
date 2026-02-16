@@ -28,6 +28,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
   const [dateFilter, setDateFilter] = useState("Alla");
+  const [sakomradeFilter, setSakomradeFilter] = useState("Alla");
   const [fleraSakfragorFilter, setFleraSakfragorFilter] = useState(false);
 
   const courts = useMemo(() => {
@@ -45,6 +46,11 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     return ["Alla", ...unique.sort()];
   }, [hearings]);
 
+  const sakomraden = useMemo(() => {
+    const unique = Array.from(new Set(hearings.map((h) => h.sakomrade).filter(Boolean)));
+    return ["Alla", ...unique.sort()];
+  }, [hearings]);
+
   const filtered = hearings.filter((h) => {
     const matchesSearch = search === "" ||
       h.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -54,8 +60,9 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     const matchesCourt = courtFilter === "Alla" || h.court === courtFilter;
     const matchesType = typeFilter === "Alla" || normalizeType(h.type) === normalizeType(typeFilter);
     const matchesDate = dateFilter === "Alla" || h.date === dateFilter;
+    const matchesSakomrade = sakomradeFilter === "Alla" || h.sakomrade === sakomradeFilter;
     const matchesFleraSakfragor = !fleraSakfragorFilter || h.fleraSakfragor;
-    return matchesSearch && matchesCourt && matchesType && matchesDate && matchesFleraSakfragor;
+    return matchesSearch && matchesCourt && matchesType && matchesDate && matchesSakomrade && matchesFleraSakfragor;
   });
 
   if (hearings.length === 0) {
@@ -73,7 +80,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         <div className="space-y-1.5">
           <Label>Sök</Label>
           <div className="relative">
@@ -128,6 +135,19 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
+          <Label>Sakområde</Label>
+          <Select value={sakomradeFilter} onValueChange={setSakomradeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sakområde" />
+            </SelectTrigger>
+            <SelectContent>
+              {sakomraden.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
           <Label>&nbsp;</Label>
           <div className="flex items-center space-x-2 h-10">
             <Checkbox
@@ -156,6 +176,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
               <TableHead>Målnummer</TableHead>
               <TableHead>Typ</TableHead>
               <TableHead>Saken</TableHead>
+              <TableHead>Sakområde</TableHead>
               <TableHead>Lagrum</TableHead>
               <TableHead>Flera</TableHead>
             </TableRow>
@@ -163,7 +184,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-              <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
 
                   Inga förhandlingar matchar filtren.
                 </TableCell>
@@ -179,6 +200,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
                     <Badge variant={typeBadgeVariant(h.type) as any}>{h.type}</Badge>
                   </TableCell>
                   <TableCell>{h.saken}</TableCell>
+                  <TableCell className="text-muted-foreground">{h.sakomrade || "–"}</TableCell>
                   <TableCell className="text-muted-foreground">{h.lagrum || "–"}</TableCell>
                   <TableCell>
                     <Checkbox checked={h.fleraSakfragor} disabled />
