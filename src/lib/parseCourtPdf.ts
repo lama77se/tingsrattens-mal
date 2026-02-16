@@ -56,7 +56,9 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   // Pre-process: insert space before case number prefixes glued to text
   // e.g. "HuvudförhandlingT 3535-24" -> "Huvudförhandling T 3535-24"
   const processedLines = lines.map(line =>
-    line.replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+    line
+      .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+      .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
   );
 
   let currentDate = "";
