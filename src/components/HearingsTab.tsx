@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, Info, CalendarDays } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
@@ -27,6 +28,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
   const [dateFilter, setDateFilter] = useState("Alla");
+  const [fleraSakfragorFilter, setFleraSakfragorFilter] = useState(false);
 
   const courts = useMemo(() => {
     const unique = Array.from(new Set(hearings.map((h) => h.court)));
@@ -52,7 +54,8 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     const matchesCourt = courtFilter === "Alla" || h.court === courtFilter;
     const matchesType = typeFilter === "Alla" || normalizeType(h.type) === normalizeType(typeFilter);
     const matchesDate = dateFilter === "Alla" || h.date === dateFilter;
-    return matchesSearch && matchesCourt && matchesType && matchesDate;
+    const matchesFleraSakfragor = !fleraSakfragorFilter || h.fleraSakfragor;
+    return matchesSearch && matchesCourt && matchesType && matchesDate && matchesFleraSakfragor;
   });
 
   if (hearings.length === 0) {
@@ -70,13 +73,13 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="space-y-1.5">
           <Label>Sök</Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Målnummer, parter..."
+              placeholder="Målnummer, saken..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -124,6 +127,17 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
             </SelectContent>
           </Select>
         </div>
+        <div className="space-y-1.5">
+          <Label>&nbsp;</Label>
+          <div className="flex items-center space-x-2 h-10">
+            <Checkbox
+              id="fleraSakfragor"
+              checked={fleraSakfragorFilter}
+              onCheckedChange={(checked) => setFleraSakfragorFilter(checked === true)}
+            />
+            <Label htmlFor="fleraSakfragor" className="cursor-pointer">Flera sakfrågor</Label>
+          </div>
+        </div>
       </div>
 
       {/* Results count */}
@@ -142,14 +156,15 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
               <TableHead>Målnummer</TableHead>
               <TableHead>Typ</TableHead>
               <TableHead>Saken</TableHead>
-              <TableHead>Sal</TableHead>
-              <TableHead>Parter</TableHead>
+              <TableHead>Lagrum</TableHead>
+              <TableHead>Flera</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+
                   Inga förhandlingar matchar filtren.
                 </TableCell>
               </TableRow>
@@ -164,8 +179,10 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
                     <Badge variant={typeBadgeVariant(h.type) as any}>{h.type}</Badge>
                   </TableCell>
                   <TableCell>{h.saken}</TableCell>
-                  <TableCell>{h.room}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{h.parties}</TableCell>
+                  <TableCell className="text-muted-foreground">{h.lagrum || "–"}</TableCell>
+                  <TableCell>
+                    <Checkbox checked={h.fleraSakfragor} disabled />
+                  </TableCell>
                 </TableRow>
               ))
             )}
