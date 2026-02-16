@@ -1,103 +1,212 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { RefreshCw, CheckCircle2, Clock, AlertCircle, Circle, FileText } from "lucide-react";
+import { getCurrentWeek, getNextWeek, buildPdfUrl } from "@/lib/weekUtils";
+import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
 
-interface CourtSource {
-  id: string;
-  name: string;
-  enabled: boolean;
-  lastFetched: string | null;
-  status: "idle" | "loading" | "success" | "error";
-  count: number;
+type StepStatus = "idle" | "active" | "done" | "error";
+
+interface FetchStep {
+  label: string;
+  status: StepStatus;
+  detail?: string;
 }
 
-const INITIAL_COURTS: CourtSource[] = [
-  { id: "stockholm", name: "Stockholms tingsrätt", enabled: true, lastFetched: "2026-02-16 08:00", status: "success", count: 12 },
-  { id: "goteborg", name: "Göteborgs tingsrätt", enabled: true, lastFetched: "2026-02-16 08:00", status: "success", count: 8 },
-  { id: "malmo", name: "Malmö tingsrätt", enabled: true, lastFetched: null, status: "idle", count: 0 },
-  { id: "uppsala", name: "Uppsala tingsrätt", enabled: false, lastFetched: null, status: "idle", count: 0 },
-  { id: "linkoping", name: "Linköpings tingsrätt", enabled: false, lastFetched: null, status: "idle", count: 0 },
-  { id: "vasteras", name: "Västerås tingsrätt", enabled: false, lastFetched: null, status: "idle", count: 0 },
-  { id: "orebro", name: "Örebro tingsrätt", enabled: false, lastFetched: null, status: "idle", count: 0 },
-  { id: "norrkoping", name: "Norrköpings tingsrätt", enabled: false, lastFetched: null, status: "idle", count: 0 },
+interface WeekFetch {
+  week: number;
+  year: number;
+  steps: FetchStep[];
+  result?: CourtPdfResult;
+}
+
+const STEP_LABELS = [
+  "Beräknar URL",
+  "Hämtar PDF",
+  "Bearbetar",
+  "Klar",
 ];
 
-const statusIcon = (status: CourtSource["status"]) => {
+function createInitialSteps(): FetchStep[] {
+  return STEP_LABELS.map((label) => ({ label, status: "idle" as StepStatus }));
+}
+
+const stepIcon = (status: StepStatus) => {
   switch (status) {
-    case "success": return <CheckCircle2 className="h-4 w-4 text-accent-foreground" />;
-    case "loading": return <RefreshCw className="h-4 w-4 text-primary animate-spin" />;
-    case "error": return <AlertCircle className="h-4 w-4 text-destructive" />;
-    default: return <Clock className="h-4 w-4 text-muted-foreground" />;
+    case "done":
+      return <CheckCircle2 className="h-4 w-4 text-accent-foreground" />;
+    case "active":
+      return <RefreshCw className="h-4 w-4 text-primary animate-spin" />;
+    case "error":
+      return <AlertCircle className="h-4 w-4 text-destructive" />;
+    default:
+      return <Circle className="h-4 w-4 text-muted-foreground" />;
   }
 };
 
 export default function DataLoadingTab() {
-  const [courts, setCourts] = useState<CourtSource[]>(INITIAL_COURTS);
+  const current = getCurrentWeek();
+  const next = getNextWeek();
 
-  const toggleCourt = (id: string) => {
-    setCourts((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c))
-    );
-  };
+  const [weeks, setWeeks] = useState<WeekFetch[]>([
+    { week: current.week, year: current.year, steps: createInitialSteps() },
+    { week: next.week, year: next.year, steps: createInitialSteps() },
+  ]);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const handleFetchAll = () => {
-    setCourts((prev) =>
-      prev.map((c) =>
-        c.enabled ? { ...c, status: "loading" } : c
-      )
-    );
-    // Simulate fetch
-    setTimeout(() => {
-      setCourts((prev) =>
-        prev.map((c) =>
-          c.status === "loading"
-            ? { ...c, status: "success", lastFetched: new Date().toLocaleString("sv-SE"), count: Math.floor(Math.random() * 15) + 1 }
-            : c
+  const updateStep = useCallback(
+    (weekIndex: number, stepIndex: number, update: Partial<FetchStep>) => {
+      setWeeks((prev) =>
+        prev.map((w, wi) =>
+          wi === weekIndex
+            ? {
+                ...w,
+                steps: w.steps.map((s, si) =>
+                  si === stepIndex ? { ...s, ...update } : s
+                ),
+              }
+            : w
         )
       );
-    }, 2000);
+    },
+    []
+  );
+
+  const setResult = useCallback(
+    (weekIndex: number, result: CourtPdfResult) => {
+      setWeeks((prev) =>
+        prev.map((w, wi) => (wi === weekIndex ? { ...w, result } : w))
+      );
+    },
+    []
+  );
+
+  const fetchWeek = async (weekIndex: number, week: number, year: number) => {
+    // Step 0: Beräknar URL
+    updateStep(weekIndex, 0, { status: "active" });
+    const url = buildPdfUrl("solna_tingsratt", week, year);
+    await delay(400);
+    updateStep(weekIndex, 0, { status: "done", detail: url });
+
+    // Step 1: Hämtar PDF
+    updateStep(weekIndex, 1, { status: "active" });
+
+    const result = await fetchCourtPdf("solna_tingsratt", week, year);
+
+    if (!result.success) {
+      updateStep(weekIndex, 1, { status: "error", detail: result.error });
+      updateStep(weekIndex, 2, { status: "idle" });
+      updateStep(weekIndex, 3, {
+        status: "error",
+        detail: result.notFound ? "PDF inte publicerad ännu" : result.error,
+      });
+      setResult(weekIndex, result);
+      return;
+    }
+
+    updateStep(weekIndex, 1, {
+      status: "done",
+      detail: `${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB`,
+    });
+
+    // Step 2: Bearbetar
+    updateStep(weekIndex, 2, { status: "active" });
+    await delay(300);
+    updateStep(weekIndex, 2, {
+      status: "done",
+      detail: `${(result.text?.length || 0)} tecken extraherade`,
+    });
+
+    // Step 3: Klar
+    updateStep(weekIndex, 3, {
+      status: "done",
+      detail: `~${result.estimatedHearings || 0} förhandlingar`,
+    });
+    setResult(weekIndex, result);
   };
 
-  const enabledCount = courts.filter((c) => c.enabled).length;
+  const handleFetchAll = async () => {
+    setIsFetching(true);
+    // Reset
+    setWeeks([
+      { week: current.week, year: current.year, steps: createInitialSteps() },
+      { week: next.week, year: next.year, steps: createInitialSteps() },
+    ]);
+    await delay(100);
+
+    // Fetch both weeks sequentially so status is visible
+    await fetchWeek(0, current.week, current.year);
+    await fetchWeek(1, next.week, next.year);
+
+    setIsFetching(false);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
+          <h3 className="font-semibold">Solna tingsrätt</h3>
           <p className="text-sm text-muted-foreground">
-            {enabledCount} av {courts.length} tingsrätter aktiverade
+            Hämtar veckans förhandlingar som PDF från domstol.se
           </p>
         </div>
-        <Button onClick={handleFetchAll} disabled={enabledCount === 0}>
-          <RefreshCw className="h-4 w-4 mr-2" />
+        <Button onClick={handleFetchAll} disabled={isFetching}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
           Hämta data
         </Button>
       </div>
 
-      <div className="grid gap-3">
-        {courts.map((court) => (
-          <Card key={court.id} className={`transition-all ${!court.enabled ? "opacity-60" : ""}`}>
-            <CardContent className="flex items-center gap-4 py-4 px-5">
-              <Checkbox
-                checked={court.enabled}
-                onCheckedChange={() => toggleCourt(court.id)}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{court.name}</span>
-                  {statusIcon(court.status)}
-                </div>
-                {court.lastFetched && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Senast hämtad: {court.lastFetched}
-                  </p>
+      <div className="grid gap-4 md:grid-cols-2">
+        {weeks.map((w, wi) => (
+          <Card key={wi}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Vecka {w.week}, {w.year}
+                {wi === 0 && (
+                  <Badge variant="secondary" className="text-xs">Nuvarande</Badge>
                 )}
-              </div>
-              {court.count > 0 && (
-                <Badge variant="secondary">{court.count} mål</Badge>
+                {wi === 1 && (
+                  <Badge variant="outline" className="text-xs">Nästa</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {w.steps.map((step, si) => (
+                <div key={si} className="flex items-start gap-3">
+                  <div className="mt-0.5">{stepIcon(step.status)}</div>
+                  <div className="flex-1 min-w-0">
+                    <span
+                      className={`text-sm font-medium ${
+                        step.status === "error"
+                          ? "text-destructive"
+                          : step.status === "done"
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {step.label}
+                    </span>
+                    {step.detail && (
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {step.detail}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {w.result?.success && w.result.text && (
+                <details className="mt-3 pt-3 border-t">
+                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                    Visa rådata ({w.result.text.length} tecken)
+                  </summary>
+                  <pre className="mt-2 text-xs bg-muted p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap">
+                    {w.result.text.substring(0, 2000)}
+                    {(w.result.text.length || 0) > 2000 && "\n\n... (trunkerad)"}
+                  </pre>
+                </details>
               )}
             </CardContent>
           </Card>
@@ -105,4 +214,8 @@ export default function DataLoadingTab() {
       </div>
     </div>
   );
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
