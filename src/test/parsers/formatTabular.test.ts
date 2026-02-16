@@ -158,4 +158,40 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("förolämpning mot tjänsteman");
     expect(result[0].room).toBe("Sal 3");
   });
+
+  it("maps 'Fortsatt muntlig förb' to Muntlig förberedelse", () => {
+    const text = "2026-02-20 10:00 - 11:00 Fortsatt muntlig förb tvist om underhåll Tingssal 2";
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("tvist om underhåll");
+    expect(result[0].room).toBe("Tingssal 2");
+  });
+
+  it("maps 'Muntlig förberedelse och ev hf' to Muntlig förberedelse", () => {
+    const text = "2026-02-19 09:00 - 12:00 Muntlig förberedelse och ev hf fordran Tingssal 1";
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("fordran");
+    expect(result[0].room).toBe("Tingssal 1");
+  });
+
+  it("parses Hässleholm-style with Tingssal rooms", () => {
+    const text = [
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling brott mot trafikförordningenTingssal 2",
+      "ti 2026-02-17 13:00 - 15:00 Muntlig förberedelse och ev hf fordranTingssal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("brott mot trafikförordningen");
+    expect(result[0].room).toBe("Tingssal 2");
+    expect(result[1].date).toBe("2026-02-17");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].saken).toBe("fordran");
+    expect(result[1].room).toBe("Tingssal 1");
+  });
 });
