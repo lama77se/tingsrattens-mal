@@ -44,9 +44,7 @@ export const formatStandard: ParserStrategy = {
       } else {
         const isoDate = extractIsoDate(line);
         if (isoDate) {
-          // Always use ISO date if line also has a case number (inline date),
-          // otherwise only use as header date if we don't have one yet
-          if (!currentDate || line.match(CASE_NUMBER_REGEX)) currentDate = isoDate;
+          currentDate = isoDate;
         } else {
           const swedishDate = extractSwedishDate(line);
           if (swedishDate) currentDate = swedishDate;
