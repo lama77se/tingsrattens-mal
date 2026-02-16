@@ -111,12 +111,12 @@ export function preprocessLines(text: string): string[] {
         .replace(/(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)(\d{1,2}:\d{2})/gi, "$1 $2")
         // Time glued to text: 09:45Huvudförhandling → 09:45 Huvudförhandling
         .replace(/(\d{1,2}:\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
-        // Text glued to case number prefix
-        .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+        // Text glued to case number prefix ((?<!F) prevents splitting "FT" case numbers)
+        .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|(?<!F)[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
         // Case number glued to text
         .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
         // Text glued to Sal/Tingssal: knivlagenSal → knivlagen Sal, textTingssal → text Tingssal
-        .replace(/([a-zA-ZåäöÅÄÖ.,])(Tingssal|Sal)/g, "$1 $2")
+        .replace(/([a-zA-ZåäöÅÄÖ.,)])(Tingssal|Sal)/g, "$1 $2")
         // Case number space before dash: B 784 -25 → B 784-25
         .replace(/([TBFTKÄ]\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
         // Bare sal number glued to text at end of line: Konkurs21 → Konkurs Sal 21, m.m.10 → m.m. Sal 10
