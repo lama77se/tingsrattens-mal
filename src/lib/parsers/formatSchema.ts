@@ -100,7 +100,11 @@ export const formatSchema: ParserStrategy = {
       if (angMatch) {
         const angText = angMatch[1];
         const embeddedCase = angText.match(CASE_NUMBER_REGEX);
-        if (embeddedCase) {
+        // Case numbers inside parentheses are references, not separate cases
+        // e.g. "undanröjande av ungdomstjänst (B 512-25)"
+        const isReference = embeddedCase &&
+          /\(\s*$/.test(angText.substring(0, angText.indexOf(embeddedCase[0])));
+        if (embeddedCase && !isReference) {
           // Text before the embedded case number is saken for the current hearing
           const beforeCase = angText.substring(0, angText.indexOf(embeddedCase[0])).replace(/[,\s]+$/, "").trim();
           if (beforeCase) sakenParts = [beforeCase];
