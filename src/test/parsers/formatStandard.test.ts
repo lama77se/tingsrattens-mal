@@ -126,4 +126,40 @@ describe("formatStandard", () => {
     expect(result[0].caseNumber).toBe("B 24584-25");
     expect(result[0].saken).toBe("brott mot vapenlagen");
   });
+
+  it("handles multi-line pdf-parse format (Halmstad-style)", () => {
+    const text = [
+      "må2026-02-1609:00 - 16:00Huvudförhandling",
+      "B 3895-25",
+      "grovt olaga hot m.m.Sal 1",
+      "må2026-02-1609:00 - 14:00Huvudförhandling",
+      "B 1748-25",
+      "Övergrepp i rättssak m.m.Sal 3",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Halmstads tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].caseNumber).toBe("B 3895-25");
+    expect(result[0].saken).toBe("grovt olaga hot m.m.");
+    expect(result[0].room).toBe("Sal 1");
+    expect(result[1].caseNumber).toBe("B 1748-25");
+    expect(result[1].saken).toBe("Övergrepp i rättssak m.m.");
+  });
+
+  it("updates ISO date across different hearing lines", () => {
+    const text = [
+      "to2026-02-1913:00 - 14:00Huvudförhandling",
+      "B 3898-25",
+      "ringa vapenbrott m.mSal 2",
+      "fr2026-02-2009:00 - 16:00Huvudförhandling",
+      "B 2519-25",
+      "grov våldtäkt mot barn m.m.Sal 1",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].date).toBe("2026-02-19");
+    expect(result[1].date).toBe("2026-02-20");
+  });
 });
