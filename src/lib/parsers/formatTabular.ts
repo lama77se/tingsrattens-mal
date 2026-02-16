@@ -95,18 +95,16 @@ export const formatTabular: ParserStrategy = {
       let room = extractRoomFromText(remainder);
       let saken = stripRoom(remainder);
 
-      // If saken is empty or very short, check subsequent lines
-      if (saken.length <= 1) {
-        for (let j = i + 1; j < lines.length; j++) {
-          const nextLine = lines[j];
-          // Stop at the next hearing line, day abbreviation, or header
-          if (nextLine.match(HEARING_LINE_REGEX) || DAY_ABBREV_REGEX.test(nextLine)) break;
-          if (nextLine.length > 1) {
-            if (!room) room = extractRoomFromText(nextLine);
-            const cleaned = stripRoom(nextLine);
-            if (cleaned && !DAY_ABBREV_REGEX.test(cleaned)) {
-              saken = saken ? `${saken} ${cleaned}` : cleaned;
-            }
+      // Always check subsequent lines for continuation text
+      for (let j = i + 1; j < lines.length; j++) {
+        const nextLine = lines[j];
+        // Stop at the next hearing line, day abbreviation, or header
+        if (nextLine.match(HEARING_LINE_REGEX) || DAY_ABBREV_REGEX.test(nextLine)) break;
+        if (nextLine.length > 1) {
+          if (!room) room = extractRoomFromText(nextLine);
+          const cleaned = stripRoom(nextLine);
+          if (cleaned && !DAY_ABBREV_REGEX.test(cleaned)) {
+            saken = saken ? `${saken} ${cleaned}` : cleaned;
           }
         }
       }
