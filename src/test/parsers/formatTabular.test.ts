@@ -1,0 +1,122 @@
+import { describe, it, expect } from "vitest";
+import { formatTabular } from "@/lib/parsers/formatTabular";
+
+describe("formatTabular", () => {
+  it("has correct metadata", () => {
+    expect(formatTabular.name).toBe("Tabular");
+    expect(formatTabular.formatFamily).toBe("tabular");
+  });
+
+  it("returns empty array for empty text", () => {
+    expect(formatTabular.parse({ courtName: "Test", text: "" })).toEqual([]);
+  });
+
+  it("parses a hearing with saken on the same line", () => {
+    const text = [
+      "ti",
+      "2026-02-17 09:00 - 16:00 Huvudförhandling försök till rån m m",
+      "Sal 3",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-17");
+    expect(result[0].time).toBe("09:00 - 16:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("försök till rån m m");
+    expect(result[0].caseNumber).toBe("");
+    expect(result[0].parties).toBe("");
+  });
+
+  it("parses a hearing with saken on the next line", () => {
+    const text = [
+      "ti",
+      "2026-02-17 09:00 - 10:00 Huvudförhandling",
+      "förolämpning mot tjänsteman",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("förolämpning mot tjänsteman");
+  });
+
+  it("extracts room from same line", () => {
+    const text = "2026-02-18 10:30 - 11:00 Huvudförhandling narkotikabrott Sal 1";
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 1");
+    expect(result[0].saken).toBe("narkotikabrott");
+  });
+
+  it("extracts room from next line", () => {
+    const text = [
+      "2026-02-18 09:00 - 09:30 Huvudförhandling",
+      "grov olovlig körning",
+      "Sal 1",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 1");
+    expect(result[0].saken).toBe("grov olovlig körning");
+  });
+
+  it("maps 'Fortsatt hf' to Huvudförhandling", () => {
+    const text = "2026-02-20 10:00 - 11:00 Fortsatt hf grovt rattfylleri m m Sal 1";
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("grovt rattfylleri m m");
+  });
+
+  it("parses Konkursförhandling", () => {
+    const text = "2026-02-20 10:00 - 11:00 Konkursförhandling ansökan om konkurs Sal 4";
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Konkursförhandling");
+    expect(result[0].saken).toBe("ansökan om konkurs");
+  });
+
+  it("parses Muntlig förberedelse", () => {
+    const text = [
+      "2026-02-16 13:00 - 15:00 Muntlig förberedelse",
+      "underhållsbidrag mm",
+      "Sal 3",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("underhållsbidrag mm");
+  });
+
+  it("parses multiple hearings", () => {
+    const text = [
+      "ti",
+      "2026-02-17 09:00 - 10:00 Huvudförhandling",
+      "narkotikabrott",
+      "Sal 1",
+      "ti",
+      "2026-02-17 10:00 - 11:00 Huvudförhandling",
+      "misshandel",
+      "Sal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("narkotikabrott");
+    expect(result[1].saken).toBe("misshandel");
+  });
+
+  it("handles multi-line saken", () => {
+    const text = [
+      "2026-02-18 14:00 - 14:45 Sammanträde",
+      "undanröjande av",
+      "ungdomsvård",
+      "Sal 1",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].saken).toBe("undanröjande av ungdomsvård");
+    expect(result[0].type).toBe("Sammanträde");
+  });
+});
