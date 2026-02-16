@@ -11,33 +11,34 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { courtId, weekNumber, year } = await req.json();
+    const body = await req.json();
+    const pdfUrl: string = body.pdfUrl;
+    const weekNumber: number | undefined = body.weekNumber;
+    const year: number | undefined = body.year;
 
-    if (!courtId || !weekNumber || !year) {
+    if (!pdfUrl) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Saknar parametrar' }),
+        JSON.stringify({ success: false, error: 'Saknar pdfUrl' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const courtPathMap: Record<string, string> = { solna_tingsratt: 'solna_tingsratt' };
-    const courtPath = courtPathMap[courtId];
-    if (!courtPath) {
+    // Validate URL is from domstol.se
+    if (!pdfUrl.startsWith('https://www.domstol.se/')) {
       return new Response(
-        JSON.stringify({ success: false, error: `Okänd tingsrätt: ${courtId}` }),
+        JSON.stringify({ success: false, error: 'Ogiltig URL – måste vara från domstol.se' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const pdfUrl = `https://www.domstol.se/globalassets/filer/domstol/${courtPath}/veckans-forhandlingar/v${weekNumber}.${year}.pdf`;
     console.log(`Fetching PDF from: ${pdfUrl}`);
 
     // Use proxy to bypass TLS incompatibility between Deno and domstol.se
     const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(pdfUrl)}`;
-    
+
     let pdfResponse: Response | null = null;
     let lastError = '';
-    
+
     try {
       pdfResponse = await fetch(proxyUrl);
       if (!pdfResponse.ok) {
