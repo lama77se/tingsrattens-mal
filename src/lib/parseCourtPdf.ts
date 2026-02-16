@@ -213,6 +213,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     if (afterCase.length > 2) {
       saken = afterCase
         .replace(roomRegex, "")
+        .replace(/\s*[Ss]al\s+\S+\s*$/, "")
         .replace(timeRangeRegex, "")
         .replace(timeRegex, "")
         .trim();
@@ -227,7 +228,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     if (!saken && i + 1 < lines.length) {
       const nextLine = lines[i + 1].trim();
       if (nextLine.length > 1 && !nextLine.match(caseNumberRegex) && !nextLine.match(shortDateRegex) && !nextLine.match(isoDateRegex)) {
-        saken = nextLine;
+        saken = nextLine.replace(/\s*[Ss]al\s+\S+\s*$/, "").trim();
         sakenFromNextLine = true;
       }
     }
