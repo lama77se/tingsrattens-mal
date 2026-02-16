@@ -12,7 +12,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="container max-w-6xl mx-auto px-4 py-5">
+        <div className="max-w-[1600px] mx-auto px-4 py-5">
           <div className="flex items-center gap-3">
             <Scale className="h-6 w-6 text-primary" />
             <div>
@@ -24,7 +24,7 @@ const Index = () => {
       </header>
 
       {/* Main content */}
-      <main className="container max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-[1600px] mx-auto px-4 py-6">
         <Tabs defaultValue="hearings" className="space-y-6">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="hearings" className="gap-2">
