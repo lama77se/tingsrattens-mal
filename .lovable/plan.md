@@ -1,29 +1,44 @@
 
 
-# Generalisera PDF-parsern
+# Fixa PDF-parsern for formatet "må 16-feb 09:00 - 11:00 Huvudförhandling B 1626-25 ..."
 
-## Sammanfattning
-Byt namn pa `parseSolnaPdf.ts` till `parseCourtPdf.ts` och funktionen fran `parseSolnaPdf` till `parseCourtPdf`. Parsern ar redan generisk i sin logik — den letar efter standardmonster som alla svenska tingsratter anvander (malnummer, tider, salar, forhandlingstyper). Det enda som behover andras ar namngivningen.
+## Problem
+Raden `må 16-feb 09:00 - 11:00 Huvudförhandling B 1626-25 Grov olovlig körning` parsas fel pa tre satt:
+1. **Datum**: `16-feb` kanns inte igen — parsern hanterar bara ISO-datum (`2026-02-16`) och fullstandiga svenska datum (`16 februari 2026`), inte forkortat format med bindestreck
+2. **Tid**: Bara en av tiderna fangas, borde vara `09:00 - 11:00`
+3. **Forhandlingstyp**: "Huvudforhandling" tappas och faller tillbaka till default "Forhandling"
 
-## Andringar
+## Losning — uppdatera `src/lib/parseCourtPdf.ts`
 
-### 1. Byt namn pa filen och funktionen
-- `src/lib/parseSolnaPdf.ts` -> `src/lib/parseCourtPdf.ts`
-- Funktionen `parseSolnaPdf()` -> `parseCourtPdf()`
-- Uppdatera JSDoc-kommentaren fran "Solna tingsratt" till "Swedish court PDFs"
-- Andra default-varde for `court`-parametern fran `"Solna tingsratt"` till att inte ha nagot default (kraver explicit angivelse)
+### 1. Lagg till stod for forkortat datumformat `dd-mmm`
+Lagg till en ny regex och en `shortMonthMap` for att matcha `16-feb`, `3-mar`, etc:
+```
+shortMonthMap: jan->01, feb->02, mar->03, apr->04, maj->05, jun->06, jul->07, aug->08, sep->09, okt->10, nov->11, dec->12
+```
+Regex: `(\d{1,2})-(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)`
+Aret hamleds fran nuvarande ar (eller fran kontexten i dokumentet om det finns).
 
-### 2. Uppdatera importerna
-- `src/components/DataLoadingTab.tsx`: andra import fran `parseSolnaPdf` till `parseCourtPdf` fran `@/lib/parseCourtPdf`
-- `src/pages/Index.tsx`: andra import av `Hearing`-typen fran `@/lib/parseCourtPdf`
+### 2. Fanga tidsintervall
+Andra fran att bara fanga forsta tiden till att fanga hela intervallet `09:00 - 11:00`:
+```
+timeRangeRegex: /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/
+```
+Om tidsintervall hittas, spara som `"09:00 - 11:00"`. Om bara en tid hittas, anvand den.
 
-### 3. Ta bort gamla filen
-- Radera `src/lib/parseSolnaPdf.ts`
+### 3. Forhandlingstyp — kontrollera hela raden forst
+Flytta typdetekteringen sa att den kor pa hela raden innan vi extraherar case number. Nuvarande logik fungerar i princip, men vi behover sakerstalla att "Huvudforhandling" matchas fore "Forhandling" genom att satta "Forhandling" sist i listan (den ar en substring av "Huvudforhandling").
+
+### 4. Forbattra parties-extraktionen
+Rensa bort forhandlingstyp och tidsintervall fran parties-strangen sa att bara "Grov olovlig korning" blir kvar.
 
 ## Tekniska detaljer
-Inga logikandringar behovs — parsern anvander redan generiska regex-monster for svenska domstolshandlingar:
-- Malnummer: `T`, `B`, `FT`, `A` (alla maltyper)
-- Datum: ISO-format och svenska datumformat
-- Tider, salar, forhandlingstyper — samma over alla tingsratter
 
-Det enda som ar "per tingsratt" ar `court`-parametern som skickas in vid anrop, vilket redan fungerar korrekt.
+Alla andringar sker i `src/lib/parseCourtPdf.ts`:
+- Ny `shortMonthMap` for `jan`-`dec`
+- Ny regex for `dd-mmm` datumformat
+- Ny regex for tidsintervall (`HH:MM - HH:MM`)
+- Flytta "Forhandling" till sist i `hearingTypes`-listan sa att mer specifika typer matchas forst
+- Rensa parties fran typ- och tidsdata
+
+Inga andringar i andra filer behovs.
+
