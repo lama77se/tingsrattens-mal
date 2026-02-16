@@ -54,7 +54,7 @@ export const formatSchema: ParserStrategy = {
           caseNumber: currentCaseNumber,
           type: currentType || "Förhandling",
           room: currentRoom,
-          saken: sakenParts.join(" ").trim(),
+          saken: sakenParts.join(" ").replace(/[,\s]+$/, "").trim(),
           parties: "",
           location: currentLocation,
         });
@@ -93,6 +93,31 @@ export const formatSchema: ParserStrategy = {
         }
       }
 
+      // "angående" line — check BEFORE case number since angående lines may contain
+      // embedded case numbers for multi-case hearings:
+      //   "angående häleriförseelse, B 443-25 ringa narkotikabrott, ..."
+      const angMatch = line.match(ANGAENDE_REGEX);
+      if (angMatch) {
+        const angText = angMatch[1];
+        const embeddedCase = angText.match(CASE_NUMBER_REGEX);
+        if (embeddedCase) {
+          // Text before the embedded case number is saken for the current hearing
+          const beforeCase = angText.substring(0, angText.indexOf(embeddedCase[0])).replace(/[,\s]+$/, "").trim();
+          if (beforeCase) sakenParts = [beforeCase];
+          const inheritedType = currentType;
+          flush();
+
+          // Start new hearing with embedded case number, inheriting type/time/location/room/date
+          currentCaseNumber = embeddedCase[1];
+          currentType = inheritedType;
+          const afterCase = angText.substring(angText.indexOf(embeddedCase[0]) + embeddedCase[0].length).replace(/^[\s,]+/, "").trim();
+          sakenParts = afterCase ? [afterCase] : [];
+        } else {
+          sakenParts = [angText];
+        }
+        continue;
+      }
+
       // Case number line: "B 784-25, Huvudförhandling"
       const caseMatch = line.match(CASE_NUMBER_REGEX);
       if (caseMatch) {
@@ -115,15 +140,8 @@ export const formatSchema: ParserStrategy = {
         continue;
       }
 
-      // "angående" line starts saken
-      const angMatch = line.match(ANGAENDE_REGEX);
-      if (angMatch) {
-        sakenParts = [angMatch[1]];
-        continue;
-      }
-
-      // Continuation of saken (only if we're building a hearing with a case number)
-      if (currentCaseNumber && sakenParts.length > 0) {
+      // Continuation of saken
+      if (currentCaseNumber) {
         sakenParts.push(line);
         continue;
       }
