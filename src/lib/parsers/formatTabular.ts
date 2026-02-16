@@ -172,6 +172,9 @@ export const formatTabular: ParserStrategy = {
         }
       }
 
+      // Strip inline (dag X/Y) annotations from rest text
+      rest = rest.replace(/\s*\(dag\s+\d+\/\d+\)/gi, "").trim();
+
       // Extract hearing type from the text after the time range
       const { type, remainder } = extractTypeFromText(rest);
 
