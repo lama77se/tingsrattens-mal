@@ -33,6 +33,12 @@ export const COURTS: CourtConfig[] = [
     },
   },
   {
+    id: "blekinge_tingsratt",
+    name: "Blekinge tingsrätt",
+    buildUrl: (week, year) =>
+      `${BASE}/blekinge_tingsratt/block/veckans-forhandlingar-${year}/veckans-forhandlingar-vecka-${week}.pdf`,
+  },
+  {
     id: "solna_tingsratt",
     name: "Solna tingsrätt",
     buildUrl: (week, year) =>
