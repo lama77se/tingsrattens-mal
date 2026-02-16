@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ interface WeekFetch {
 
 interface DataLoadingTabProps {
   onHearingsFetched: (hearings: Hearing[]) => void;
+  fetchAllTrigger?: number;
 }
 
 const STEP_LABELS = ["Beräknar URL", "Hämtar PDF", "Bearbetar", "Klar"];
@@ -70,7 +71,7 @@ function initAllCourts(): CourtWeeksState {
   return state;
 }
 
-export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProps) {
+export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger }: DataLoadingTabProps) {
   const [courtWeeks, setCourtWeeks] = useState<CourtWeeksState>(initAllCourts);
   const [fetchingCourts, setFetchingCourts] = useState<Set<string>>(new Set());
   const [isFetchingAll, setIsFetchingAll] = useState(false);
@@ -247,6 +248,13 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
   };
 
   const anyFetching = isFetchingAll || fetchingCourts.size > 0;
+
+  // Allow external trigger (e.g. from HearingsTab empty state)
+  useEffect(() => {
+    if (fetchAllTrigger && fetchAllTrigger > 0 && !anyFetching) {
+      handleFetchAll();
+    }
+  }, [fetchAllTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="space-y-6">

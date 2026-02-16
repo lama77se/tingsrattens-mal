@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scale, Database } from "lucide-react";
 import HearingsTab from "@/components/HearingsTab";
@@ -7,6 +7,13 @@ import { Hearing } from "@/lib/parseCourtPdf";
 
 const Index = () => {
   const [hearings, setHearings] = useState<Hearing[]>([]);
+  const [activeTab, setActiveTab] = useState("hearings");
+  const [fetchAllTrigger, setFetchAllTrigger] = useState(0);
+
+  const handleFetchAll = useCallback(() => {
+    setActiveTab("loading");
+    setFetchAllTrigger((n) => n + 1);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,7 +32,7 @@ const Index = () => {
 
       {/* Main content */}
       <main className="max-w-[1600px] mx-auto px-4 py-6">
-        <Tabs defaultValue="hearings" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="hearings" className="gap-2">
               <Scale className="h-4 w-4" />
@@ -38,11 +45,11 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="hearings">
-            <HearingsTab hearings={hearings} />
+            <HearingsTab hearings={hearings} onFetchAll={handleFetchAll} />
           </TabsContent>
 
           <TabsContent value="loading">
-            <DataLoadingTab onHearingsFetched={setHearings} />
+            <DataLoadingTab onHearingsFetched={setHearings} fetchAllTrigger={fetchAllTrigger} />
           </TabsContent>
         </Tabs>
       </main>
