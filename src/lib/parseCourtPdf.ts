@@ -53,6 +53,12 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   const hearings: Hearing[] = [];
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
+  // Pre-process: insert space before case number prefixes glued to text
+  // e.g. "HuvudförhandlingT 3535-24" -> "Huvudförhandling T 3535-24"
+  const processedLines = lines.map(line =>
+    line.replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+  );
+
   let currentDate = "";
   let idCounter = 0;
 
@@ -100,8 +106,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   // Pre-compute normalized type strings for matching
   const normalizedTypes = hearingTypes.map((ht) => ({ original: ht, normalized: normalize(ht) }));
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (let i = 0; i < processedLines.length; i++) {
+    const line = processedLines[i];
 
     // --- Date extraction: try short date FIRST, then ISO, then Swedish long ---
     const shortDate = extractShortDate(line, shortDateRegex, shortMonthMap);
@@ -136,7 +142,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
 
     // If current line has no date but previous line does, grab it
     if (i > 0 && !line.match(shortDateRegex)) {
-      const prevShortDate = extractShortDate(lines[i - 1], shortDateRegex, shortMonthMap);
+      const prevShortDate = extractShortDate(processedLines[i - 1], shortDateRegex, shortMonthMap);
       if (prevShortDate) {
         currentDate = prevShortDate;
       }
@@ -152,11 +158,11 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       if (timeMatch) {
         time = timeMatch[1];
       } else if (i > 0) {
-        const prevRange = lines[i - 1].match(timeRangeRegex);
+        const prevRange = processedLines[i - 1].match(timeRangeRegex);
         if (prevRange) {
           time = `${prevRange[1]} - ${prevRange[2]}`;
         } else {
-          const prevTimeMatch = lines[i - 1].match(timeRegex);
+          const prevTimeMatch = processedLines[i - 1].match(timeRegex);
           if (prevTimeMatch) time = prevTimeMatch[1];
         }
       }
@@ -169,8 +175,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       const prefix = roomMatch[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
       room = `${prefix} ${roomMatch[1]}`;
     } else {
-      for (let j = Math.max(0, i - 2); j <= Math.min(lines.length - 1, i + 2); j++) {
-        const rm = lines[j].match(roomRegex);
+      for (let j = Math.max(0, i - 2); j <= Math.min(processedLines.length - 1, i + 2); j++) {
+        const rm = processedLines[j].match(roomRegex);
         if (rm) {
           const prefix = rm[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
           room = `${prefix} ${rm[1]}`;
@@ -190,7 +196,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     }
     // Check PREVIOUS line for type (case number is often on line after type)
     if (type === "Förhandling" && i > 0) {
-      const prevNormalized = normalize(lines[i - 1]);
+      const prevNormalized = normalize(processedLines[i - 1]);
       for (const nt of normalizedTypes) {
         if (prevNormalized.includes(nt.normalized)) {
           type = nt.original;
@@ -199,8 +205,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       }
     }
     // Also check next line for type
-    if (type === "Förhandling" && i + 1 < lines.length) {
-      const nextNormalized = normalize(lines[i + 1]);
+    if (type === "Förhandling" && i + 1 < processedLines.length) {
+      const nextNormalized = normalize(processedLines[i + 1]);
       for (const nt of normalizedTypes) {
         if (nextNormalized.includes(nt.normalized)) {
           type = nt.original;
@@ -227,8 +233,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
 
     // If no saken on case number line, next line is saken (not parties)
     let sakenFromNextLine = false;
-    if (!saken && i + 1 < lines.length) {
-      const nextLine = lines[i + 1].trim();
+    if (!saken && i + 1 < processedLines.length) {
+      const nextLine = processedLines[i + 1].trim();
       if (nextLine.length > 1 && !nextLine.match(caseNumberRegex) && !nextLine.match(shortDateRegex) && !nextLine.match(isoDateRegex)) {
         saken = nextLine.replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
         sakenFromNextLine = true;
@@ -238,8 +244,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     // Extract parties from the line AFTER saken
     let parties = "";
     const partiesLineIndex = sakenFromNextLine ? i + 2 : i + 1;
-    if (partiesLineIndex < lines.length && !lines[partiesLineIndex].match(caseNumberRegex)) {
-      const pLine = lines[partiesLineIndex].trim();
+    if (partiesLineIndex < processedLines.length && !processedLines[partiesLineIndex].match(caseNumberRegex)) {
+      const pLine = processedLines[partiesLineIndex].trim();
       if (pLine.length > 2 && !pLine.match(shortDateRegex) && !pLine.match(isoDateRegex)) {
         // Don't use as parties if it looks like a new hearing line (has time pattern)
         if (!pLine.match(timeRangeRegex) || pLine.match(caseNumberRegex)) {
