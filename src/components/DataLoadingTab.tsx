@@ -2,8 +2,9 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle2, Clock, AlertCircle, Circle, FileText } from "lucide-react";
-import { getPreviousWeek, getCurrentWeek, getNextWeek, buildPdfUrl } from "@/lib/weekUtils";
+import { RefreshCw, CheckCircle2, AlertCircle, Circle, FileText } from "lucide-react";
+import { getPreviousWeek, getCurrentWeek, getNextWeek } from "@/lib/weekUtils";
+import { COURTS, CourtConfig } from "@/lib/courtConfig";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
 import { parseCourtPdf, Hearing } from "@/lib/parseCourtPdf";
 
@@ -26,15 +27,21 @@ interface DataLoadingTabProps {
   onHearingsFetched: (hearings: Hearing[]) => void;
 }
 
-const STEP_LABELS = [
-  "Beräknar URL",
-  "Hämtar PDF",
-  "Bearbetar",
-  "Klar",
-];
+const STEP_LABELS = ["Beräknar URL", "Hämtar PDF", "Bearbetar", "Klar"];
 
 function createInitialSteps(): FetchStep[] {
   return STEP_LABELS.map((label) => ({ label, status: "idle" as StepStatus }));
+}
+
+function createWeeksForCourt(): WeekFetch[] {
+  const previous = getPreviousWeek();
+  const current = getCurrentWeek();
+  const next = getNextWeek();
+  return [
+    { week: previous.week, year: previous.year, steps: createInitialSteps() },
+    { week: current.week, year: current.year, steps: createInitialSteps() },
+    { week: next.week, year: next.year, steps: createInitialSteps() },
+  ];
 }
 
 const stepIcon = (status: StepStatus) => {
@@ -50,200 +57,259 @@ const stepIcon = (status: StepStatus) => {
   }
 };
 
-export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProps) {
-  const previous = getPreviousWeek();
-  const current = getCurrentWeek();
-  const next = getNextWeek();
+type CourtWeeksState = Record<string, WeekFetch[]>;
 
-  const [weeks, setWeeks] = useState<WeekFetch[]>([
-    { week: previous.week, year: previous.year, steps: createInitialSteps() },
-    { week: current.week, year: current.year, steps: createInitialSteps() },
-    { week: next.week, year: next.year, steps: createInitialSteps() },
-  ]);
-  const [isFetching, setIsFetching] = useState(false);
+function initAllCourts(): CourtWeeksState {
+  const state: CourtWeeksState = {};
+  for (const court of COURTS) {
+    state[court.id] = createWeeksForCourt();
+  }
+  return state;
+}
+
+export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProps) {
+  const [courtWeeks, setCourtWeeks] = useState<CourtWeeksState>(initAllCourts);
+  const [fetchingCourts, setFetchingCourts] = useState<Set<string>>(new Set());
+  const [isFetchingAll, setIsFetchingAll] = useState(false);
 
   const updateStep = useCallback(
-    (weekIndex: number, stepIndex: number, update: Partial<FetchStep>) => {
-      setWeeks((prev) =>
-        prev.map((w, wi) =>
+    (courtId: string, weekIndex: number, stepIndex: number, update: Partial<FetchStep>) => {
+      setCourtWeeks((prev) => ({
+        ...prev,
+        [courtId]: prev[courtId].map((w, wi) =>
           wi === weekIndex
-            ? {
-                ...w,
-                steps: w.steps.map((s, si) =>
-                  si === stepIndex ? { ...s, ...update } : s
-                ),
-              }
+            ? { ...w, steps: w.steps.map((s, si) => (si === stepIndex ? { ...s, ...update } : s)) }
             : w
-        )
-      );
+        ),
+      }));
     },
     []
   );
 
   const setResult = useCallback(
-    (weekIndex: number, result: CourtPdfResult) => {
-      setWeeks((prev) =>
-        prev.map((w, wi) => (wi === weekIndex ? { ...w, result } : w))
-      );
+    (courtId: string, weekIndex: number, result: CourtPdfResult) => {
+      setCourtWeeks((prev) => ({
+        ...prev,
+        [courtId]: prev[courtId].map((w, wi) => (wi === weekIndex ? { ...w, result } : w)),
+      }));
     },
     []
   );
 
-  const fetchWeek = async (weekIndex: number, week: number, year: number): Promise<CourtPdfResult | undefined> => {
+  const fetchWeek = async (
+    court: CourtConfig,
+    weekIndex: number,
+    week: number,
+    year: number
+  ): Promise<CourtPdfResult | undefined> => {
     // Step 0: Beräknar URL
-    updateStep(weekIndex, 0, { status: "active" });
-    const url = buildPdfUrl("solna_tingsratt", week, year);
-    await delay(400);
-    updateStep(weekIndex, 0, { status: "done", detail: url });
+    updateStep(court.id, weekIndex, 0, { status: "active" });
+    const url = court.buildUrl(week, year);
+    await delay(300);
+    updateStep(court.id, weekIndex, 0, { status: "done", detail: url });
 
     // Step 1: Hämtar PDF
-    updateStep(weekIndex, 1, { status: "active" });
-
-    const result = await fetchCourtPdf("solna_tingsratt", week, year);
+    updateStep(court.id, weekIndex, 1, { status: "active" });
+    const result = await fetchCourtPdf(url, week, year);
 
     if (!result.success) {
-      updateStep(weekIndex, 1, { status: "error", detail: result.error });
-      updateStep(weekIndex, 2, { status: "idle" });
-      updateStep(weekIndex, 3, {
+      updateStep(court.id, weekIndex, 1, { status: "error", detail: result.error });
+      updateStep(court.id, weekIndex, 2, { status: "idle" });
+      updateStep(court.id, weekIndex, 3, {
         status: "error",
         detail: result.notFound ? "PDF inte publicerad ännu" : result.error,
       });
-      setResult(weekIndex, result);
+      setResult(court.id, weekIndex, result);
       return undefined;
     }
 
-    updateStep(weekIndex, 1, {
+    updateStep(court.id, weekIndex, 1, {
       status: "done",
       detail: `${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB`,
     });
 
     // Step 2: Bearbetar
-    updateStep(weekIndex, 2, { status: "active" });
-    await delay(300);
-    updateStep(weekIndex, 2, {
+    updateStep(court.id, weekIndex, 2, { status: "active" });
+    await delay(200);
+    updateStep(court.id, weekIndex, 2, {
       status: "done",
-      detail: `${(result.text?.length || 0)} tecken extraherade`,
+      detail: `${result.text?.length || 0} tecken extraherade`,
     });
 
     // Step 3: Klar
-    updateStep(weekIndex, 3, {
+    updateStep(court.id, weekIndex, 3, {
       status: "done",
       detail: `~${result.estimatedHearings || 0} förhandlingar`,
     });
-    setResult(weekIndex, result);
+    setResult(court.id, weekIndex, result);
     return result;
   };
 
+  const fetchCourt = async (court: CourtConfig): Promise<Hearing[]> => {
+    const weeks = createWeeksForCourt();
+    setCourtWeeks((prev) => ({ ...prev, [court.id]: weeks }));
+    await delay(50);
+
+    const hearings: Hearing[] = [];
+    for (let i = 0; i < weeks.length; i++) {
+      const w = weeks[i];
+      const result = await fetchWeek(court, i, w.week, w.year);
+      if (result?.success && result.text) {
+        const parsed = parseCourtPdf(result.text, court.name);
+        parsed.forEach((h, j) => { h.id = `${court.id}-w${i}-${j}`; });
+        hearings.push(...parsed);
+      }
+    }
+    return hearings;
+  };
+
+  const handleFetchCourt = async (court: CourtConfig) => {
+    setFetchingCourts((prev) => new Set(prev).add(court.id));
+    const courtHearings = await fetchCourt(court);
+
+    // Merge with hearings from other courts
+    setCourtWeeks((prev) => {
+      // Collect hearings from all OTHER courts that already have results
+      const allHearings: Hearing[] = [];
+      for (const c of COURTS) {
+        if (c.id === court.id) {
+          allHearings.push(...courtHearings);
+          continue;
+        }
+        const cWeeks = prev[c.id];
+        if (!cWeeks) continue;
+        for (let i = 0; i < cWeeks.length; i++) {
+          const w = cWeeks[i];
+          if (w.result?.success && w.result.text) {
+            const parsed = parseCourtPdf(w.result.text, c.name);
+            parsed.forEach((h, j) => { h.id = `${c.id}-w${i}-${j}`; });
+            allHearings.push(...parsed);
+          }
+        }
+      }
+      onHearingsFetched(allHearings);
+      return prev;
+    });
+
+    setFetchingCourts((prev) => {
+      const next = new Set(prev);
+      next.delete(court.id);
+      return next;
+    });
+  };
+
   const handleFetchAll = async () => {
-    setIsFetching(true);
-    // Reset
-    setWeeks([
-      { week: previous.week, year: previous.year, steps: createInitialSteps() },
-      { week: current.week, year: current.year, steps: createInitialSteps() },
-      { week: next.week, year: next.year, steps: createInitialSteps() },
-    ]);
-    await delay(100);
+    setIsFetchingAll(true);
+    setCourtWeeks(initAllCourts());
+    await delay(50);
 
     const allHearings: Hearing[] = [];
-
-    const r1 = await fetchWeek(0, previous.week, previous.year);
-    if (r1?.success && r1.text) {
-      const parsed = parseCourtPdf(r1.text, "Solna tingsrätt");
-      parsed.forEach((h, i) => { h.id = `w0-${i}`; });
-      allHearings.push(...parsed);
-    }
-
-    const r2 = await fetchWeek(1, current.week, current.year);
-    if (r2?.success && r2.text) {
-      const parsed = parseCourtPdf(r2.text, "Solna tingsrätt");
-      parsed.forEach((h, i) => { h.id = `w1-${i}`; });
-      allHearings.push(...parsed);
-    }
-
-    const r3 = await fetchWeek(2, next.week, next.year);
-    if (r3?.success && r3.text) {
-      const parsed = parseCourtPdf(r3.text, "Solna tingsrätt");
-      parsed.forEach((h, i) => { h.id = `w2-${i}`; });
-      allHearings.push(...parsed);
+    for (const court of COURTS) {
+      setFetchingCourts((prev) => new Set(prev).add(court.id));
+      const hearings = await fetchCourt(court);
+      allHearings.push(...hearings);
+      setFetchingCourts((prev) => {
+        const next = new Set(prev);
+        next.delete(court.id);
+        return next;
+      });
     }
 
     onHearingsFetched(allHearings);
-    setIsFetching(false);
+    setIsFetchingAll(false);
   };
+
+  const anyFetching = isFetchingAll || fetchingCourts.size > 0;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold">Solna tingsrätt</h3>
+          <h3 className="font-semibold">Datahämtning</h3>
           <p className="text-sm text-muted-foreground">
-            Hämtar veckans förhandlingar som PDF från domstol.se
+            Hämtar förhandlingar från {COURTS.length} tingsrätter via domstol.se
           </p>
         </div>
-        <Button onClick={handleFetchAll} disabled={isFetching}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-          Hämta data
+        <Button onClick={handleFetchAll} disabled={anyFetching}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isFetchingAll ? "animate-spin" : ""}`} />
+          Hämta alla
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {weeks.map((w, wi) => (
-          <Card key={wi}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Vecka {w.week}, {w.year}
-                {wi === 0 && (
-                  <Badge variant="outline" className="text-xs">Föregående</Badge>
-                )}
-                {wi === 1 && (
-                  <Badge variant="secondary" className="text-xs">Nuvarande</Badge>
-                )}
-                {wi === 2 && (
-                  <Badge variant="outline" className="text-xs">Nästa</Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {w.steps.map((step, si) => (
-                <div key={si} className="flex items-start gap-3">
-                  <div className="mt-0.5">{stepIcon(step.status)}</div>
-                  <div className="flex-1 min-w-0">
-                    <span
-                      className={`text-sm font-medium ${
-                        step.status === "error"
-                          ? "text-destructive"
-                          : step.status === "done"
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {step.label}
-                    </span>
-                    {step.detail && (
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {step.detail}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+      {COURTS.map((court) => {
+        const weeks = courtWeeks[court.id] || [];
+        const isCourtFetching = fetchingCourts.has(court.id);
 
-              {w.result?.success && w.result.text && (
-                <details className="mt-3 pt-3 border-t">
-                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                    Visa rådata ({w.result.text.length} tecken)
-                  </summary>
-                  <pre className="mt-2 text-xs bg-muted p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap">
-                    {w.result.text.substring(0, 2000)}
-                    {(w.result.text.length || 0) > 2000 && "\n\n... (trunkerad)"}
-                  </pre>
-                </details>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        return (
+          <div key={court.id} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-sm">{court.name}</h4>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleFetchCourt(court)}
+                disabled={anyFetching}
+              >
+                <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isCourtFetching ? "animate-spin" : ""}`} />
+                Hämta
+              </Button>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {weeks.map((w, wi) => (
+                <Card key={wi}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Vecka {w.week}, {w.year}
+                      {wi === 0 && <Badge variant="outline" className="text-xs">Föregående</Badge>}
+                      {wi === 1 && <Badge variant="secondary" className="text-xs">Nuvarande</Badge>}
+                      {wi === 2 && <Badge variant="outline" className="text-xs">Nästa</Badge>}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {w.steps.map((step, si) => (
+                      <div key={si} className="flex items-start gap-3">
+                        <div className="mt-0.5">{stepIcon(step.status)}</div>
+                        <div className="flex-1 min-w-0">
+                          <span
+                            className={`text-sm font-medium ${
+                              step.status === "error"
+                                ? "text-destructive"
+                                : step.status === "done"
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {step.label}
+                          </span>
+                          {step.detail && (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                              {step.detail}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                    {w.result?.success && w.result.text && (
+                      <details className="mt-3 pt-3 border-t">
+                        <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
+                          Visa rådata ({w.result.text.length} tecken)
+                        </summary>
+                        <pre className="mt-2 text-xs bg-muted p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap">
+                          {w.result.text.substring(0, 2000)}
+                          {(w.result.text.length || 0) > 2000 && "\n\n... (trunkerad)"}
+                        </pre>
+                      </details>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
