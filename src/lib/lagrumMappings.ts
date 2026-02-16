@@ -481,6 +481,27 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 32 kap. 4 §"],
     kommentar: "Avser undanröjande av påföljden ungdomstjänst och ny påföljdsbestämning.",
   },
+  "undanröjande av ungdomsövervakning": {
+    sakomrade: "Straffverkställighet",
+    primart_lagrum: ["BrB 32 kap. 8 §"],
+    kommentar: "Avser undanröjande av påföljden ungdomsövervakning och ny påföljdsbestämning.",
+  },
+  "överträdelse av vistelseförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (2024:79) om vistelseförbud 23 §"],
+    kommentar: "Straffbestämmelsen finns i lagen om vistelseförbud.",
+  },
+  "talan om självständigt förverkande": {
+    sakomrade: "Särskild rättsverkan av brott",
+    primart_lagrum: ["BrB 36 kap."],
+    kommentar: "Självständigt förverkande regleras i 36 kap. BrB och är en särskild rättsverkan, inte ett brott.",
+  },
+  "vållande till kroppskada": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 8 §"],
+    alternativa_lagrum: ["BrB 3 kap. 9 § (grovt brott)"],
+    kommentar: "Stavningsvariant av 'vållande till kroppsskada'. Bör normaliseras till korrekt rubricering.",
+  },
   "olvolig körning": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 3 §"],
