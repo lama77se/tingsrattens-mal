@@ -7,6 +7,12 @@ export interface CourtConfig {
   formatFamily: FormatFamily;
   /** Return a single URL or an array of candidate URLs to try in order. */
   buildUrl: (week: number, year: number) => string | string[];
+  /** If true, only fetch once (current week) — for courts that overwrite the same URL. */
+  singleUrl?: boolean;
+  /** If true, court cannot be fetched — shown as info-only on the loading page. */
+  disabled?: boolean;
+  /** Note shown on the loading page (e.g., why a court is disabled). */
+  note?: string;
 }
 
 const BASE = "https://www.domstol.se/globalassets/filer/domstol";
@@ -60,5 +66,95 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/boras_tingsratt/veckans_forhandlingar/veckans-forhandlingar-vecka-${week - 1}-${week}.pdf`,
       `${BASE}/boras_tingsratt/veckans_forhandlingar/veckans-forhandlingar-vecka-${week}-${week + 1}.pdf`,
     ],
+  },
+  {
+    id: "eksjo_tingsratt",
+    name: "Eksjö tingsrätt",
+    formatFamily: "tabular",
+    singleUrl: true,
+    buildUrl: () => `${BASE}/eksjo_tingsratt/schema/veckan.pdf`,
+  },
+  {
+    id: "eskilstuna_tingsratt",
+    name: "Eskilstuna tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "falu_tingsratt",
+    name: "Falu tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "gallivare_tingsratt",
+    name: "Gällivare tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "gavle_tingsratt",
+    name: "Gävle tingsrätt",
+    formatFamily: "gavle",
+    singleUrl: true,
+    buildUrl: (_week, year) => {
+      const now = new Date();
+      const currentMonth = now.getMonth(); // 0-indexed
+      const monthNames = [
+        "januari", "februari", "mars", "april", "maj", "juni",
+        "juli", "augusti", "september", "oktober", "november", "december",
+      ];
+      // Known misspellings on domstol.se
+      const misspellings: Record<string, string[]> = {
+        februari: ["februrai"],
+      };
+      const curr = monthNames[currentMonth];
+      const prev = monthNames[(currentMonth + 11) % 12];
+      const next = monthNames[(currentMonth + 1) % 12];
+      const prevYear = currentMonth === 0 ? year - 1 : year;
+      const nextYear = currentMonth === 11 ? year + 1 : year;
+
+      const base = `${BASE}/gavle_tingsratt/veckans-forhandlingar/forhandlingar`;
+      const urls: string[] = [];
+
+      // current + next month
+      urls.push(`${base}-${curr}-${next}-${nextYear}.pdf`);
+      // prev + current month
+      urls.push(`${base}-${prev}-${curr}-${year}.pdf`);
+      // current month only
+      urls.push(`${base}-${curr}-${year}.pdf`);
+
+      // misspelled variants
+      const currMisspellings = misspellings[curr] || [];
+      const prevMisspellings = misspellings[prev] || [];
+      const nextMisspellings = misspellings[next] || [];
+      for (const alt of currMisspellings) {
+        urls.push(`${base}-${alt}-${next}-${nextYear}.pdf`);
+        urls.push(`${base}-${prev}-${alt}-${year}.pdf`);
+        urls.push(`${base}-${alt}-${year}.pdf`);
+      }
+      for (const alt of prevMisspellings) {
+        urls.push(`${base}-${alt}-${curr}-${year}.pdf`);
+      }
+      for (const alt of nextMisspellings) {
+        urls.push(`${base}-${curr}-${alt}-${nextYear}.pdf`);
+      }
+
+      return urls;
+    },
+  },
+  {
+    id: "gotlands_tingsratt",
+    name: "Gotlands tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
   },
 ];

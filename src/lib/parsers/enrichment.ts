@@ -31,7 +31,7 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
     date: raw.date || "Okänt datum",
     time: raw.time || "–",
     court: resolvedCourt,
-    caseNumber: raw.caseNumber,
+    caseNumber: raw.caseNumber || "–",
     type: raw.type,
     maltyp: getMaltyp(raw.caseNumber),
     room: raw.room || "–",

@@ -5,12 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, Info, CalendarDays } from "lucide-react";
+import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
 interface HearingsTabProps {
   hearings: Hearing[];
 }
+
+type SortKey = "datetime" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
+type SortDir = "asc" | "desc";
 
 const normalizeType = (t: string) => t.trim().normalize("NFC");
 
@@ -31,6 +34,8 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   const [sakomradeFilter, setSakomradeFilter] = useState("Alla");
   const [maltypFilter, setMaltypFilter] = useState("Alla");
   const [fleraSakfragorFilter, setFleraSakfragorFilter] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const courts = useMemo(() => {
     const unique = Array.from(new Set(hearings.map((h) => h.court)));
@@ -72,6 +77,49 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     const matchesFleraSakfragor = !fleraSakfragorFilter || h.fleraSakfragor;
     return matchesSearch && matchesCourt && matchesType && matchesDate && matchesSakomrade && matchesMaltyp && matchesFleraSakfragor;
   });
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortIcon = (key: SortKey) => {
+    if (sortKey !== key) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered;
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sortKey) {
+        case "datetime":
+          return dir * (`${a.date} ${a.time}`).localeCompare(`${b.date} ${b.time}`);
+        case "caseNumber":
+          return dir * a.caseNumber.localeCompare(b.caseNumber);
+        case "type":
+          return dir * normalizeType(a.type).localeCompare(normalizeType(b.type), "sv");
+        case "maltyp":
+          return dir * (a.maltyp || "").localeCompare(b.maltyp || "", "sv");
+        case "saken":
+          return dir * a.saken.localeCompare(b.saken, "sv");
+        case "sakomrade":
+          return dir * (a.sakomrade || "").localeCompare(b.sakomrade || "", "sv");
+        case "lagrum":
+          return dir * (a.lagrum || "").localeCompare(b.lagrum || "", "sv");
+        case "flera":
+          return dir * (Number(a.fleraSakfragor) - Number(b.fleraSakfragor));
+        default:
+          return 0;
+      }
+    });
+  }, [filtered, sortKey, sortDir]);
 
   if (hearings.length === 0) {
     return (
@@ -191,31 +239,61 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>Datum</TableHead>
-              <TableHead>Tid</TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("datetime")}>
+                  Datum + Tid{sortIcon("datetime")}
+                </button>
+              </TableHead>
               <TableHead>Tingsrätt</TableHead>
-              <TableHead>Målnummer</TableHead>
-              <TableHead>Typ</TableHead>
-              <TableHead>Måltyp</TableHead>
-              <TableHead>Saken</TableHead>
-              <TableHead>Sakområde</TableHead>
-              <TableHead>Lagrum</TableHead>
-              <TableHead>Flera</TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("caseNumber")}>
+                  Målnummer{sortIcon("caseNumber")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("type")}>
+                  Typ{sortIcon("type")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("maltyp")}>
+                  Måltyp{sortIcon("maltyp")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("saken")}>
+                  Saken{sortIcon("saken")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("sakomrade")}>
+                  Sakområde{sortIcon("sakomrade")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("lagrum")}>
+                  Lagrum{sortIcon("lagrum")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("flera")}>
+                  Flera{sortIcon("flera")}
+                </button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.length === 0 ? (
+            {sorted.length === 0 ? (
               <TableRow>
-              <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
 
                   Inga förhandlingar matchar filtren.
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((h) => (
+              sorted.map((h) => (
                 <TableRow key={h.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium">{h.date}</TableCell>
-                  <TableCell>{h.time}</TableCell>
+                  <TableCell className="font-medium whitespace-nowrap">{h.date} {h.time}</TableCell>
                   <TableCell>{h.court}</TableCell>
                   <TableCell className="font-mono text-sm">{h.caseNumber}</TableCell>
                   <TableCell>

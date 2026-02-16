@@ -1,5 +1,7 @@
 import { enrichHearing } from "./parsers/enrichment";
 import { formatStandard } from "./parsers/formatStandard";
+import { formatTabular } from "./parsers/formatTabular";
+import { formatGavle } from "./parsers/formatGavle";
 import type { ParserStrategy, FormatFamily } from "./parsers/types";
 
 // Re-export Hearing from types for backward compatibility
@@ -14,9 +16,10 @@ export type { RawHearing, FormatFamily, ParserStrategy, ParserContext } from "./
  */
 const strategyRegistry: Record<FormatFamily, ParserStrategy> = {
   standard: formatStandard,
+  tabular: formatTabular,
+  gavle: formatGavle,
   // Future formats:
-  formatB: formatStandard, // placeholder — override when implemented
-  formatC: formatStandard,
+  formatC: formatStandard, // placeholder — override when implemented
   formatD: formatStandard,
   formatE: formatStandard,
 };
