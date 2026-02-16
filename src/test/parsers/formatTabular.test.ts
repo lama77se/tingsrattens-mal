@@ -194,4 +194,70 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("fordran");
     expect(result[1].room).toBe("Tingssal 1");
   });
+
+  it("handles multi-line entries with (dag X/Y)", () => {
+    const text = [
+      "må 2026-02-09",
+      "(dag 2/2)",
+      "09:00 - 12:00Huvudförhandling överflyttande av vårdnad om barn Tingssal 2",
+      "må 2026-02-09",
+      "(dag 2/3)",
+      "09:00 - 16:00Huvudförhandling våldtäkt Tingssal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].date).toBe("2026-02-09");
+    expect(result[0].time).toBe("09:00 - 12:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("överflyttande av vårdnad om barn");
+    expect(result[0].room).toBe("Tingssal 2");
+    expect(result[1].date).toBe("2026-02-09");
+    expect(result[1].saken).toBe("våldtäkt");
+    expect(result[1].room).toBe("Tingssal 1");
+  });
+
+  it("does not absorb next entry into previous saken", () => {
+    const text = [
+      "ti 2026-02-1009:00 - 12:00Huvudförhandling näringspenningtvätt Tingssal 1",
+      "ti 2026-02-10",
+      "(dag 1/2)",
+      "09:00 - 12:00Huvudförhandling boende och umgänge Tingssal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("näringspenningtvätt");
+    expect(result[0].room).toBe("Tingssal 1");
+    expect(result[1].date).toBe("2026-02-10");
+    expect(result[1].saken).toBe("boende och umgänge");
+    expect(result[1].room).toBe("Tingssal 2");
+  });
+
+  it("cleans cross-line alias suffix from saken", () => {
+    const text = [
+      "fr 2026-02-1313:00 - 14:30Muntlig förberedelse och ev",
+      "hf",
+      "fordran (återvinning av mål FT 1065-25)Tingssal 3",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("fordran (återvinning av mål FT 1065-25)");
+    expect(result[0].room).toBe("Tingssal 3");
+  });
+
+  it("skips page headers in continuation", () => {
+    const text = [
+      "on 2026-02-1115:00 - 15:45Huvudförhandling stöld Tingssal 1",
+      "Uppropslista Hässleholms tingsrätt V.07",
+      "to 2026-02-1209:00 - 11:00Huvudförhandling hot mot tjänsteman Tingssal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("stöld");
+    expect(result[1].saken).toBe("hot mot tjänsteman");
+  });
 });
