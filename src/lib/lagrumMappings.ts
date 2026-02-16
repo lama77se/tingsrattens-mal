@@ -307,6 +307,36 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 36 kap."],
     kommentar: "Förverkande regleras i 36 kap. BrB; kan även förekomma i speciallagstiftning.",
   },
+  "arbetsmiljöbrott, talan om företagsbot": {
+    sakomrade: "Arbetsmiljöbrott / företagsbot",
+    primart_lagrum: [
+      "Arbetsmiljölagen (1977:1160) 8 kap.",
+      "BrB 36 kap. 7 §",
+    ],
+    kommentar: "Arbetsmiljöbrott bygger ofta på vållandebestämmelser i BrB (3 kap. 7–10 §§) i kombination med AML. Företagsbot regleras i 36 kap. BrB.",
+  },
+  "försök till mord": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: [
+      "BrB 3 kap. 1 §",
+      "BrB 23 kap. 1 §",
+    ],
+    kommentar: "Försök regleras i 23 kap. BrB i kombination med straffbudet för fullbordat brott.",
+  },
+  "mord": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 1 §"],
+  },
+  "undanröjande av ungdomstjänst": {
+    sakomrade: "Straffverkställighet",
+    primart_lagrum: ["BrB 32 kap. 4 §"],
+    kommentar: "Avser undanröjande av påföljden ungdomstjänst och ny påföljdsbestämning.",
+  },
+  "olvolig körning": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 3 §"],
+    kommentar: "Felskrivning av 'olovlig körning'. Bör normaliseras till korrekt brottsrubricering.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
