@@ -1,3 +1,5 @@
+import { matchLagrum } from "./lagrumMappings";
+
 export interface Hearing {
   id: string;
   date: string;
@@ -9,6 +11,7 @@ export interface Hearing {
   saken: string;
   parties: string;
   lagrum: string;
+  sakomrade: string;
   fleraSakfragor: boolean;
 }
 
@@ -257,6 +260,9 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     const fleraSakfragor = fleraSakfragorRegex.test(saken) || fleraSakfragorRegex.test(cleanedSaken);
     console.log("Saken for fleraSakfragor check:", JSON.stringify(saken), "->", fleraSakfragor);
 
+    // Enrich lagrum and sakområde for B-mål
+    const lagrumMatch = matchLagrum(saken, caseNumber);
+
     idCounter++;
     const hearing: Hearing = {
       id: `parsed-${idCounter}`,
@@ -268,7 +274,8 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       room: room || "–",
       saken: saken || "–",
       parties: parties || "–",
-      lagrum: "",
+      lagrum: lagrumMatch.lagrum,
+      sakomrade: lagrumMatch.sakomrade,
       fleraSakfragor,
     };
     console.log("Parsed hearing:", hearing);
