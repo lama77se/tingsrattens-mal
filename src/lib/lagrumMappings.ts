@@ -226,6 +226,33 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 1 §"],
   },
+  "brott mot knivlagen": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) om förbud beträffande knivar och andra farliga föremål 1 §"],
+    alternativa_lagrum: ["Lag (1988:254) 1 § (grovt brott)"],
+    kommentar: "Straffbestämmelser finns i samma lag. Exakt grad beror på om brottet bedöms som grovt.",
+  },
+  "barnpornografibrott": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 16 kap. 10 a §"],
+    alternativa_lagrum: [
+      "BrB 16 kap. 10 a § (grovt barnpornografibrott)",
+      "BrB 16 kap. 10 a § (ringa barnpornografibrott)",
+    ],
+  },
+  "häleri": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 9 kap. 6 §"],
+    alternativa_lagrum: [
+      "BrB 9 kap. 6 § (grovt häleri)",
+      "BrB 9 kap. 7 § (häleriförseelse)",
+    ],
+  },
+  "ansökan om rättslig hjälp i brottmål": {
+    sakomrade: "Internationellt straffprocessuellt samarbete",
+    primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
+    kommentar: "Processuell fråga – avser rättsligt samarbete mellan stater, inte ett materiellt brott.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
