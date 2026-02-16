@@ -337,6 +337,47 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Trafikbrottslagen (1951:649) 3 §"],
     kommentar: "Felskrivning av 'olovlig körning'. Bör normaliseras till korrekt brottsrubricering.",
   },
+  "försök till grov utpressning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: [
+      "BrB 9 kap. 4 § (grov utpressning)",
+      "BrB 23 kap. 1 §",
+    ],
+    kommentar: "Försök regleras i 23 kap. BrB i kombination med straffbudet för grov utpressning.",
+  },
+  "förtal": {
+    sakomrade: "Ärekränkningsbrott",
+    primart_lagrum: ["BrB 5 kap. 1 §"],
+    alternativa_lagrum: ["BrB 5 kap. 2 § (grovt förtal)"],
+  },
+  "grovt sjöfylleri": {
+    sakomrade: "Trafikbrott (sjötrafik)",
+    primart_lagrum: ["Lag (1951:649) om straff för vissa trafikbrott 4 a §"],
+    kommentar: "Sjöfylleri regleras i samma lag som rattfylleri.",
+  },
+  "olovlig avbildning av skyddsobjekt": {
+    sakomrade: "Säkerhets- och skyddsbrott",
+    primart_lagrum: ["Skyddslagen (2010:305) 7 §"],
+    kommentar: "Straffbestämmelser finns i skyddslagen.",
+  },
+  "brott mot djurskyddslagen": {
+    sakomrade: "Djurskyddsbrott",
+    primart_lagrum: ["Djurskyddslagen (2018:1192) 10 kap."],
+    kommentar: "Exakt paragraf beror på överträdelsens art.",
+  },
+  "våldsamt motstånd": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 4 §"],
+  },
+  "olovlig identitetsanvändning": {
+    sakomrade: "Bedrägerirelaterade brott",
+    primart_lagrum: ["BrB 4 kap. 6 b §"],
+  },
+  "sabotage mot blåljusverksamhet": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 5 c §"],
+    alternativa_lagrum: ["BrB 13 kap. 5 c § (grovt brott)"],
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
