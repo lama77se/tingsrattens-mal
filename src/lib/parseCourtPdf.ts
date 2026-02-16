@@ -10,10 +10,10 @@ export interface Hearing {
 }
 
 /**
- * Parse raw PDF text from Solna tingsrätt into structured hearing objects.
- * This is a best-effort parser that handles common patterns in Swedish court PDFs.
+ * Parse raw PDF text from Swedish court PDFs into structured hearing objects.
+ * This is a best-effort parser that handles common patterns across all Swedish district courts.
  */
-export function parseSolnaPdf(text: string, court: string = "Solna tingsrätt"): Hearing[] {
+export function parseCourtPdf(text: string, court: string): Hearing[] {
   if (!text || text.trim().length === 0) return [];
 
   const hearings: Hearing[] = [];

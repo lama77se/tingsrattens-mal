@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CheckCircle2, Clock, AlertCircle, Circle, FileText } from "lucide-react";
 import { getPreviousWeek, getCurrentWeek, getNextWeek, buildPdfUrl } from "@/lib/weekUtils";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
-import { parseSolnaPdf, Hearing } from "@/lib/parseSolnaPdf";
+import { parseCourtPdf, Hearing } from "@/lib/parseCourtPdf";
 
 type StepStatus = "idle" | "active" | "done" | "error";
 
@@ -148,17 +148,17 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
 
     const r1 = await fetchWeek(0, previous.week, previous.year);
     if (r1?.success && r1.text) {
-      allHearings.push(...parseSolnaPdf(r1.text, "Solna tingsrätt"));
+      allHearings.push(...parseCourtPdf(r1.text, "Solna tingsrätt"));
     }
 
     const r2 = await fetchWeek(1, current.week, current.year);
     if (r2?.success && r2.text) {
-      allHearings.push(...parseSolnaPdf(r2.text, "Solna tingsrätt"));
+      allHearings.push(...parseCourtPdf(r2.text, "Solna tingsrätt"));
     }
 
     const r3 = await fetchWeek(2, next.week, next.year);
     if (r3?.success && r3.text) {
-      allHearings.push(...parseSolnaPdf(r3.text, "Solna tingsrätt"));
+      allHearings.push(...parseCourtPdf(r3.text, "Solna tingsrätt"));
     }
 
     onHearingsFetched(allHearings);
