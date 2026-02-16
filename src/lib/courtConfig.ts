@@ -208,6 +208,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/hassleholms_tingsratt/uppropslistor/uppropslista-hassleholms-tingsratt-v.${String(week).padStart(2, "0")}.pdf`,
   },
   {
+    id: "jonkopings_tingsratt",
+    name: "Jönköpings tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week, year) =>
+      `${BASE}/jonkopings_tingsratt/vecka-${week}-${year}.pdf`,
+  },
+  {
     id: "gotlands_tingsratt",
     name: "Gotlands tingsrätt",
     formatFamily: "standard",
