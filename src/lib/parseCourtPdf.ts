@@ -259,6 +259,16 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     }
     parties = parties.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "");
 
+    // Detect another court in saken: "Uppsala tingsrätt - mord m.m."
+    const courtInSakenRegex = /^(.+(?:tingsrätt|hovrätt|kammarrätt))\s*[-–—]\s*(.+)$/i;
+    let resolvedCourt = court;
+    const courtInSaken = saken.match(courtInSakenRegex);
+    if (courtInSaken) {
+      const otherCourt = courtInSaken[1].trim();
+      saken = courtInSaken[2].trim();
+      resolvedCourt = `${otherCourt} (plats: ${court})`;
+    }
+
     // Detect "flera sakfrågor" from saken field
     const fleraSakfragorRegex = /m\s*\.?\s*m\s*\.?\s*$/i;
     const cleanedSaken = saken.replace(/[^\w\s.,åäöÅÄÖ]/g, "").trim();
@@ -273,7 +283,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       id: `parsed-${idCounter}`,
       date: currentDate || "Okänt datum",
       time: time || "–",
-      court,
+      court: resolvedCourt,
       caseNumber,
       type,
       maltyp: getMaltyp(caseNumber),
