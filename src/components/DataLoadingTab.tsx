@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CheckCircle2, Clock, AlertCircle, Circle, FileText } from "lucide-react";
 import { getPreviousWeek, getCurrentWeek, getNextWeek, buildPdfUrl } from "@/lib/weekUtils";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
+import { parseSolnaPdf, Hearing } from "@/lib/parseSolnaPdf";
 
 type StepStatus = "idle" | "active" | "done" | "error";
 
@@ -19,6 +20,10 @@ interface WeekFetch {
   year: number;
   steps: FetchStep[];
   result?: CourtPdfResult;
+}
+
+interface DataLoadingTabProps {
+  onHearingsFetched: (hearings: Hearing[]) => void;
 }
 
 const STEP_LABELS = [
@@ -45,7 +50,7 @@ const stepIcon = (status: StepStatus) => {
   }
 };
 
-export default function DataLoadingTab() {
+export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProps) {
   const previous = getPreviousWeek();
   const current = getCurrentWeek();
   const next = getNextWeek();
@@ -84,7 +89,7 @@ export default function DataLoadingTab() {
     []
   );
 
-  const fetchWeek = async (weekIndex: number, week: number, year: number) => {
+  const fetchWeek = async (weekIndex: number, week: number, year: number): Promise<CourtPdfResult | undefined> => {
     // Step 0: Beräknar URL
     updateStep(weekIndex, 0, { status: "active" });
     const url = buildPdfUrl("solna_tingsratt", week, year);
@@ -104,7 +109,7 @@ export default function DataLoadingTab() {
         detail: result.notFound ? "PDF inte publicerad ännu" : result.error,
       });
       setResult(weekIndex, result);
-      return;
+      return undefined;
     }
 
     updateStep(weekIndex, 1, {
@@ -126,6 +131,7 @@ export default function DataLoadingTab() {
       detail: `~${result.estimatedHearings || 0} förhandlingar`,
     });
     setResult(weekIndex, result);
+    return result;
   };
 
   const handleFetchAll = async () => {
@@ -138,10 +144,24 @@ export default function DataLoadingTab() {
     ]);
     await delay(100);
 
-    await fetchWeek(0, previous.week, previous.year);
-    await fetchWeek(1, current.week, current.year);
-    await fetchWeek(2, next.week, next.year);
+    const allHearings: Hearing[] = [];
 
+    const r1 = await fetchWeek(0, previous.week, previous.year);
+    if (r1?.success && r1.text) {
+      allHearings.push(...parseSolnaPdf(r1.text, "Solna tingsrätt"));
+    }
+
+    const r2 = await fetchWeek(1, current.week, current.year);
+    if (r2?.success && r2.text) {
+      allHearings.push(...parseSolnaPdf(r2.text, "Solna tingsrätt"));
+    }
+
+    const r3 = await fetchWeek(2, next.week, next.year);
+    if (r3?.success && r3.text) {
+      allHearings.push(...parseSolnaPdf(r3.text, "Solna tingsrätt"));
+    }
+
+    onHearingsFetched(allHearings);
     setIsFetching(false);
   };
 

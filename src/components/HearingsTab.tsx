@@ -1,20 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Info } from "lucide-react";
+import { Hearing } from "@/lib/parseSolnaPdf";
 
-const MOCK_HEARINGS = [
-  { id: 1, court: "Stockholms tingsrätt", caseNumber: "T 1234-25", type: "Huvudförhandling", date: "2026-02-16", time: "09:00", room: "Sal 3", parties: "Andersson vs. Johansson" },
-  { id: 2, court: "Göteborgs tingsrätt", caseNumber: "B 5678-25", type: "Häktningsförhandling", date: "2026-02-17", time: "10:30", room: "Sal 1", parties: "Åklagaren vs. Eriksson" },
-  { id: 3, court: "Malmö tingsrätt", caseNumber: "T 9012-25", type: "Muntlig förberedelse", date: "2026-02-17", time: "13:00", room: "Sal 5", parties: "Svensson vs. Nilsson" },
-  { id: 4, court: "Uppsala tingsrätt", caseNumber: "B 3456-25", type: "Huvudförhandling", date: "2026-02-18", time: "09:30", room: "Sal 2", parties: "Åklagaren vs. Larsson" },
-  { id: 5, court: "Linköpings tingsrätt", caseNumber: "T 7890-25", type: "Huvudförhandling", date: "2026-02-18", time: "11:00", room: "Sal 4", parties: "Pettersson vs. Karlsson" },
-];
-
-const COURTS = ["Alla", "Stockholms tingsrätt", "Göteborgs tingsrätt", "Malmö tingsrätt", "Uppsala tingsrätt", "Linköpings tingsrätt"];
-const TYPES = ["Alla", "Huvudförhandling", "Häktningsförhandling", "Muntlig förberedelse"];
+interface HearingsTabProps {
+  hearings: Hearing[];
+}
 
 const typeBadgeVariant = (type: string) => {
   switch (type) {
@@ -25,13 +19,23 @@ const typeBadgeVariant = (type: string) => {
   }
 };
 
-export default function HearingsTab() {
+export default function HearingsTab({ hearings }: HearingsTabProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
 
-  const filtered = MOCK_HEARINGS.filter((h) => {
-    const matchesSearch = search === "" || 
+  const courts = useMemo(() => {
+    const unique = Array.from(new Set(hearings.map((h) => h.court)));
+    return ["Alla", ...unique.sort()];
+  }, [hearings]);
+
+  const types = useMemo(() => {
+    const unique = Array.from(new Set(hearings.map((h) => h.type)));
+    return ["Alla", ...unique.sort()];
+  }, [hearings]);
+
+  const filtered = hearings.filter((h) => {
+    const matchesSearch = search === "" ||
       h.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
       h.parties.toLowerCase().includes(search.toLowerCase()) ||
       h.court.toLowerCase().includes(search.toLowerCase());
@@ -39,6 +43,18 @@ export default function HearingsTab() {
     const matchesType = typeFilter === "Alla" || h.type === typeFilter;
     return matchesSearch && matchesCourt && matchesType;
   });
+
+  if (hearings.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Info className="h-10 w-10 text-muted-foreground mb-4" />
+        <h3 className="font-semibold text-lg">Ingen data hämtad</h3>
+        <p className="text-sm text-muted-foreground mt-1 max-w-md">
+          Gå till fliken "Laddning av data" och klicka på "Hämta data" för att ladda förhandlingar från domstol.se.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -59,7 +75,7 @@ export default function HearingsTab() {
             <SelectValue placeholder="Tingsrätt" />
           </SelectTrigger>
           <SelectContent>
-            {COURTS.map((c) => (
+            {courts.map((c) => (
               <SelectItem key={c} value={c}>{c}</SelectItem>
             ))}
           </SelectContent>
@@ -69,7 +85,7 @@ export default function HearingsTab() {
             <SelectValue placeholder="Typ" />
           </SelectTrigger>
           <SelectContent>
-            {TYPES.map((t) => (
+            {types.map((t) => (
               <SelectItem key={t} value={t}>{t}</SelectItem>
             ))}
           </SelectContent>
@@ -78,7 +94,7 @@ export default function HearingsTab() {
 
       {/* Results count */}
       <p className="text-sm text-muted-foreground">
-        Visar {filtered.length} av {MOCK_HEARINGS.length} förhandlingar
+        Visar {filtered.length} av {hearings.length} förhandlingar
       </p>
 
       {/* Table */}
