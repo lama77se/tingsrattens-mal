@@ -102,7 +102,14 @@ export function preprocessLines(text: string): string[] {
     .filter(Boolean)
     .map((line) =>
       line
+        // pdf-parse gluing fixes: insert spaces at known boundaries
+        // Date glued to time: 2026-02-1609:00 → 2026-02-16 09:00
+        .replace(/(\d{4}-\d{2}-\d{2})(\d{1,2}:\d{2})/g, "$1 $2")
+        // Time glued to text: 09:45Huvudförhandling → 09:45 Huvudförhandling
+        .replace(/(\d{1,2}:\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
+        // Text glued to case number prefix
         .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+        // Case number glued to text
         .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
     );
 }
