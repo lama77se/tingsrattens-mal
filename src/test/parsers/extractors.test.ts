@@ -104,6 +104,7 @@ describe("preprocessLines", () => {
     expect(preprocessLines("Konkurs21")).toEqual(["Konkurs Sal 21"]);
     expect(preprocessLines("misshandel1")).toEqual(["misshandel Sal 1"]);
     expect(preprocessLines("fordran4")).toEqual(["fordran Sal 4"]);
+    expect(preprocessLines("grovt rattfylleri m.m.10")).toEqual(["grovt rattfylleri m.m. Sal 10"]);
   });
 
   it("does not insert Sal when digits are preceded by non-letter", () => {
