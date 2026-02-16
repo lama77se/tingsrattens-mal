@@ -11,7 +11,6 @@ const Index = () => {
   const [fetchAllTrigger, setFetchAllTrigger] = useState(0);
 
   const handleFetchAll = useCallback(() => {
-    setActiveTab("loading");
     setFetchAllTrigger((n) => n + 1);
   }, []);
 
