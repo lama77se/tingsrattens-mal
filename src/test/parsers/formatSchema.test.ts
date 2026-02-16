@@ -170,4 +170,30 @@ describe("formatSchema", () => {
     expect(result[1].time).toBe("10:30 - 11:30");
     expect(result[1].saken).toBe("misshandel");
   });
+
+  it("splits multi-case hearing from angående line", () => {
+    const text = [
+      "Tisdag 24 februari 2026",
+      "kl. 09:30 - 15:00",
+      "Haparanda tingsrätt, Sal 1",
+      "B 811-24, Huvudförhandling",
+      "angående häleriförseelse, B 443-25 ringa narkotikabrott,",
+      "brott mot lagen om förbud beträffande knivar och andra",
+      "farliga föremål",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].caseNumber).toBe("B 811-24");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("häleriförseelse");
+    expect(result[0].time).toBe("09:30 - 15:00");
+
+    expect(result[1].caseNumber).toBe("B 443-25");
+    expect(result[1].type).toBe("Huvudförhandling");
+    expect(result[1].saken).toBe("ringa narkotikabrott, brott mot lagen om förbud beträffande knivar och andra farliga föremål");
+    expect(result[1].time).toBe("09:30 - 15:00");
+    expect(result[1].room).toBe("Sal 1");
+  });
 });
