@@ -28,6 +28,8 @@ function normalize(str: string): string {
 export function parseCourtPdf(text: string, court: string): Hearing[] {
   if (!text || text.trim().length === 0) return [];
 
+  console.log("PDF text first 500 chars:", text.substring(0, 500));
+
   const hearings: Hearing[] = [];
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
@@ -35,7 +37,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   let idCounter = 0;
 
   // Short date pattern: e.g. "16-feb", "3-mar" — MUST be checked before ISO to avoid false matches
-  const shortDateRegex = /\b(\d{1,2})-(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\b/i;
+  const shortDateRegex = /\b(\d{1,2})[-\u2013\u2014](jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\b/i;
   const shortMonthMap: Record<string, string> = {
     jan: "01", feb: "02", mar: "03", apr: "04",
     maj: "05", jun: "06", jul: "07", aug: "08",
@@ -43,7 +45,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   };
 
   // ISO date: "2026-02-16"
-  const isoDateRegex = /(\d{4}-\d{2}-\d{2})/;
+  const isoDateRegex = /(\d{4}[-\u2013\u2014]\d{2}[-\u2013\u2014]\d{2})/;
   // Swedish long date: "16 februari 2026"
   const swedishDateRegex = /(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i;
 
@@ -54,10 +56,10 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   };
 
   // Case number: "T 1234-25", "B 5678-25", "FT 123-25", "Ä 456-25"
-  const caseNumberRegex = /\b([TBFTÄ]\s?\d{1,6}-\d{2})\b/i;
+  const caseNumberRegex = /\b([TBFT\u00c4]\s?\d{1,6}[-\u2013\u2014]\d{2})\b/i;
 
   // Time range: "09:00 - 11:00"
-  const timeRangeRegex = /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/;
+  const timeRangeRegex = /(\d{1,2}:\d{2})\s*[-\u2013\u2014]\s*(\d{1,2}:\d{2})/;
   const timeRegex = /\b(\d{1,2}:\d{2})\b/;
 
   // Room/Sal: "Sal 3", "sal 12"
@@ -87,11 +89,12 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       const month = shortMonthMap[shortMatch[2].toLowerCase()];
       if (month) {
         currentDate = `${new Date().getFullYear()}-${month}-${day}`;
+        console.log("Short date matched:", currentDate, "from line:", line);
       }
     } else {
       const isoMatch = line.match(isoDateRegex);
       if (isoMatch) {
-        currentDate = isoMatch[1];
+        currentDate = isoMatch[1].replace(/[\u2013\u2014]/g, "-");
       } else {
         const swedishMatch = line.match(swedishDateRegex);
         if (swedishMatch) {
@@ -204,7 +207,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
     parties = parties.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "");
 
     idCounter++;
-    hearings.push({
+    const hearing = {
       id: `parsed-${idCounter}`,
       date: currentDate || "Okänt datum",
       time: time || "–",
@@ -214,7 +217,9 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       room: room || "–",
       saken: saken || "–",
       parties: parties || "–",
-    });
+    };
+    console.log("Parsed hearing:", hearing);
+    hearings.push(hearing);
   }
 
   return hearings;
