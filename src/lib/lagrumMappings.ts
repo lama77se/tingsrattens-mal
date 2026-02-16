@@ -85,6 +85,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276)"],
   },
+  "brott mot fordonsförordningen": {
+    sakomrade: "Trafik- och fordonsregleringsbrott",
+    primart_lagrum: ["Fordonsförordningen (2009:211)"],
+    kommentar: "Exakt paragraf beror på överträdelsens art. Straff- och sanktionsbestämmelser finns i förordningen och tillhörande regelverk.",
+  },
   "brott mot förordningen om vilotider vid vissa vägtransporter inom landet": {
     sakomrade: "Trafik- och näringsregleringsbrott",
     primart_lagrum: ["Förordning (2004:865) om kör- och vilotider m.m."],
@@ -130,6 +135,10 @@ const mappings: Record<string, LagrumEntry> = {
   "koppleri": {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 12 §"],
+  },
+  "grovt sexuellt övergrepp": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 2 § (grovt brott)"],
   },
   "vapenbrott": {
     sakomrade: "Vapenbrott",
@@ -308,6 +317,16 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Vapen- och ordningsbrott",
     primart_lagrum: ["Lag (1988:254) 1 §"],
     kommentar: "Straffbestämmelsen återfinns i samma lag.",
+  },
+  "brott mot lag om förbud beträffande knivar och andra farliga föremål": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) om förbud beträffande knivar och andra farliga föremål 1 §"],
+    kommentar: "Avser överträdelser enligt knivlagen.",
+  },
+  "brott mot lagen beträffande knivar och andra farliga föremål, grovt brot": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) om förbud beträffande knivar och andra farliga föremål 1 § (grovt brott)"],
+    kommentar: "Felskrivning av 'grovt brott'. Bör normaliseras till korrekt rubricering.",
   },
   "brott mot lagen om brandfarliga och explosiva varor": {
     sakomrade: "Allmänfarliga brott / särskild straffrätt",

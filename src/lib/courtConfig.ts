@@ -227,6 +227,13 @@ export const COURTS: CourtConfig[] = [
     },
   },
   {
+    id: "linkopings_tingsratt",
+    name: "Linköpings tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/linkopings_tingsratt/veckans-forhandlingar/v${week}.pdf`,
+  },
+  {
     id: "kalmar_tingsratt",
     name: "Kalmar tingsrätt",
     formatFamily: "standard",
