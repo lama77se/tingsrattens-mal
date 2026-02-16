@@ -175,6 +175,16 @@ const mappings: Record<string, LagrumEntry> = {
       "Skattebrottslagen (1971:69) 3 § (vårdslös skatteuppgift)",
     ],
   },
+  "undanröjande av ordningsbot": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["RB 48 kap. 13 §"],
+    kommentar: "Avser prövning av godkänd ordningsbot och eventuellt undanröjande enligt rättegångsbalken.",
+  },
+  "olovligt innehav och försäljning av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
+    kommentar: "Exakt paragraf beror på om det gäller olovlig försäljning, innehav för försäljning eller annan överträdelse enligt alkohollagen.",
+  },
   "allmänfarlig vårdslöshet": {
     sakomrade: "Allmänfarliga brott",
     primart_lagrum: ["BrB 13 kap. 6 §"],
