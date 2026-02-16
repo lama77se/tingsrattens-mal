@@ -110,24 +110,33 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
     await delay(300);
     updateStep(court.id, weekIndex, 0, {
       status: "done",
-      detail: urls.length > 1 ? `${urls.length} URL-varianter` : urls[0],
+      detail: urls.join("\n"),
     });
 
     // Step 1: Hämtar PDF — try each candidate URL in order
     updateStep(court.id, weekIndex, 1, { status: "active" });
     let result: CourtPdfResult | undefined;
+    const triedUrls: { url: string; ok: boolean }[] = [];
     for (const url of urls) {
+      updateStep(court.id, weekIndex, 1, {
+        status: "active",
+        detail: urls.length > 1 ? `Testar ${triedUrls.length + 1}/${urls.length}...` : undefined,
+      });
       const attempt = await fetchCourtPdf(url, week, year);
+      triedUrls.push({ url, ok: attempt.success });
       if (attempt.success) {
         result = attempt;
         break;
       }
-      // Keep last failure for error reporting
       result = attempt;
     }
 
+    const urlSummary = triedUrls
+      .map(({ url, ok }) => `${ok ? "\u2713" : "\u2717"} ${url}`)
+      .join("\n");
+
     if (!result || !result.success) {
-      updateStep(court.id, weekIndex, 1, { status: "error", detail: result?.error });
+      updateStep(court.id, weekIndex, 1, { status: "error", detail: urlSummary });
       updateStep(court.id, weekIndex, 2, { status: "idle" });
       updateStep(court.id, weekIndex, 3, {
         status: "error",
@@ -139,7 +148,7 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
 
     updateStep(court.id, weekIndex, 1, {
       status: "done",
-      detail: `${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB`,
+      detail: `${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB\n${urlSummary}`,
     });
 
     // Step 2: Bearbetar
@@ -247,7 +256,7 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
         </Button>
       </div>
 
-      {COURTS.map((court) => {
+      {[...COURTS].sort((a, b) => a.name.localeCompare(b.name, "sv")).map((court) => {
         const weeks = courtWeeks[court.id] || [];
         const isCourtFetching = fetchingCourts.has(court.id);
 
@@ -295,7 +304,7 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
                             {step.label}
                           </span>
                           {step.detail && (
-                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            <p className="text-xs text-muted-foreground mt-0.5 break-all whitespace-pre-line">
                               {step.detail}
                             </p>
                           )}
