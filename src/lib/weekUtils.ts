@@ -24,10 +24,3 @@ export function getNextWeek(): { week: number; year: number } {
   };
 }
 
-export function buildPdfUrl(courtId: string, week: number, year: number): string {
-  const courtPathMap: Record<string, string> = {
-    solna_tingsratt: "solna_tingsratt",
-  };
-  const courtPath = courtPathMap[courtId] || courtId;
-  return `https://www.domstol.se/globalassets/filer/domstol/${courtPath}/veckans-forhandlingar/v${week}.${year}.pdf`;
-}
