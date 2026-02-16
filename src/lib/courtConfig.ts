@@ -1,8 +1,10 @@
 import { startOfISOWeek, addDays, format } from "date-fns";
+import type { FormatFamily } from "./parsers/types";
 
 export interface CourtConfig {
   id: string;
   name: string;
+  formatFamily: FormatFamily;
   buildUrl: (week: number, year: number) => string;
 }
 
@@ -18,12 +20,14 @@ export const COURTS: CourtConfig[] = [
   {
     id: "alingsas_tingsratt",
     name: "Alingsås tingsrätt",
+    formatFamily: "standard",
     buildUrl: (week, year) =>
       `${BASE}/alingsas_tingsratt/veckans-brottmal/veckans-forhandlingar-vecka-${week}-${year}.pdf`,
   },
   {
     id: "attunda_tingsratt",
     name: "Attunda tingsrätt",
+    formatFamily: "standard",
     buildUrl: (week, year) => {
       const monday = getISOWeekMonday(week, year);
       const friday = addDays(monday, 4);
@@ -35,12 +39,14 @@ export const COURTS: CourtConfig[] = [
   {
     id: "blekinge_tingsratt",
     name: "Blekinge tingsrätt",
+    formatFamily: "standard",
     buildUrl: (week, year) =>
       `${BASE}/blekinge_tingsratt/block/veckans-forhandlingar-${year}/veckans-forhandlingar-vecka-${week}.pdf`,
   },
   {
     id: "solna_tingsratt",
     name: "Solna tingsrätt",
+    formatFamily: "standard",
     buildUrl: (week, year) =>
       `${BASE}/solna_tingsratt/veckans-forhandlingar/v${week}.${year}.pdf`,
   },

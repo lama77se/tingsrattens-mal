@@ -156,7 +156,7 @@ export default function DataLoadingTab({ onHearingsFetched }: DataLoadingTabProp
       const w = weeks[i];
       const result = await fetchWeek(court, i, w.week, w.year);
       if (result?.success && result.text) {
-        const parsed = parseCourtPdf(result.text, court.name);
+        const parsed = parseCourtPdf(result.text, court);
         parsed.forEach((h, j) => { h.id = `${court.id}-w${i}-${j}`; });
         hearings.push(...parsed);
       }
