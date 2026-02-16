@@ -11,6 +11,14 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
   let saken = raw.saken;
   let resolvedCourt = courtName;
 
+  // If parser provides a physical location that differs from the court, reflect it
+  if (raw.location) {
+    const courtFirstWord = courtName.split(/\s/)[0].toLowerCase();
+    if (!raw.location.toLowerCase().startsWith(courtFirstWord)) {
+      resolvedCourt = `${courtName} (plats: ${raw.location})`;
+    }
+  }
+
   // Detect another court in saken: "Uppsala tingsrätt - mord m.m."
   const courtInSaken = saken.match(COURT_IN_SAKEN_REGEX);
   if (courtInSaken) {
