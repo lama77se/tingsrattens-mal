@@ -208,6 +208,24 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Trafikförordningen (1998:1276) 3 kap. 17 §"],
     kommentar: "Straff enligt 14 kap. trafikförordningen.",
   },
+  "undanröjande av skyddstillsyn": {
+    sakomrade: "Straffverkställighet",
+    primart_lagrum: ["BrB 28 kap. 8 §"],
+    kommentar: "Avser undanröjande av påföljden skyddstillsyn och bestämmande av annan påföljd.",
+  },
+  "grov kvinnofridskränkning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 a §"],
+  },
+  "köp av sexuell handling": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 11 §"],
+    kommentar: "Alternativ formulering för köp av sexuell tjänst.",
+  },
+  "vårdslöshet i trafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 1 §"],
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
