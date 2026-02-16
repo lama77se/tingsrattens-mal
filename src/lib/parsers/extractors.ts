@@ -103,10 +103,12 @@ export function preprocessLines(text: string): string[] {
     .map((line) =>
       line
         // pdf-parse gluing fixes: insert spaces at known boundaries
-        // Day abbreviation glued to date: to2026 → to 2026
-        .replace(/((?:må|ti|on|to|fr|lö|sö))(\d{4})/gi, "$1 $2")
+        // Day abbreviation glued to date: to2026 → to 2026, ma16 → ma 16
+        .replace(/((?:må|ma|ti|on|to|fr|lö|lo|sö|so))(\d)/gi, "$1 $2")
         // Date glued to time: 2026-02-1609:00 → 2026-02-16 09:00
         .replace(/(\d{4}-\d{2}-\d{2})(\d{1,2}:\d{2})/g, "$1 $2")
+        // Month abbreviation glued to time: feb09:00 → feb 09:00
+        .replace(/(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)(\d{1,2}:\d{2})/gi, "$1 $2")
         // Time glued to text: 09:45Huvudförhandling → 09:45 Huvudförhandling
         .replace(/(\d{1,2}:\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
         // Text glued to case number prefix
@@ -117,6 +119,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/([a-zA-ZåäöÅÄÖ.,])(Sal)/g, "$1 $2")
         // Case number space before dash: B 784 -25 → B 784-25
         .replace(/([TBFTKÄ]\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
+        // Bare sal number glued to text at end of line: Konkurs21 → Konkurs Sal 21
+        .replace(/([a-zA-ZåäöÅÄÖ])(\d{1,2})$/, "$1 Sal $2")
     );
 }
 
@@ -145,7 +149,16 @@ export function extractRoom(lines: string[], index: number): string {
     return `${prefix} ${roomMatch[1]}`;
   }
 
-  for (let j = Math.max(0, index - 2); j <= Math.min(lines.length - 1, index + 2); j++) {
+  // Prefer forward lines (room is often after case number) over backward
+  for (let j = index + 1; j <= Math.min(lines.length - 1, index + 2); j++) {
+    const rm = lines[j].match(ROOM_REGEX);
+    if (rm) {
+      const prefix = rm[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+      return `${prefix} ${rm[1]}`;
+    }
+  }
+
+  for (let j = Math.max(0, index - 2); j < index; j++) {
     const rm = lines[j].match(ROOM_REGEX);
     if (rm) {
       const prefix = rm[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
