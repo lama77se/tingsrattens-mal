@@ -7,6 +7,11 @@ import {
 } from "./extractors";
 
 /**
+ * Regex matching a case number at the start of text (B, T, FT, K, Ä prefixes).
+ */
+const CASE_AT_START_REGEX = /^((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
+
+/**
  * Regex matching a hearing line: YYYY-MM-DD HH:MM - HH:MM <rest>
  */
 const HEARING_LINE_REGEX = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
@@ -29,7 +34,7 @@ const DAG_REGEX = /^\(dag\s+\d+\/\d+\)/i;
 /**
  * Regex matching page headers to skip.
  */
-const HEADER_REGEX = /^(uppropslista|datum\s+tid|förhandlingar i|listan\s|dagdatum)/i;
+const HEADER_REGEX = /^(uppropslista|datum\s+tid|förhandlingar i|listan\s|dagdatum|dag\s+datum)/i;
 
 /**
  * Day abbreviations (Swedish) — standalone lines to skip.
@@ -179,9 +184,18 @@ export const formatTabular: ParserStrategy = {
       // Extract hearing type from the text after the time range
       const { type, remainder } = extractTypeFromText(rest);
 
-      // Extract room and saken from the remainder
-      let room = extractRoomFromText(remainder);
-      let saken = stripRoom(remainder);
+      // Extract case number if present at start of remainder
+      let caseNumber = "";
+      let afterCase = remainder;
+      const caseMatch = remainder.match(CASE_AT_START_REGEX);
+      if (caseMatch) {
+        caseNumber = caseMatch[1];
+        afterCase = remainder.substring(caseMatch[0].length).trim();
+      }
+
+      // Extract room and saken from the text after type (and case number)
+      let room = extractRoomFromText(afterCase);
+      let saken = stripRoom(afterCase);
 
       // Always check subsequent lines for continuation text
       for (let j = i + 1; j < lines.length; j++) {
@@ -214,7 +228,7 @@ export const formatTabular: ParserStrategy = {
       hearings.push({
         date,
         time,
-        caseNumber: "",
+        caseNumber,
         type,
         room: room || "",
         saken: saken || "",

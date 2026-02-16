@@ -313,6 +313,78 @@ describe("formatTabular", () => {
     expect(result[0].room).toBe("Sal 3");
   });
 
+  it("extracts case numbers (Linköping-style)", () => {
+    const text = [
+      "må 2026-02-16 10:00 - 10:30 Konkursförhandling K 6578-25 ansökan om konkurs Sal 10",
+      "må 2026-02-16 13:00 - 15:00 Muntlig förberedelse T 5050-25 skadestånd Sal 6",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("K 6578-25");
+    expect(result[0].type).toBe("Konkursförhandling");
+    expect(result[0].saken).toBe("ansökan om konkurs");
+    expect(result[0].room).toBe("Sal 10");
+    expect(result[1].caseNumber).toBe("T 5050-25");
+    expect(result[1].saken).toBe("skadestånd");
+  });
+
+  it("extracts FT case numbers", () => {
+    const text = "ti 2026-02-17 10:00 - 12:00 Muntlig förberedelse FT 5079-25 fordran Sal 8";
+    const result = formatTabular.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("FT 5079-25");
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("fordran");
+  });
+
+  it("extracts Ä case numbers", () => {
+    const text = "to 2026-02-19 10:00 - 12:00 Sammanträde Ä 271-26 anordnande av förvaltarskap Sal 10";
+    const result = formatTabular.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("Ä 271-26");
+    expect(result[0].type).toBe("Sammanträde");
+    expect(result[0].saken).toBe("anordnande av förvaltarskap");
+  });
+
+  it("handles Linköping multi-line with (dag X/Y) and case number", () => {
+    const text = [
+      "må 2026-02-16",
+      "(dag 1/2)",
+      "09:00 - 16:00 Huvudförhandling B 945-24 grov misshandel Sal 3",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].caseNumber).toBe("B 945-24");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("grov misshandel");
+    expect(result[0].room).toBe("Sal 3");
+  });
+
+  it("handles wrapping saken with case number", () => {
+    const text = [
+      "må 2026-02-16 13:00 - 15:00 Muntlig förberedelse T 313-26 fordran (överlämnat från",
+      "kronofogden)",
+      "Sal 8",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 313-26");
+    expect(result[0].saken).toBe("fordran (överlämnat från kronofogden)");
+    expect(result[0].room).toBe("Sal 8");
+  });
+
+  it("leaves caseNumber empty when no case number is present", () => {
+    const text = "2026-02-17 09:00 - 10:00 Huvudförhandling narkotikabrott Sal 1";
+    const result = formatTabular.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("");
+    expect(result[0].saken).toBe("narkotikabrott");
+  });
+
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
       "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",
