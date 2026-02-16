@@ -27,24 +27,34 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
   const isoDateRegex = /(\d{4}-\d{2}-\d{2})/;
   const swedishDateRegex = /(\d{1,2})\s+(januari|februari|mars|april|maj|juni|juli|augusti|september|oktober|november|december)\s+(\d{4})/i;
 
+  // Short date pattern: e.g. "16-feb", "3-mar"
+  const shortDateRegex = /\b(\d{1,2})-(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\b/i;
+  const shortMonthMap: Record<string, string> = {
+    jan: "01", feb: "02", mar: "03", apr: "04",
+    maj: "05", jun: "06", jul: "07", aug: "08",
+    sep: "09", okt: "10", nov: "11", dec: "12",
+  };
+
   // Case number pattern: e.g. "T 1234-25", "B 5678-25", "FT 123-25", "Ä 456-25"
   const caseNumberRegex = /\b([TBFTÄ]\s?\d{1,6}-\d{2})\b/i;
 
-  // Time pattern: e.g. "09:00", "13:30"
+  // Time range pattern: e.g. "09:00 - 11:00"
+  const timeRangeRegex = /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/;
+  // Single time pattern: e.g. "09:00", "13:30"
   const timeRegex = /\b(\d{1,2}:\d{2})\b/;
 
   // Room/Sal pattern: e.g. "Sal 3", "sal 12"
   const roomRegex = /\b[Ss]al\s+(\S+)/;
 
-  // Common hearing types
+  // Common hearing types — "Förhandling" last since it's a substring of others
   const hearingTypes = [
     "Huvudförhandling",
     "Häktningsförhandling",
     "Muntlig förberedelse",
     "Sammanträde",
-    "Förhandling",
     "Tredskodom",
     "Avgörande",
+    "Förhandling",
   ];
 
   const monthMap: Record<string, string> = {
@@ -69,6 +79,15 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
         if (month) {
           currentDate = `${year}-${month}-${day}`;
         }
+      } else {
+        const shortMatch = line.match(shortDateRegex);
+        if (shortMatch) {
+          const day = shortMatch[1].padStart(2, "0");
+          const month = shortMonthMap[shortMatch[2].toLowerCase()];
+          if (month) {
+            currentDate = `${new Date().getFullYear()}-${month}-${day}`;
+          }
+        }
       }
     }
 
@@ -78,14 +97,24 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
 
     const caseNumber = caseMatch[1];
 
-    // Extract time from this line or nearby lines
+    // Extract time (prefer range like "09:00 - 11:00", fallback to single time)
     let time = "";
-    const timeMatch = line.match(timeRegex);
-    if (timeMatch) {
-      time = timeMatch[1];
-    } else if (i > 0) {
-      const prevTimeMatch = lines[i - 1].match(timeRegex);
-      if (prevTimeMatch) time = prevTimeMatch[1];
+    const rangeMatch = line.match(timeRangeRegex);
+    if (rangeMatch) {
+      time = `${rangeMatch[1]} - ${rangeMatch[2]}`;
+    } else {
+      const timeMatch = line.match(timeRegex);
+      if (timeMatch) {
+        time = timeMatch[1];
+      } else if (i > 0) {
+        const prevRange = lines[i - 1].match(timeRangeRegex);
+        if (prevRange) {
+          time = `${prevRange[1]} - ${prevRange[2]}`;
+        } else {
+          const prevTimeMatch = lines[i - 1].match(timeRegex);
+          if (prevTimeMatch) time = prevTimeMatch[1];
+        }
+      }
     }
 
     // Extract room
@@ -134,12 +163,17 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       parties = lines[i + 1].trim();
     }
 
-    // Clean up parties - remove room/type info if accidentally captured
+    // Clean up parties - remove room/type/time info if accidentally captured
     parties = parties
       .replace(roomRegex, "")
+      .replace(timeRangeRegex, "")
       .replace(timeRegex, "")
-      .trim()
-      .replace(/^[\s,;:.\-]+|[\s,;:.\-]+$/g, "");
+      .trim();
+    // Remove the hearing type from parties if present
+    for (const ht of hearingTypes) {
+      parties = parties.replace(new RegExp(ht, "gi"), "").trim();
+    }
+    parties = parties.replace(/^[\s,;:.\-]+|[\s,;:.\-]+$/g, "");
 
     idCounter++;
     hearings.push({
