@@ -1,80 +1,59 @@
 
-# Fix: Bevara alla tingsratters data vid enskild hamtning
 
-## Problem
-Nar man hamtar data for en tingsratt (t.ex. Alingsas) efter att redan ha hamtat en annan (t.ex. Solna) forsvinner den forsta tingsrattens data fran tabellen. Bugg finns i `handleFetchCourt` i `DataLoadingTab.tsx`.
+# Lagg till Attunda tingsratt och sortera tingsratter
 
-## Orsak
-1. `onHearingsFetched` anropas inuti en `setCourtWeeks` state-updater (rad 190) -- en sidoeffekt i en state-updater, vilket ar opaalitligt i React
-2. Merge-logiken re-parsar text fran state for andra tingsratter, men React-batchning kan gora att state inte ar uppdaterat an
+## 1. Lagg till Attunda tingsratt i `src/lib/courtConfig.ts`
 
-## Losning
-Infor en separat `useRef` som lagrar parsade hearings per tingsratt. Nar en tingsratt hamtas uppdateras refen for just den tingsratten, sedan slas alla ihop och skickas via `onHearingsFetched` -- utanfor state-updaters.
+Attundas URL-format ar mer komplext: `v.[vecka]-YYYY-MM-DD-DD` dar datumen representerar mandag och fredag i den aktuella veckan.
 
-### Andring i `src/components/DataLoadingTab.tsx`
+Exempel: vecka 7 2026 -> `webb-forhandlingar-v.7-2026-02-09-13.pdf`
+- 2026-02-09 ar mandag
+- 13 ar fredagens dag (den 13:e)
 
-1. **Lagg till en ref for hearings per tingsratt:**
+For att bygga URL:en behovs en hjalp-funktion som beraknar mandagens datum for en given ISO-vecka och ar, samt fredagens dag.
+
 ```typescript
-const hearingsRef = useRef<Record<string, Hearing[]>>({});
+import { startOfISOWeek, addDays, format } from "date-fns";
+
+// Hjalp-funktion for att fa mandagens datum fran ISO vecka+ar
+function getISOWeekMonday(week: number, year: number): Date {
+  // Jan 4 ar alltid i vecka 1
+  const jan4 = new Date(year, 0, 4);
+  const startOfWeek1 = startOfISOWeek(jan4);
+  return addDays(startOfWeek1, (week - 1) * 7);
+}
 ```
 
-2. **Uppdatera `handleFetchCourt`** (rad 166-199):
-   - Spara den hamtade tingsrattens hearings i `hearingsRef.current[court.id]`
-   - Sla ihop alla hearings fran refen: `Object.values(hearingsRef.current).flat()`
-   - Anropa `onHearingsFetched(allHearings)` direkt -- inte inuti en state-updater
-   - Ta bort hela `setCourtWeeks`-blocket (rad 171-192) som anvandes for merge
-
-3. **Uppdatera `handleFetchAll`** (rad 201-220):
-   - Rensa `hearingsRef.current = {}` forst
-   - Spara varje tingsratts hearings i refen under loopen
-   - Anropa `onHearingsFetched` med alla samlade hearings i slutet
-
-4. **Uppdatera `fetchCourt`** (rad 148-164):
-   - Behall som den ar, den returnerar hearings korrekt redan
-
-### Resulterande kod i `handleFetchCourt`:
+Ny court-entry:
 ```typescript
-const handleFetchCourt = async (court: CourtConfig) => {
-  setFetchingCourts((prev) => new Set(prev).add(court.id));
-  const courtHearings = await fetchCourt(court);
-
-  // Store in ref and merge all courts
-  hearingsRef.current[court.id] = courtHearings;
-  const allHearings = Object.values(hearingsRef.current).flat();
-  onHearingsFetched(allHearings);
-
-  setFetchingCourts((prev) => {
-    const next = new Set(prev);
-    next.delete(court.id);
-    return next;
-  });
-};
+{
+  id: "attunda_tingsratt",
+  name: "Attunda tingsrätt",
+  buildUrl: (week, year) => {
+    const monday = getISOWeekMonday(week, year);
+    const friday = addDays(monday, 4);
+    const monStr = format(monday, "yyyy-MM-dd");
+    const friDay = format(friday, "dd");
+    return `${BASE}/attunda_tingsratt/veckans-forhandlingar/webb-forhandlingar-v.${week}-${monStr}-${friDay}.pdf`;
+  },
+}
 ```
 
-### Resulterande kod i `handleFetchAll`:
-```typescript
-const handleFetchAll = async () => {
-  setIsFetchingAll(true);
-  setCourtWeeks(initAllCourts());
-  hearingsRef.current = {};
-  await delay(50);
+## 2. Sortera alla tingsratter i bokstavsordning
 
-  for (const court of COURTS) {
-    setFetchingCourts((prev) => new Set(prev).add(court.id));
-    const hearings = await fetchCourt(court);
-    hearingsRef.current[court.id] = hearings;
-    setFetchingCourts((prev) => {
-      const next = new Set(prev);
-      next.delete(court.id);
-      return next;
-    });
-  }
+Ordningen blir: Alingsas, Attunda, Solna. Sorteringen gors statiskt i COURTS-arrayen.
 
-  const allHearings = Object.values(hearingsRef.current).flat();
-  onHearingsFetched(allHearings);
-  setIsFetchingAll(false);
-};
-```
+## 3. Uppdatera parsern for "Tingssal"
 
-## Fil som andras
-- `src/components/DataLoadingTab.tsx` -- lagg till `useRef`, forenkla merge-logiken
+Attundas PDF anvander "Tingssal 16" istallet for "Sal 4". Det befintliga `roomRegex` (`\b[Ss]al\s+(\S+)`) matchar delvis men ger fel resultat -- det fångar "Sal" inuti "Tingssal" men missar numret korrekt.
+
+Andring i `src/lib/parseCourtPdf.ts`:
+- Uppdatera `roomRegex` till att matcha bade "Sal" och "Tingssal": `/(?:Tings)?[Ss]al\s+(\S+)/`
+- Uppdatera cleanup-regex for saken till att aven ta bort "Tingssal X": `/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/`
+- Uppdatera room-visningen sa att "Tingssal 16" visas korrekt (behall prefix fran matchningen)
+
+## Filer som andras
+
+1. **`src/lib/courtConfig.ts`** -- lagg till import av date-fns, hjalp-funktion, ny tingsratt, sortera arrayen
+2. **`src/lib/parseCourtPdf.ts`** -- uppdatera roomRegex och cleanup-regex for att hantera "Tingssal"
+
