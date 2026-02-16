@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CheckCircle2, Clock, AlertCircle, Circle, FileText } from "lucide-react";
-import { getCurrentWeek, getNextWeek, buildPdfUrl } from "@/lib/weekUtils";
+import { getPreviousWeek, getCurrentWeek, getNextWeek, buildPdfUrl } from "@/lib/weekUtils";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
 
 type StepStatus = "idle" | "active" | "done" | "error";
@@ -46,10 +46,12 @@ const stepIcon = (status: StepStatus) => {
 };
 
 export default function DataLoadingTab() {
+  const previous = getPreviousWeek();
   const current = getCurrentWeek();
   const next = getNextWeek();
 
   const [weeks, setWeeks] = useState<WeekFetch[]>([
+    { week: previous.week, year: previous.year, steps: createInitialSteps() },
     { week: current.week, year: current.year, steps: createInitialSteps() },
     { week: next.week, year: next.year, steps: createInitialSteps() },
   ]);
@@ -130,14 +132,15 @@ export default function DataLoadingTab() {
     setIsFetching(true);
     // Reset
     setWeeks([
+      { week: previous.week, year: previous.year, steps: createInitialSteps() },
       { week: current.week, year: current.year, steps: createInitialSteps() },
       { week: next.week, year: next.year, steps: createInitialSteps() },
     ]);
     await delay(100);
 
-    // Fetch both weeks sequentially so status is visible
-    await fetchWeek(0, current.week, current.year);
-    await fetchWeek(1, next.week, next.year);
+    await fetchWeek(0, previous.week, previous.year);
+    await fetchWeek(1, current.week, current.year);
+    await fetchWeek(2, next.week, next.year);
 
     setIsFetching(false);
   };
@@ -157,7 +160,7 @@ export default function DataLoadingTab() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         {weeks.map((w, wi) => (
           <Card key={wi}>
             <CardHeader className="pb-3">
@@ -165,9 +168,12 @@ export default function DataLoadingTab() {
                 <FileText className="h-4 w-4" />
                 Vecka {w.week}, {w.year}
                 {wi === 0 && (
-                  <Badge variant="secondary" className="text-xs">Nuvarande</Badge>
+                  <Badge variant="outline" className="text-xs">Föregående</Badge>
                 )}
                 {wi === 1 && (
+                  <Badge variant="secondary" className="text-xs">Nuvarande</Badge>
+                )}
+                {wi === 2 && (
                   <Badge variant="outline" className="text-xs">Nästa</Badge>
                 )}
               </CardTitle>
