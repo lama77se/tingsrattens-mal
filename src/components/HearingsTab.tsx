@@ -48,8 +48,9 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   }, [hearings]);
 
   const sakomraden = useMemo(() => {
+    const hasEmpty = hearings.some((h) => !h.sakomrade);
     const unique = Array.from(new Set(hearings.map((h) => h.sakomrade).filter(Boolean)));
-    return ["Alla", ...unique.sort()];
+    return ["Alla", ...(hasEmpty ? ["(Tomt)"] : []), ...unique.sort()];
   }, [hearings]);
 
   const maltyper = useMemo(() => {
@@ -66,7 +67,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     const matchesCourt = courtFilter === "Alla" || h.court === courtFilter;
     const matchesType = typeFilter === "Alla" || normalizeType(h.type) === normalizeType(typeFilter);
     const matchesDate = dateFilter === "Alla" || h.date === dateFilter;
-    const matchesSakomrade = sakomradeFilter === "Alla" || h.sakomrade === sakomradeFilter;
+    const matchesSakomrade = sakomradeFilter === "Alla" || (sakomradeFilter === "(Tomt)" ? !h.sakomrade : h.sakomrade === sakomradeFilter);
     const matchesMaltyp = maltypFilter === "Alla" || h.maltyp === maltypFilter;
     const matchesFleraSakfragor = !fleraSakfragorFilter || h.fleraSakfragor;
     return matchesSearch && matchesCourt && matchesType && matchesDate && matchesSakomrade && matchesMaltyp && matchesFleraSakfragor;
