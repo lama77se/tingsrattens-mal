@@ -215,6 +215,26 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/jonkopings_tingsratt/vecka-${week}-${year}.pdf`,
   },
   {
+    id: "kristianstads_tingsratt",
+    name: "Kristianstads tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week, year) => {
+      const monday = getISOWeekMonday(week, year);
+      const endDate = addDays(monday, 12);
+      const monStr = format(monday, "yyMMdd");
+      const endStr = format(endDate, "MMdd");
+      return `${BASE}/kristianstads_tingsratt/webb-forhandlingar-${monStr}-${endStr}.pdf`;
+    },
+  },
+  {
+    id: "kalmar_tingsratt",
+    name: "Kalmar tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
     id: "gotlands_tingsratt",
     name: "Gotlands tingsrätt",
     formatFamily: "standard",
