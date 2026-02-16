@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scale, Database } from "lucide-react";
 import HearingsTab from "@/components/HearingsTab";
 import DataLoadingTab from "@/components/DataLoadingTab";
+import { Hearing } from "@/lib/parseSolnaPdf";
 
 const Index = () => {
+  const [hearings, setHearings] = useState<Hearing[]>([]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -34,11 +38,11 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="hearings">
-            <HearingsTab />
+            <HearingsTab hearings={hearings} />
           </TabsContent>
 
           <TabsContent value="loading">
-            <DataLoadingTab />
+            <DataLoadingTab onHearingsFetched={setHearings} />
           </TabsContent>
         </Tabs>
       </main>
