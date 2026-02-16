@@ -99,6 +99,16 @@ export const COURTS: CourtConfig[] = [
     buildUrl: () => "",
   },
   {
+    id: "goteborgs_tingsratt",
+    name: "Göteborgs tingsrätt",
+    formatFamily: "standard",
+    buildUrl: (week, year) => [
+      `${BASE}/goteborgs_tingsratt/veckans-forhandlingar/webb_forhandlingar_v${week}_ii-${year}.pdf`,
+      `${BASE}/goteborgs_tingsratt/veckans-forhandlingar/webb_forhandlingar_v${week}_i-${year}.pdf`,
+      `${BASE}/goteborgs_tingsratt/veckans-forhandlingar/webb_forhandlingar_v${week}-${year}.pdf`,
+    ],
+  },
+  {
     id: "gavle_tingsratt",
     name: "Gävle tingsrätt",
     formatFamily: "gavle",

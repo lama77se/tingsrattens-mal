@@ -99,4 +99,31 @@ describe("formatStandard", () => {
     expect(result[0].caseNumber).toBe("T 5678-25");
     expect(result[0].type).toBe("Muntlig förberedelse");
   });
+
+  it("handles inline ISO dates (Göteborg-style single-line entries)", () => {
+    const text = [
+      "må 2026-02-16 09:00 - 09:45 Häktningsförhandling B 24584-25 brott mot vapenlagen Sal 11",
+      "ti 2026-02-17 10:00 - 12:00 Huvudförhandling B 1234-25 misshandel Sal 3",
+      "on 2026-02-18 13:00 - 15:00 Muntlig förberedelse T 5678-25 fordran Sal 5",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Göteborgs tingsrätt", text });
+    expect(result).toHaveLength(3);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].caseNumber).toBe("B 24584-25");
+    expect(result[0].saken).toBe("brott mot vapenlagen");
+    expect(result[1].date).toBe("2026-02-17");
+    expect(result[1].caseNumber).toBe("B 1234-25");
+    expect(result[2].date).toBe("2026-02-18");
+    expect(result[2].type).toBe("Muntlig förberedelse");
+  });
+
+  it("handles pdf-parse glued inline format", () => {
+    const text = "må2026-02-1609:00 - 09:45Häktningsförhandling B 24584-25brott mot vapenlagenSal 11";
+    const result = formatStandard.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].caseNumber).toBe("B 24584-25");
+    expect(result[0].saken).toBe("brott mot vapenlagen");
+  });
 });
