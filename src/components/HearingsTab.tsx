@@ -3,15 +3,18 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Info } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Search, Filter, Info, CalendarDays } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
 interface HearingsTabProps {
   hearings: Hearing[];
 }
 
+const normalizeType = (t: string) => t.trim().normalize("NFC");
+
 const typeBadgeVariant = (type: string) => {
-  switch (type) {
+  switch (normalizeType(type)) {
     case "Huvudförhandling": return "default";
     case "Häktningsförhandling": return "destructive";
     case "Muntlig förberedelse": return "secondary";
@@ -23,6 +26,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
+  const [dateFilter, setDateFilter] = useState("Alla");
 
   const courts = useMemo(() => {
     const unique = Array.from(new Set(hearings.map((h) => h.court)));
@@ -30,7 +34,12 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   }, [hearings]);
 
   const types = useMemo(() => {
-    const unique = Array.from(new Set(hearings.map((h) => h.type)));
+    const unique = Array.from(new Set(hearings.map((h) => normalizeType(h.type))));
+    return ["Alla", ...unique.sort()];
+  }, [hearings]);
+
+  const dates = useMemo(() => {
+    const unique = Array.from(new Set(hearings.map((h) => h.date)));
     return ["Alla", ...unique.sort()];
   }, [hearings]);
 
@@ -41,8 +50,9 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
       h.court.toLowerCase().includes(search.toLowerCase()) ||
       h.saken.toLowerCase().includes(search.toLowerCase());
     const matchesCourt = courtFilter === "Alla" || h.court === courtFilter;
-    const matchesType = typeFilter === "Alla" || h.type === typeFilter;
-    return matchesSearch && matchesCourt && matchesType;
+    const matchesType = typeFilter === "Alla" || normalizeType(h.type) === normalizeType(typeFilter);
+    const matchesDate = dateFilter === "Alla" || h.date === dateFilter;
+    return matchesSearch && matchesCourt && matchesType && matchesDate;
   });
 
   if (hearings.length === 0) {
@@ -60,37 +70,60 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Sök målnummer, parter..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="space-y-1.5">
+          <Label>Sök</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Målnummer, parter..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
         </div>
-        <Select value={courtFilter} onValueChange={setCourtFilter}>
-          <SelectTrigger className="w-full sm:w-[220px]">
-            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
-            <SelectValue placeholder="Tingsrätt" />
-          </SelectTrigger>
-          <SelectContent>
-            {courts.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-full sm:w-[220px]">
-            <SelectValue placeholder="Typ" />
-          </SelectTrigger>
-          <SelectContent>
-            {types.map((t) => (
-              <SelectItem key={t} value={t}>{t}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-1.5">
+          <Label>Tingsrätt</Label>
+          <Select value={courtFilter} onValueChange={setCourtFilter}>
+            <SelectTrigger>
+              <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Tingsrätt" />
+            </SelectTrigger>
+            <SelectContent>
+              {courts.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Typ</Label>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Typ" />
+            </SelectTrigger>
+            <SelectContent>
+              {types.map((t) => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Datum</Label>
+          <Select value={dateFilter} onValueChange={setDateFilter}>
+            <SelectTrigger>
+              <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Datum" />
+            </SelectTrigger>
+            <SelectContent>
+              {dates.map((d) => (
+                <SelectItem key={d} value={d}>{d}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Results count */}
