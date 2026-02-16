@@ -29,6 +29,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   const [typeFilter, setTypeFilter] = useState("Alla");
   const [dateFilter, setDateFilter] = useState("Alla");
   const [sakomradeFilter, setSakomradeFilter] = useState("Alla");
+  const [maltypFilter, setMaltypFilter] = useState("Alla");
   const [fleraSakfragorFilter, setFleraSakfragorFilter] = useState(false);
 
   const courts = useMemo(() => {
@@ -51,6 +52,11 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     return ["Alla", ...unique.sort()];
   }, [hearings]);
 
+  const maltyper = useMemo(() => {
+    const unique = Array.from(new Set(hearings.map((h) => h.maltyp).filter(Boolean)));
+    return ["Alla", ...unique.sort()];
+  }, [hearings]);
+
   const filtered = hearings.filter((h) => {
     const matchesSearch = search === "" ||
       h.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -61,8 +67,9 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
     const matchesType = typeFilter === "Alla" || normalizeType(h.type) === normalizeType(typeFilter);
     const matchesDate = dateFilter === "Alla" || h.date === dateFilter;
     const matchesSakomrade = sakomradeFilter === "Alla" || h.sakomrade === sakomradeFilter;
+    const matchesMaltyp = maltypFilter === "Alla" || h.maltyp === maltypFilter;
     const matchesFleraSakfragor = !fleraSakfragorFilter || h.fleraSakfragor;
-    return matchesSearch && matchesCourt && matchesType && matchesDate && matchesSakomrade && matchesFleraSakfragor;
+    return matchesSearch && matchesCourt && matchesType && matchesDate && matchesSakomrade && matchesMaltyp && matchesFleraSakfragor;
   });
 
   if (hearings.length === 0) {
@@ -80,7 +87,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
         <div className="space-y-1.5">
           <Label>Sök</Label>
           <div className="relative">
@@ -135,6 +142,19 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
           </Select>
         </div>
         <div className="space-y-1.5">
+          <Label>Måltyp</Label>
+          <Select value={maltypFilter} onValueChange={setMaltypFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Måltyp" />
+            </SelectTrigger>
+            <SelectContent>
+              {maltyper.map((m) => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
           <Label>Sakområde</Label>
           <Select value={sakomradeFilter} onValueChange={setSakomradeFilter}>
             <SelectTrigger>
@@ -175,6 +195,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
               <TableHead>Tingsrätt</TableHead>
               <TableHead>Målnummer</TableHead>
               <TableHead>Typ</TableHead>
+              <TableHead>Måltyp</TableHead>
               <TableHead>Saken</TableHead>
               <TableHead>Sakområde</TableHead>
               <TableHead>Lagrum</TableHead>
@@ -184,7 +205,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
 
                   Inga förhandlingar matchar filtren.
                 </TableCell>
@@ -199,6 +220,7 @@ export default function HearingsTab({ hearings }: HearingsTabProps) {
                   <TableCell>
                     <Badge variant={typeBadgeVariant(h.type) as any}>{h.type}</Badge>
                   </TableCell>
+                  <TableCell className="text-muted-foreground">{h.maltyp || "–"}</TableCell>
                   <TableCell>{h.saken}</TableCell>
                   <TableCell className="text-muted-foreground">{h.sakomrade || "–"}</TableCell>
                   <TableCell className="text-muted-foreground">{h.lagrum || "–"}</TableCell>

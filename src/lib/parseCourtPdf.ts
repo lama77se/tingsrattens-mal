@@ -1,4 +1,5 @@
 import { matchLagrum } from "./lagrumMappings";
+import { getMaltyp } from "./maltypMappings";
 
 export interface Hearing {
   id: string;
@@ -7,6 +8,7 @@ export interface Hearing {
   court: string;
   caseNumber: string;
   type: string;
+  maltyp: string;
   room: string;
   saken: string;
   parties: string;
@@ -271,6 +273,7 @@ export function parseCourtPdf(text: string, court: string): Hearing[] {
       court,
       caseNumber,
       type,
+      maltyp: getMaltyp(caseNumber),
       room: room || "–",
       saken: saken || "–",
       parties: parties || "–",
