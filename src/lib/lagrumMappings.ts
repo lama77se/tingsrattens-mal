@@ -253,6 +253,60 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
     kommentar: "Processuell fråga – avser rättsligt samarbete mellan stater, inte ett materiellt brott.",
   },
+  "brott mot utlänningslagen": {
+    sakomrade: "Utlänningsrättsliga brott",
+    primart_lagrum: ["Utlänningslagen (2005:716) 20 kap."],
+    kommentar: "Exakt paragraf beror på gärning (t.ex. olovlig vistelse, organiserande av olaglig inresa m.m.).",
+  },
+  "vållande till kroppsskada": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 8 §"],
+    alternativa_lagrum: ["BrB 3 kap. 9 § (grovt brott)"],
+  },
+  "rättslig hjälp åt utländsk domstol": {
+    sakomrade: "Internationellt straffprocessuellt samarbete",
+    primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
+    kommentar: "Processuell fråga, inte materiellt brott.",
+  },
+  "våldtäkt mot barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 4 §"],
+    alternativa_lagrum: ["BrB 6 kap. 4 § (grovt brott)"],
+  },
+  "brott mot totalförsvarsplikten": {
+    sakomrade: "Totalförsvars- och tjänstepliktsbrott",
+    primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
+    kommentar: "Exakt paragraf beror på gärning (t.ex. uteblivande från tjänstgöring).",
+  },
+  "undanröjande av villkorlig dom med samhällstjänst": {
+    sakomrade: "Straffverkställighet",
+    primart_lagrum: ["BrB 27 kap. 6 §"],
+    kommentar: "Avser undanröjande av påföljd och ny påföljdsbestämning.",
+  },
+  "osant intygande": {
+    sakomrade: "Urkundsbrott",
+    primart_lagrum: ["BrB 15 kap. 11 §"],
+  },
+  "våldtäkt": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 1 §"],
+    alternativa_lagrum: ["BrB 6 kap. 1 § (grovt brott)"],
+  },
+  "mordbrand": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 1 §"],
+    alternativa_lagrum: ["BrB 13 kap. 2 § (grov mordbrand)"],
+  },
+  "smuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
+    alternativa_lagrum: ["Lag (2000:1225) 6 § (grovt smugglingsbrott)"],
+  },
+  "ansökan om förverkande": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["BrB 36 kap."],
+    kommentar: "Förverkande regleras i 36 kap. BrB; kan även förekomma i speciallagstiftning.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
