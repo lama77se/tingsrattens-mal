@@ -1,48 +1,46 @@
 
 
-# Fixa datum, typ och lagg till "Saken"-kolumn
+# Fixa parsern: hantera dash-varianter och debugging
 
-## Problem
-Raden `ma 16-feb 09:00 - 11:00 Huvudforhandling B 1626-25 Grov olovlig korning` parsas fel:
-- **A) Datum** visar `2026-02-12` istallet for `2026-02-16`
-- **B) Typ** visar "Forhandling" istallet for "Huvudforhandling"
-- **C) Saken** saknas som eget falt — "Grov olovlig korning" hamnar i "Parter"-kolumnen
+## Rotorsak
+`pdf-parse` extraherar troligen texten med **en-dash (–, U+2013)** eller **em-dash (—, U+2014)** istallet for vanligt bindestreck (-) i datum som `17-feb`. Darfor matchar inte `shortDateRegex` (som anvander `-`), och datumet faller tillbaka till vad som satts av en tidigare rad (t.ex. `2026-02-12`).
+
+Samma problem kan paverka typ-detekteringen om PDF-texten innehaller ovanliga Unicode-tecken for svenska bokstaver som `normalize()` inte hanterar.
 
 ## Losning
 
-### 1. Robust datum-parsning (`parseCourtPdf.ts`)
-Datumet `16-feb` borde fångas av `shortDateRegex` men det verkar finnas ett problem med matchningsordningen eller med att ISO-regexen falskt matchar nagot pa raden. Fix:
-- Flytta short date-matchningen FORE den generella logiken sa att `dd-mmm` format alltid fangas
-- Gor matchningen mer explicit med en combined regex som testar alla datumformat i ratt ordning
-- Lagg till loggning/fallback sa att om shortDateRegex matchar, den ALLTID anvands oavsett andra matchningar
+### 1. Gor alla regex dash-agnostiska (`parseCourtPdf.ts`)
+Ersatt alla literala `-` i regex-monster med en teckengrupp som matchar bindestreck, en-dash och em-dash: `[-–—]`
 
-### 2. Robust typ-detektion (`parseCourtPdf.ts`)
-"Huvudforhandling" matchas inte, troligen for att PDF-extraherad text kan ha annorlunda tecken (t.ex. ligatures eller specialtecken for o, a). Fix:
-- Normalisera bade raden och hearing types innan jamforelse (ersatt accenterade tecken)
-- Alternativt: anvand en regex per typ som tillater valfri variant av svenska tecken
+Paverkade regex:
+- `shortDateRegex`: `(\d{1,2})[-–—](jan|feb|...)`
+- `caseNumberRegex`: `([TBFTA]\s?\d{1,6}[-–—]\d{2})`
+- `timeRangeRegex`: `(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})`
+- `isoDateRegex`: `(\d{4}[-–—]\d{2}[-–—]\d{2})`
 
-### 3. Nytt falt "saken" i Hearing-interfacet
-Lagg till `saken: string` i `Hearing`-interfacet. I PDF-formatet ar "Saken" texten som beskriver brottet/tvisten, t.ex. "Grov olovlig korning". Parsern ska extrahera detta fran texten efter malnumret (och skilja det fran "parter" som ar namnen pa parterna).
+### 2. Lagg till console.log for debugging (`parseCourtPdf.ts`)
+Logga de forsta 20 raderna av den extraherade texten sa vi kan se exakt vad pdf-parse producerar. Detta gor framtida debugging mycket enklare. Logga aven varje giltigt hearing-objekt.
 
-### 4. Visa "Saken" i tabellen (`HearingsTab.tsx`)
-Lagg till en ny kolumn "Saken" i tabellen mellan "Typ" och "Sal".
+### 3. Normalisera bindestreck i output
+Nar datumet sparas, ersatt eventuella en-dash/em-dash med vanligt bindestreck i ISO-datumstrangen sa att `currentDate` alltid ar i format `2026-02-17`.
 
 ## Tekniska detaljer
 
-### Filandringar
+Alla andringar i `src/lib/parseCourtPdf.ts`:
 
-**`src/lib/parseCourtPdf.ts`**:
-- Lagg till `saken: string` i `Hearing`-interfacet
-- Refaktorera datumextraktionen: testa `shortDateRegex` forst pa raden INNAN ISO/svenska datum, eftersom formatet `dd-mmm` ar vanligt och entydigt
-- For typ-detektion: normalisera strangarna genom att gora case-insensitive jamforelse och hantera potentiella encoding-skillnader fran PDF-text
-- Extrahera "saken" fran texten efter malnumret. I formatet `B 1626-25 Grov olovlig korning` ar "Grov olovlig korning" saken. Nuvarande logik laggar detta i `parties` — det ska istallet ga till `saken`
-- `parties` hamtas fran nasta rad eller annan kontext (om tillgangligt)
+**Regex-uppdateringar:**
+```
+shortDateRegex:  /\b(\d{1,2})[-\u2013\u2014](jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)\b/i
+caseNumberRegex: /\b([TBFT\u00c4]\s?\d{1,6}[-\u2013\u2014]\d{2})\b/i
+timeRangeRegex:  /(\d{1,2}:\d{2})\s*[-\u2013\u2014]\s*(\d{1,2}:\d{2})/
+isoDateRegex:    /(\d{4}[-\u2013\u2014]\d{2}[-\u2013\u2014]\d{2})/
+```
 
-**`src/components/HearingsTab.tsx`**:
-- Lagg till kolumnhuvud "Saken" i tabellen
-- Visa `h.saken` i en ny cell
-- Uppdatera sokfiltret att aven soka i `saken`-faltet
-- Uppdatera `colSpan` fran 7 till 8 for tom-raden
+**Debug-loggning:**
+- `console.log("PDF text first 500 chars:", text.substring(0, 500))` i borjan av funktionen
+- `console.log("Parsed hearing:", hearing)` for varje hearing
 
-**`src/pages/Index.tsx`**: Inga andringar behovs (Hearing-typen importeras redan fran parseCourtPdf).
+**Normalisering av output:**
+- Ersatt alla dash-varianter med `-` i `currentDate` efter extraktion
 
+Inga andringar i andra filer.
