@@ -260,4 +260,47 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("stöld");
     expect(result[1].saken).toBe("hot mot tjänsteman");
   });
+
+  it("strips inline (dag X/Y) from hearing type (Jönköping-style)", () => {
+    const text = [
+      "ti2026-02-17  09:00 - 16:15   Huvudförhandling (dag 1/2)inbrottsstöld m.mSal 12",
+      "on2026-02-18  09:00 - 12:00   Huvudförhandling (dag 2/2)inbrottsstöld m.mSal 12",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Jönköpings tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("inbrottsstöld m.m");
+    expect(result[0].room).toBe("Sal 12");
+    expect(result[1].date).toBe("2026-02-18");
+    expect(result[1].saken).toBe("inbrottsstöld m.m");
+  });
+
+  it("parses Borgenärssammanträde", () => {
+    const text = "to2026-02-19  13:00 - 16:00   BorgenärssammanträdeföretagsrekonstruktionSal 5";
+    const result = formatTabular.parse({ courtName: "Jönköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Borgenärssammanträde");
+    expect(result[0].saken).toBe("företagsrekonstruktion");
+    expect(result[0].room).toBe("Sal 5");
+  });
+
+  it("parses Jönköping-style glued single-line entries", () => {
+    const text = [
+      "må2026-02-16  09:00 - 09:45   Huvudförhandlingringa narkotikabrottSal 4",
+      "må2026-02-16  09:00 - 10:15   Huvudförhandlinggrovt rattfylleri m mSal 7",
+      "ti2026-02-17  09:00 - 12:00   Fortsatt hfmisshandel mm.Sal 6",
+      "ti2026-02-17  13:15 - 16:00   Huvudförhandlingolovligt innehav och försäljning av alkoholSal 11",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Jönköpings tingsrätt", text });
+    expect(result).toHaveLength(4);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].saken).toBe("ringa narkotikabrott");
+    expect(result[0].room).toBe("Sal 4");
+    expect(result[1].saken).toBe("grovt rattfylleri m m");
+    expect(result[2].type).toBe("Huvudförhandling");
+    expect(result[2].saken).toBe("misshandel mm");
+    expect(result[3].saken).toBe("olovligt innehav och försäljning av alkohol");
+  });
 });

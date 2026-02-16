@@ -162,6 +162,19 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Penning- och urkundsbrott",
     primart_lagrum: ["BrB 14 kap. 10 § (ringa brott)"],
   },
+  "olovlig hantering av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
+    kommentar: "Exakt paragraf beror på gärningens art (t.ex. olovlig försäljning eller servering).",
+  },
+  "skattebrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 2 §"],
+    alternativa_lagrum: [
+      "Skattebrottslagen (1971:69) 4 § (grovt skattebrott)",
+      "Skattebrottslagen (1971:69) 3 § (vårdslös skatteuppgift)",
+    ],
+  },
   "allmänfarlig vårdslöshet": {
     sakomrade: "Allmänfarliga brott",
     primart_lagrum: ["BrB 13 kap. 6 §"],
