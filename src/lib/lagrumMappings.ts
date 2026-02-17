@@ -528,6 +528,30 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 4 kap. 4 §"],
     alternativa_lagrum: ["BrB 4 kap. 4 § (grovt olaga tvång)"],
   },
+  "människohandel": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 1 a §"],
+    alternativa_lagrum: ["BrB 4 kap. 1 a § (grovt brott)"],
+  },
+  "missbruk av urkund": {
+    sakomrade: "Urkundsbrott",
+    primart_lagrum: ["BrB 15 kap. 12 §"],
+  },
+  "brott mot lagen om handel med läkemedel": {
+    sakomrade: "Läkemedelsreglering",
+    primart_lagrum: ["Lag (2009:366) om handel med läkemedel 9 kap."],
+    kommentar: "Exakt paragraf beror på överträdelsens art (t.ex. olovlig försäljning eller tillståndsbrist).",
+  },
+  "brott mot lagen om tillsyn över hundar och katter": {
+    sakomrade: "Djurskydds- och ordningsbrott",
+    primart_lagrum: ["Lag (2007:1150) om tillsyn över hundar och katter 16 §"],
+    kommentar: "Straffbestämmelser finns i samma lag.",
+  },
+  "brott mot luftfartsförordningen": {
+    sakomrade: "Luftfartsreglering",
+    primart_lagrum: ["Luftfartsförordningen (2010:770)"],
+    kommentar: "Exakt paragraf beror på överträdelsens art; straff- och sanktionsbestämmelser är kopplade till luftfartslagstiftningen.",
+  },
   "olvolig körning": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 3 §"],
