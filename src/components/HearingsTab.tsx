@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, Clock, MapPin } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
 interface HearingsTabProps {
@@ -28,6 +29,17 @@ const typeBadgeVariant = (type: string) => {
   }
 };
 
+const sortKeyLabels: Record<SortKey, string> = {
+  datetime: "Datum + Tid",
+  caseNumber: "Målnummer",
+  type: "Typ",
+  maltyp: "Måltyp",
+  saken: "Saken",
+  sakomrade: "Sakområde",
+  lagrum: "Lagrum",
+  flera: "Flera sakfrågor",
+};
+
 export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState("Alla");
@@ -38,6 +50,18 @@ export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) 
   const [fleraSakfragorFilter, setFleraSakfragorFilter] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (courtFilter !== "Alla") count++;
+    if (typeFilter !== "Alla") count++;
+    if (dateFilter !== "Alla") count++;
+    if (sakomradeFilter !== "Alla") count++;
+    if (maltypFilter !== "Alla") count++;
+    if (fleraSakfragorFilter) count++;
+    return count;
+  }, [courtFilter, typeFilter, dateFilter, sakomradeFilter, maltypFilter, fleraSakfragorFilter]);
 
   const courts = useMemo(() => {
     const unique = Array.from(new Set(hearings.map((h) => h.court)));
@@ -141,111 +165,263 @@ export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) 
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Search */}
+  const filtersContent = (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
       <div className="space-y-1.5">
-        <Label>Sök</Label>
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Målnummer, parter, tingsrätt, saken..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+        <Label>Tingsrätt</Label>
+        <Select value={courtFilter} onValueChange={setCourtFilter}>
+          <SelectTrigger className="h-11 md:h-10">
+            <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="Tingsrätt" />
+          </SelectTrigger>
+          <SelectContent>
+            {courts.map((c) => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Typ</Label>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="h-11 md:h-10">
+            <SelectValue placeholder="Typ" />
+          </SelectTrigger>
+          <SelectContent>
+            {types.map((t) => (
+              <SelectItem key={t} value={t}>{t}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Datum</Label>
+        <Select value={dateFilter} onValueChange={setDateFilter}>
+          <SelectTrigger className="h-11 md:h-10">
+            <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="Datum" />
+          </SelectTrigger>
+          <SelectContent>
+            {dates.map((d) => (
+              <SelectItem key={d} value={d}>{d}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Måltyp</Label>
+        <Select value={maltypFilter} onValueChange={setMaltypFilter}>
+          <SelectTrigger className="h-11 md:h-10">
+            <SelectValue placeholder="Måltyp" />
+          </SelectTrigger>
+          <SelectContent>
+            {maltyper.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Sakområde</Label>
+        <Select value={sakomradeFilter} onValueChange={setSakomradeFilter}>
+          <SelectTrigger className="h-11 md:h-10">
+            <SelectValue placeholder="Sakområde" />
+          </SelectTrigger>
+          <SelectContent>
+            {sakomraden.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>&nbsp;</Label>
+        <div className="flex items-center space-x-2 h-11 md:h-10">
+          <Checkbox
+            id="fleraSakfragor"
+            checked={fleraSakfragorFilter}
+            onCheckedChange={(checked) => setFleraSakfragorFilter(checked === true)}
           />
+          <Label htmlFor="fleraSakfragor" className="cursor-pointer">Flera sakfrågor</Label>
         </div>
       </div>
+    </div>
+  );
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+  return (
+    <div className="space-y-4 md:space-y-6">
+      {/* Search — sticky on mobile */}
+      <div className="sticky top-0 z-10 bg-background pb-3 -mx-4 px-4 pt-2 md:static md:mx-0 md:px-0 md:pt-0 md:pb-0 md:bg-transparent">
         <div className="space-y-1.5">
-          <Label>Tingsrätt</Label>
-          <Select value={courtFilter} onValueChange={setCourtFilter}>
-            <SelectTrigger>
-              <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Tingsrätt" />
-            </SelectTrigger>
-            <SelectContent>
-              {courts.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Typ</Label>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Typ" />
-            </SelectTrigger>
-            <SelectContent>
-              {types.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Datum</Label>
-          <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger>
-              <CalendarDays className="h-4 w-4 mr-2 text-muted-foreground" />
-              <SelectValue placeholder="Datum" />
-            </SelectTrigger>
-            <SelectContent>
-              {dates.map((d) => (
-                <SelectItem key={d} value={d}>{d}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Måltyp</Label>
-          <Select value={maltypFilter} onValueChange={setMaltypFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Måltyp" />
-            </SelectTrigger>
-            <SelectContent>
-              {maltyper.map((m) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Sakområde</Label>
-          <Select value={sakomradeFilter} onValueChange={setSakomradeFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sakområde" />
-            </SelectTrigger>
-            <SelectContent>
-              {sakomraden.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label>&nbsp;</Label>
-          <div className="flex items-center space-x-2 h-10">
-            <Checkbox
-              id="fleraSakfragor"
-              checked={fleraSakfragorFilter}
-              onCheckedChange={(checked) => setFleraSakfragorFilter(checked === true)}
+          <Label className="hidden md:block">Sök</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Målnummer, parter, tingsrätt, saken..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-11 md:h-10 md:max-w-md"
             />
-            <Label htmlFor="fleraSakfragor" className="cursor-pointer">Flera sakfrågor</Label>
           </div>
         </div>
+
+        {/* Mobile filter toggle */}
+        <div className="mt-3 md:hidden">
+          <Button
+            variant="outline"
+            className="w-full h-11 justify-between"
+            onClick={() => setFiltersOpen(!filtersOpen)}
+          >
+            <span className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filter
+              {activeFilterCount > 0 && (
+                <Badge variant="default" className="ml-1 h-5 min-w-[20px] px-1.5 text-xs">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </span>
+            {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-muted-foreground">
-        Visar {filtered.length} av {hearings.length} förhandlingar
-      </p>
+      {/* Filters — collapsible on mobile, always visible on desktop */}
+      <div className="md:hidden">
+        {filtersOpen && (
+          <div className="rounded-lg border bg-card p-4 space-y-4">
+            {filtersContent}
+            {activeFilterCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setCourtFilter("Alla");
+                  setTypeFilter("Alla");
+                  setDateFilter("Alla");
+                  setSakomradeFilter("Alla");
+                  setMaltypFilter("Alla");
+                  setFleraSakfragorFilter(false);
+                }}
+              >
+                Rensa filter
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="hidden md:block">
+        {filtersContent}
+      </div>
 
-      {/* Table */}
-      <div className="rounded-lg border bg-card overflow-hidden">
+      {/* Results count + mobile sort controls */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Visar {filtered.length} av {hearings.length} förhandlingar
+        </p>
+
+        {/* Mobile sort — visible below md */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Label className="text-sm whitespace-nowrap text-muted-foreground">Sortera:</Label>
+          <Select
+            value={sortKey ?? "none"}
+            onValueChange={(val) => {
+              if (val === "none") {
+                setSortKey(null);
+              } else {
+                setSortKey(val as SortKey);
+              }
+            }}
+          >
+            <SelectTrigger className="h-10 flex-1">
+              <SelectValue placeholder="Välj..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Standard</SelectItem>
+              {(Object.keys(sortKeyLabels) as SortKey[]).map((key) => (
+                <SelectItem key={key} value={key}>{sortKeyLabels[key]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            disabled={!sortKey}
+            onClick={() => setSortDir((d) => d === "asc" ? "desc" : "asc")}
+          >
+            {sortDir === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile card list — visible below md */}
+      <div className="md:hidden space-y-3">
+        {sorted.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Inga förhandlingar matchar filtren.
+          </div>
+        ) : (
+          sorted.map((h) => (
+            <Card key={h.id} className="overflow-hidden">
+              <CardContent className="p-4 space-y-2">
+                {/* Top row: date/time + badge */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="font-medium">{h.date}</span>
+                    <span className="text-muted-foreground">{h.time}</span>
+                  </div>
+                  <Badge variant={typeBadgeVariant(h.type) as any} className="shrink-0">
+                    {h.type}
+                  </Badge>
+                </div>
+
+                {/* Court */}
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span>{h.court}</span>
+                </div>
+
+                {/* Case number + type */}
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="font-mono font-medium">{h.caseNumber}</span>
+                  {h.maltyp && (
+                    <span className="text-muted-foreground">{h.maltyp}</span>
+                  )}
+                </div>
+
+                {/* Saken */}
+                {h.saken && (
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Saken: </span>
+                    <span>{h.saken}</span>
+                  </div>
+                )}
+
+                {/* Additional details row */}
+                {(h.sakomrade || h.lagrum || h.fleraSakfragor) && (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground pt-1 border-t">
+                    {h.sakomrade && (
+                      <span>{h.sakomrade}</span>
+                    )}
+                    {h.lagrum && (
+                      <span>{h.lagrum}</span>
+                    )}
+                    {h.fleraSakfragor && (
+                      <span className="text-primary font-medium">Flera sakfrågor</span>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table — hidden below md */}
+      <div className="hidden md:block rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
@@ -295,8 +471,7 @@ export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) 
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
-              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   Inga förhandlingar matchar filtren.
                 </TableCell>
               </TableRow>
