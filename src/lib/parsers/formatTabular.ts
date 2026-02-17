@@ -112,6 +112,12 @@ function stripRoom(text: string): string {
 }
 
 /**
+ * Regex matching a bare date+time line (no content after the time range).
+ * Safety net for lines like "ti 2026-02-10 09:00 - 10:00" that lack trailing text.
+ */
+const BARE_DATE_TIME_REGEX = /\d{4}-\d{2}-\d{2}.*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}\s*$/;
+
+/**
  * Check if a line should stop the continuation loop.
  */
 function isContinuationBreak(line: string): boolean {
@@ -120,7 +126,8 @@ function isContinuationBreak(line: string): boolean {
     DAY_ABBREV_REGEX.test(line) ||
     DATE_ONLY_REGEX.test(line) ||
     !!line.match(TIME_ONLY_REGEX) ||
-    HEADER_REGEX.test(line)
+    HEADER_REGEX.test(line) ||
+    BARE_DATE_TIME_REGEX.test(line)
   );
 }
 
