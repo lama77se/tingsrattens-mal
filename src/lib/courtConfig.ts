@@ -250,6 +250,15 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/malmo_tingsratt/veckans_forhandlingar/forhandlingar-vecka-${week}.pdf`,
   },
   {
+    id: "mora_tingsratt",
+    name: "Mora tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) => [
+      `${BASE}/mora_tingsratt/block/vecka-${week}-${week + 1}.pdf`,
+      `${BASE}/mora_tingsratt/block/vecka-${week - 1}-${week}.pdf`,
+    ],
+  },
+  {
     id: "lulea_tingsratt",
     name: "Luleå tingsrätt",
     formatFamily: "standard",
