@@ -989,9 +989,10 @@ describe("formatTabular", () => {
     expect(result[4].saken).toBe("varumärkesintrång m.m");
     expect(result[4].room).toBe("Sal 26");
 
-    // External court reference "(Solna tingsrätt)" stripped
+    // External court reference "(Solna tingsrätt)" extracted
     expect(result[5].type).toBe("Huvudförhandling");
     expect(result[5].caseNumber).toBe("B 6394-24");
+    expect(result[5].externalCourt).toBe("Solna tingsrätt");
     expect(result[5].saken).toContain("folkrättsbrott");
 
     // Edgångssammanträde

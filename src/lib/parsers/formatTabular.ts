@@ -212,8 +212,13 @@ export const formatTabular: ParserStrategy = {
       }
       const caseNumber = caseNumbers.join(", ");
 
-      // Strip court references "(X tingsrätt)" and "med flera" after case numbers
-      afterCase = afterCase.replace(/^\([^)]*(?:tingsrätt|tingsratt)\)\s*/i, "");
+      // Extract external court reference "(X tingsrätt)" after case numbers
+      let externalCourt: string | undefined;
+      const courtRef = afterCase.match(/^\(([^)]*(?:tingsrätt|tingsratt))\)\s*/i);
+      if (courtRef) {
+        externalCourt = courtRef[1].trim();
+        afterCase = afterCase.substring(courtRef[0].length);
+      }
       afterCase = afterCase.replace(/^med\s+flera\s*/i, "");
 
       // Extract room and saken from the text after type (and case number)
@@ -256,6 +261,7 @@ export const formatTabular: ParserStrategy = {
         room: room || "",
         saken: saken || "",
         parties: "",
+        ...(externalCourt && { externalCourt }),
       });
     }
 
