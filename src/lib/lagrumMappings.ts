@@ -158,6 +158,12 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
     alternativa_lagrum: ["Lag (2014:307) 4 § (grovt penningtvättsbrott)", "Lag (2014:307) 5 § (penningtvättsförseelse)"],
   },
+  "penningstvättsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2014:307) om straff för penningtvättsbrott 3 §"],
+    alternativa_lagrum: ["Lag (2014:307) 4 § (grovt penningtvättsbrott)", "Lag (2014:307) 5 § (penningtvättsförseelse)"],
+    kommentar: "Stavningsvariant av 'penningtvättsbrott'. Bör normaliseras till korrekt rubricering.",
+  },
   "trolöshet mot huvudman": {
     sakomrade: "Förmögenhetsbrott",
     primart_lagrum: ["BrB 10 kap. 5 §"],
@@ -522,6 +528,11 @@ const mappings: Record<string, LagrumEntry> = {
       "BrB 10 kap. 3 § (grov förskingring)",
       "BrB 10 kap. 2 § (olovligt brukande, närliggande brott)",
     ],
+  },
+  "egenmäktigt förfarande": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 8 §"],
+    alternativa_lagrum: ["BrB 8 kap. 8 § (grovt brott)"],
   },
   "olaga tvång": {
     sakomrade: "Brott mot frihet och frid",
