@@ -502,6 +502,32 @@ const mappings: Record<string, LagrumEntry> = {
     alternativa_lagrum: ["BrB 3 kap. 9 § (grovt brott)"],
     kommentar: "Stavningsvariant av 'vållande till kroppsskada'. Bör normaliseras till korrekt rubricering.",
   },
+  "dopningsbrott": {
+    sakomrade: "Dopningsbrott",
+    primart_lagrum: ["Lag (1991:1969) om förbud mot vissa dopningsmedel 3 §"],
+    alternativa_lagrum: [
+      "Lag (1991:1969) 3 a § (grovt dopningsbrott)",
+      "Lag (1991:1969) 3 b § (ringa dopningsbrott)",
+    ],
+  },
+  "brott mot förordningen om kör och vilotider": {
+    sakomrade: "Trafik- och yrkestrafikreglering",
+    primart_lagrum: ["Förordning (2004:865) om kör- och vilotider m.m."],
+    kommentar: "Straff- och sanktionsbestämmelser är kopplade till vägtransportregelverket och EU-förordningar.",
+  },
+  "förskingring": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 10 kap. 1 §"],
+    alternativa_lagrum: [
+      "BrB 10 kap. 3 § (grov förskingring)",
+      "BrB 10 kap. 2 § (olovligt brukande, närliggande brott)",
+    ],
+  },
+  "olaga tvång": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 §"],
+    alternativa_lagrum: ["BrB 4 kap. 4 § (grovt olaga tvång)"],
+  },
   "olvolig körning": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 3 §"],
