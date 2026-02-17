@@ -112,6 +112,21 @@ describe("preprocessLines", () => {
     expect(preprocessLines("Sal 5")).toEqual(["Sal 5"]);
   });
 
+  it("rejoins bare room number split across lines (page boundary fix)", () => {
+    const result = preprocessLines("ansökan om konkurs Sal\n10");
+    expect(result).toEqual(["ansökan om konkurs Sal 10"]);
+  });
+
+  it("rejoins Tingssal room number split across lines", () => {
+    const result = preprocessLines("misshandel Tingssal\n2");
+    expect(result).toEqual(["misshandel Tingssal 2"]);
+  });
+
+  it("does not rejoin bare number when previous line does not end with Sal", () => {
+    const result = preprocessLines("ansökan om konkurs\n10");
+    expect(result).toHaveLength(2);
+  });
+
   it("splits de-accented day abbreviation from date digits", () => {
     expect(preprocessLines("ma16-feb09:00 - 09:15Edgangssmtr")).toEqual([
       "ma 16-feb 09:00 - 09:15 Edgangssmtr",
