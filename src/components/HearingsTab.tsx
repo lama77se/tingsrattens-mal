@@ -13,6 +13,7 @@ import { Hearing } from "@/lib/parseCourtPdf";
 interface HearingsTabProps {
   hearings: Hearing[];
   onFetchAll?: () => void;
+  isLoadingAll?: boolean;
 }
 
 type SortKey = "datetime" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
@@ -40,7 +41,7 @@ const sortKeyLabels: Record<SortKey, string> = {
   flera: "Flera sakfrågor",
 };
 
-export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) {
+export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false }: HearingsTabProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
@@ -156,9 +157,9 @@ export default function HearingsTab({ hearings, onFetchAll }: HearingsTabProps) 
           Klicka på "Hämta alla" för att ladda förhandlingar från domstol.se, eller gå till fliken "Laddning av data" för att hämta enskilda tingsrätter.
         </p>
         {onFetchAll && (
-          <Button onClick={onFetchAll} className="mt-4">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Hämta alla
+          <Button onClick={onFetchAll} disabled={isLoadingAll} className="mt-4">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAll ? "animate-spin" : ""}`} />
+            {isLoadingAll ? "Hämtar..." : "Hämta alla"}
           </Button>
         )}
       </div>
