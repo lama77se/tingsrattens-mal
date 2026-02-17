@@ -407,6 +407,63 @@ describe("formatTabular", () => {
     expect(result[2].saken).toBe("ringa narkotikabrott");
   });
 
+  it("maps 'Hf i förenklad form' to Huvudförhandling (Nacka)", () => {
+    const text = "ti2026-02-0313:00 - 15:00Hf i förenklad formFT 8641-25FordranSal 16";
+    const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("FT 8641-25");
+    expect(result[0].saken).toBe("Fordran");
+    expect(result[0].room).toBe("Sal 16");
+  });
+
+  it("maps 'Förlikningssmtr' to Förlikningssammanträde (Nacka)", () => {
+    const text = "on2026-02-1813:00 - 13:30FörlikningssmtrK 2295-25KonkursSal 17";
+    const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Förlikningssammanträde");
+    expect(result[0].caseNumber).toBe("K 2295-25");
+    expect(result[0].saken).toBe("Konkurs");
+    expect(result[0].room).toBe("Sal 17");
+  });
+
+  it("parses Nacka-style fully glued entries with all case types", () => {
+    const text = [
+      "DagDatum Tid Mötestyp Målnummer Saken Lokal",
+      "må2026-02-1609:00 - 11:30HuvudförhandlingB 10321-25StöldSal 5",
+      "ti2026-02-1712:00 - 15:00Muntlig förberedelseT 9941-25FordranSal 17",
+      "on2026-02-1809:00 - 09:20KonkursförhandlingK 355-26Ansökan om konkursSal 15",
+      "to2026-02-1909:00 - 11:00Fortsatt muntlig förbT 1214-25Ansökan om äktenskapsskillnad med frågor om umgängeSal 16",
+      "fr2026-02-2009:00 - 11:00Muntlig förberedelse och ev hfFT 6045-25TrafikförsäkringSal 15",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
+    expect(result).toHaveLength(5);
+    expect(result[0].caseNumber).toBe("B 10321-25");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("Stöld");
+    expect(result[0].room).toBe("Sal 5");
+    expect(result[1].caseNumber).toBe("T 9941-25");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[2].caseNumber).toBe("K 355-26");
+    expect(result[2].type).toBe("Konkursförhandling");
+    expect(result[3].caseNumber).toBe("T 1214-25");
+    expect(result[3].type).toBe("Muntlig förberedelse");
+    expect(result[3].saken).toBe("Ansökan om äktenskapsskillnad med frågor om umgänge");
+    expect(result[4].caseNumber).toBe("FT 6045-25");
+    expect(result[4].type).toBe("Muntlig förberedelse");
+    expect(result[4].saken).toBe("Trafikförsäkring");
+  });
+
+  it("parses Nacka Ä case numbers (Sammanträde)", () => {
+    const text = "ti2026-02-0309:00 - 11:00SammanträdeÄ 84-26Utmätning av lös egendomSal 15";
+    const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("Ä 84-26");
+    expect(result[0].type).toBe("Sammanträde");
+    expect(result[0].saken).toBe("Utmätning av lös egendom");
+  });
+
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
       "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",

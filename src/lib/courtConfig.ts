@@ -259,6 +259,13 @@ export const COURTS: CourtConfig[] = [
     ],
   },
   {
+    id: "nacka_tingsratt",
+    name: "Nacka tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week, year) =>
+      `${BASE}/nacka_tingsratt/veckans-forhandlingar/${year}/v.${week}.pdf`,
+  },
+  {
     id: "lulea_tingsratt",
     name: "Luleå tingsrätt",
     formatFamily: "standard",
