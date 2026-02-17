@@ -385,6 +385,28 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("narkotikabrott");
   });
 
+  it("parses Mora-style tabular with case numbers and header", () => {
+    const text = [
+      "Förhandlingar i Mora tingsrätt, listan skapades 2026-02-09",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel.",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "må 2026-02-09 10:00 - 11:00 Konkursförhandling K 82-26 ansökan om konkurs Sal 3",
+      "må 2026-02-09 13:00 - 16:00 Muntlig förberedelse FT 1807-25 fordran Sal 3",
+      "ti 2026-02-10 09:00 - 09:30 Huvudförhandling B 20-26 ringa narkotikabrott Sal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Mora tingsrätt", text });
+    expect(result).toHaveLength(3);
+    expect(result[0].caseNumber).toBe("K 82-26");
+    expect(result[0].type).toBe("Konkursförhandling");
+    expect(result[0].saken).toBe("ansökan om konkurs");
+    expect(result[0].room).toBe("Sal 3");
+    expect(result[1].caseNumber).toBe("FT 1807-25");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[2].caseNumber).toBe("B 20-26");
+    expect(result[2].saken).toBe("ringa narkotikabrott");
+  });
+
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
       "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",
