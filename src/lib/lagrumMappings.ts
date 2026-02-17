@@ -283,6 +283,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 17 kap. 1 §"],
     kommentar: "Begreppet används ibland generellt; straffbestämmelsen är normalt 17 kap. 1 § BrB.",
   },
+  "överträdelse av myndighets bud": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 13 §"],
+    kommentar: "Avser underlåtenhet att följa föreläggande eller förbud som meddelats av myndighet och som är straffsanktionerat.",
+  },
   "grov fridskränkning": {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["BrB 4 kap. 4 a §"],
