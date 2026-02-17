@@ -1,34 +1,21 @@
 
-# Fix: Saktext ihopklistrad med malnummer-suffix
 
-## Problem
-PDF-texten saknar mellanslag mellan malnumrets artal och sakbeskrivningen, t.ex.:
-- `K 2940-25ansökan om konkurs` -- `\b` matchar INTE mellan `5` och `a` (bada ar `\w`)
-- `T 3535-24äktenskapsskillnad` -- `\b` matchar mellan `4` och `ä` (ä ar inte `\w`)
+## Change Browser Tab Icon and Title
 
-Darfor parsas bara forhandlingar dar saken borjar med ett icke-ASCII-tecken (a, o, a).
+### Title Change
+Update the `<title>` tag and Open Graph meta tags in `index.html` from "Lovable App" to "Tingsrattens mal".
 
-## Losning
+### Favicon Change
+Replace the current favicon with an SVG scales-of-justice icon. SVG favicons are supported by all modern browsers and allow crisp rendering at any size. The icon will use the project's primary blue color to match the Nordic theme.
 
-Lagg till ytterligare en `.replace()` i `processedLines`-preprocessningen (rad 58-60) som infogar mellanslag efter malnummermonstret nar det foljs direkt av en bokstav:
+### Technical Details
 
-```typescript
-const processedLines = lines.map(line =>
-  line
-    .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
-    .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
-);
-```
+**Files to modify:**
+- `index.html` -- Update `<title>`, `og:title`, and add an SVG favicon link
+- `public/favicon.svg` -- Create new SVG file with a scales/justice icon
 
-Den nya regexen `(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])` matchar:
-- Tva siffror, bindestreck, tva siffror (slutet av ett malnummer)
-- Direkt foljt av en bokstav (borjan av saktext)
+**Changes in `index.html`:**
+- Set `<title>` to "Tingsrattens mal"
+- Set `og:title` to "Tingsrattens mal"
+- Replace favicon reference to point to `/favicon.svg`
 
-Och infogar ett mellanslag emellan. T.ex.:
-- `K 2940-25ansökan` blir `K 2940-25 ansökan`
-- `B 1267-24misshandel` blir `B 1267-24 misshandel`
-
-Redan separerade rader paverkas inte.
-
-### Fil som andras
-- `src/lib/parseCourtPdf.ts` -- lagg till en andra `.replace()` i processedLines (rad 58-60)
