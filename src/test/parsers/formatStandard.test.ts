@@ -141,10 +141,10 @@ describe("formatStandard", () => {
     expect(result).toHaveLength(2);
     expect(result[0].date).toBe("2026-02-16");
     expect(result[0].caseNumber).toBe("B 3895-25");
-    expect(result[0].saken).toBe("grovt olaga hot m.m.");
+    expect(result[0].saken).toBe("grovt olaga hot m.m");
     expect(result[0].room).toBe("Sal 1");
     expect(result[1].caseNumber).toBe("B 1748-25");
-    expect(result[1].saken).toBe("Övergrepp i rättssak m.m.");
+    expect(result[1].saken).toBe("Övergrepp i rättssak m.m");
   });
 
   it("updates ISO date across different hearing lines", () => {
