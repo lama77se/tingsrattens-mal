@@ -912,4 +912,147 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("umgänge med barn m.m");
     expect(result[1].room).toBe("Tingssal 7");
   });
+
+  it("parses Stockholm 3-line format with all special types and PMT case numbers", () => {
+    // Actual pdf-parse structure from Stockholms tingsrätt:
+    // Line 1: day+date+time + type (possibly with (dag X/Y))
+    // Line 2: case number (possibly with court reference or "med flera")
+    // Line 3: saken + room (glued)
+    const text = [
+      "Förhandlingar i Stockholms tingsrätt, vecka 8, 2026-02-16 till och med 2026-02-20 (listan publicerad 2026-02-11).",
+      "Tingsrätten framhåller att listan är preliminär.",
+      "DatumTidMöteMålnummerSakenLokal",
+      "må  2026-02-1609:00 - 09:15   Konkursförhandling",
+      "K 21241-25",
+      "konkursSal 22",
+      "må  2026-02-1609:00 - 10:30   Muntlig förberedelse, eventuell huvudförhandling",
+      "FT 23816-25",
+      "fordranSal 25",
+      "må  2026-02-1609:00 - 16:30   Huvudförhandling (dag 4/30)",
+      "T 11073-22, T 8203-24",
+      "fastställelsetalanSal 27",
+      "ti2026-02-1709:00 - 12:00   Huvudförhandling i förenklad form",
+      "FT 21289-25",
+      "fordranSal 30",
+      "ti2026-02-1709:00 - 16:30   Huvudförhandling (dag 3/5)",
+      "PMT 12670-24, med flera",
+      "varumärkesintrång m.m.Sal 26",
+      "ti2026-02-1709:00 - 17:00   Huvudförhandling",
+      "B 6394-24 (Solna tingsrätt)",
+      "folkrättsbrott, grovt brottHögsäkerhetssal 2, Bergsgatan 50",
+      "on   2026-02-1809:00 - 09:10   Edgångssammanträde",
+      "K 5348-25",
+      "konkurs Sal 9",
+      "on   2026-02-1813:00 - 15:00   Muntlig förberedelse",
+      "T 16169-25",
+      "kontraktsrättSal 25",
+      "on   2026-02-1811:30 - 12:00   Föredragning",
+      "Ä 25040-25",
+      "prövning av tillträdesförbud",
+      "to   2026-02-1909:00 - 11:00   Muntlig förberedelse",
+      "T 19657-25",
+      "fordranSal 29",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Stockholms tingsrätt", text });
+    expect(result).toHaveLength(10);
+
+    // Konkursförhandling
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].type).toBe("Konkursförhandling");
+    expect(result[0].caseNumber).toBe("K 21241-25");
+    expect(result[0].saken).toBe("konkurs");
+    expect(result[0].room).toBe("Sal 22");
+
+    // "Muntlig förberedelse, eventuell huvudförhandling" → Muntlig förberedelse
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].caseNumber).toBe("FT 23816-25");
+    expect(result[1].saken).toBe("fordran");
+    expect(result[1].room).toBe("Sal 25");
+
+    // Multi-case with (dag 4/30) stripped
+    expect(result[2].type).toBe("Huvudförhandling");
+    expect(result[2].caseNumber).toBe("T 11073-22, T 8203-24");
+    expect(result[2].saken).toBe("fastställelsetalan");
+    expect(result[2].room).toBe("Sal 27");
+
+    // "Huvudförhandling i förenklad form" → Huvudförhandling
+    expect(result[3].date).toBe("2026-02-17");
+    expect(result[3].type).toBe("Huvudförhandling");
+    expect(result[3].caseNumber).toBe("FT 21289-25");
+    expect(result[3].saken).toBe("fordran");
+    expect(result[3].room).toBe("Sal 30");
+
+    // PMT prefix + "med flera" stripped
+    expect(result[4].type).toBe("Huvudförhandling");
+    expect(result[4].caseNumber).toBe("PMT 12670-24");
+    expect(result[4].saken).toBe("varumärkesintrång m.m");
+    expect(result[4].room).toBe("Sal 26");
+
+    // External court reference "(Solna tingsrätt)" stripped
+    expect(result[5].type).toBe("Huvudförhandling");
+    expect(result[5].caseNumber).toBe("B 6394-24");
+    expect(result[5].saken).toContain("folkrättsbrott");
+
+    // Edgångssammanträde
+    expect(result[6].date).toBe("2026-02-18");
+    expect(result[6].type).toBe("Edgångssammanträde");
+    expect(result[6].caseNumber).toBe("K 5348-25");
+    expect(result[6].saken).toBe("konkurs");
+    expect(result[6].room).toBe("Sal 9");
+
+    // Standard Muntlig förberedelse
+    expect(result[7].type).toBe("Muntlig förberedelse");
+    expect(result[7].caseNumber).toBe("T 16169-25");
+    expect(result[7].saken).toBe("kontraktsrätt");
+    expect(result[7].room).toBe("Sal 25");
+
+    // Föredragning — new type, no room
+    expect(result[8].type).toBe("Föredragning");
+    expect(result[8].caseNumber).toBe("Ä 25040-25");
+    expect(result[8].saken).toBe("prövning av tillträdesförbud");
+    expect(result[8].room).toBe("");
+
+    // Thursday standard hearing
+    expect(result[9].date).toBe("2026-02-19");
+    expect(result[9].caseNumber).toBe("T 19657-25");
+    expect(result[9].saken).toBe("fordran");
+    expect(result[9].room).toBe("Sal 29");
+  });
+
+  it("handles Stockholm typo 'huvuförhandling' and Fortsatt muntlig förberedelse", () => {
+    const text = [
+      "må  2026-02-0909:00 - 11:00   Muntlig förberedelse, eventuell huvuförhandling",
+      "T 25039-25",
+      "hyresfordranSal 1",
+      "må  2026-02-0913:00 - 15:00   Fortsatt muntlig förberedelse",
+      "T 16320-25",
+      "vårdnad m.m.Sal 15",
+      "ti2026-02-1009:00 - 11:30   Förberedande förhandling",
+      "B 14600-25",
+      "enskilt åtalSal 16",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Stockholms tingsrätt", text });
+    expect(result).toHaveLength(3);
+
+    // Typo variant "huvuförhandling" (missing 'd')
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].caseNumber).toBe("T 25039-25");
+    expect(result[0].saken).toBe("hyresfordran");
+    expect(result[0].room).toBe("Sal 1");
+
+    // "Fortsatt muntlig förberedelse" (full form, not abbreviated)
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].caseNumber).toBe("T 16320-25");
+    expect(result[1].saken).toBe("vårdnad m.m");
+    expect(result[1].room).toBe("Sal 15");
+
+    // "Förberedande förhandling" → Förhandling
+    expect(result[2].date).toBe("2026-02-10");
+    expect(result[2].type).toBe("Förhandling");
+    expect(result[2].caseNumber).toBe("B 14600-25");
+    expect(result[2].saken).toBe("enskilt åtal");
+    expect(result[2].room).toBe("Sal 16");
+  });
 });
