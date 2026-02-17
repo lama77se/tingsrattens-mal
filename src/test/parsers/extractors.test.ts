@@ -230,12 +230,11 @@ describe("preprocessLines", () => {
       "konkurs ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande",
     ].join("\n");
     const result = preprocessLines(input);
-    // "konkurs" should NOT be absorbed into the first hearing's saken
-    const konkursLine = result.find((l) => l.startsWith("konkurs"));
-    expect(konkursLine).toBeDefined();
     // The second hearing starting with "ti 2026-02-10" should be separate
     const tiLine = result.find((l) => /ti 2026-02-10/.test(l));
     expect(tiLine).toBeDefined();
+    // "konkurs" should NOT be in the ti hearing line
+    expect(tiLine).not.toContain("konkurs");
   });
 
   it("splits glued page boundary like 'Sal 7on 2026-02-18'", () => {
@@ -253,6 +252,59 @@ describe("preprocessLines", () => {
     const input = "schema-förhandlingar-vecka-8-9-2026";
     const result = preprocessLines(input);
     expect(result).toHaveLength(1);
+  });
+
+  it("splits multiple same-day hearings in field-per-line PDF", () => {
+    // Multiple hearings on same day — only first has day abbreviation + date
+    const input = [
+      "ti 2026-02-",
+      "10",
+      "09:00 -",
+      "10:00",
+      "Konkursförhandling K 5555-25",
+      "konkurs Sal 1",
+      "09:00 -",
+      "10:00",
+      "Huvudförhandling B 2752-25",
+      "ofredande Sal 5",
+      "09:00 -",
+      "16:00",
+      "Huvudförhandling T 3996-24",
+      "vårdnad Sal 3",
+    ].join("\n");
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toContain("ti 2026-02-10");
+    expect(result[0]).toContain("09:00 - 10:00");
+    expect(result[0]).toContain("konkurs");
+    expect(result[1]).toContain("09:00 - 10:00");
+    expect(result[1]).toContain("ofredande");
+    expect(result[1]).not.toContain("konkurs");
+    expect(result[2]).toContain("09:00 - 16:00");
+    expect(result[2]).toContain("vårdnad");
+  });
+
+  it("strips pagination footer from line", () => {
+    const input = "upphörande av godmanskap (återförvisat mål) 1-81 visas av 81";
+    const result = preprocessLines(input);
+    expect(result[0]).toBe("upphörande av godmanskap (återförvisat mål)");
+  });
+
+  it("passes through complete hearing lines in mixed content", () => {
+    // Mix of complete hearing lines and field-per-line entries
+    const input = [
+      "to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 stöld Sal 3",
+      "ti 2026-02-",
+      "10",
+      "09:00 -",
+      "10:00",
+      "Huvudförhandling B 2752-25",
+      "ofredande Sal 5",
+    ].join("\n");
+    const result = preprocessLines(input);
+    // Complete line passes through, field-per-line gets reconstructed
+    expect(result.find((l) => /to 2026-02-12.*stöld/.test(l))).toBeDefined();
+    expect(result.find((l) => /ti 2026-02-10.*ofredande/.test(l))).toBeDefined();
   });
 });
 
