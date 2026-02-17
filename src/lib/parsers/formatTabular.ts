@@ -186,14 +186,16 @@ export const formatTabular: ParserStrategy = {
       // Extract hearing type from the text after the time range
       const { type, remainder } = extractTypeFromText(rest);
 
-      // Extract case number if present at start of remainder
-      let caseNumber = "";
+      // Extract case number(s) if present at start of remainder
+      const caseNumbers: string[] = [];
       let afterCase = remainder;
-      const caseMatch = remainder.match(CASE_AT_START_REGEX);
-      if (caseMatch) {
-        caseNumber = caseMatch[1];
-        afterCase = remainder.substring(caseMatch[0].length).trim();
+      let caseMatch = afterCase.match(CASE_AT_START_REGEX);
+      while (caseMatch) {
+        caseNumbers.push(caseMatch[1]);
+        afterCase = afterCase.substring(caseMatch[0].length).trim();
+        caseMatch = afterCase.match(CASE_AT_START_REGEX);
       }
+      const caseNumber = caseNumbers.join(", ");
 
       // Extract room and saken from the text after type (and case number)
       let room = extractRoomFromText(afterCase);
