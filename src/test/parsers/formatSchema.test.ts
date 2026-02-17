@@ -301,6 +301,75 @@ describe("formatSchema", () => {
     expect(result[1].type).toBe("Konkursförhandling");
   });
 
+  it("parses Malmö-style bare room lines", () => {
+    const text = [
+      "Fredag 13 februari 2026",
+      "kl. 09:00 - 09:30",
+      "Sal 09",
+      "B 737-26, Huvudförhandling",
+      "angående olovlig körning",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 09");
+    expect(result[0].caseNumber).toBe("B 737-26");
+    expect(result[0].saken).toBe("olovlig körning");
+    expect(result[0].location).toBe("");
+  });
+
+  it("handles Malmö room with annotation (säkerhetssal)", () => {
+    const text = [
+      "Måndag 16 februari 2026",
+      "kl. 09:00 - 16:30",
+      "Sal 10 (säkerhetssal)",
+      "B 9174-25, Huvudförhandling, Dag 2 av 6",
+      "angående grov kvinnofridskränkning och grov misshandel",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 10");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("grov kvinnofridskränkning och grov misshandel");
+  });
+
+  it("handles 'ngående' typo (missing leading 'a')", () => {
+    const text = [
+      "Fredag 13 februari 2026",
+      "kl. 13:00 - 16:00",
+      "Sal 18",
+      "B 13826-24, Huvudförhandling",
+      "ngående grovt olaga hot och ringa narkotikabrott",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].saken).toBe("grovt olaga hot och ringa narkotikabrott");
+  });
+
+  it("parses multiple Malmö hearings across page break", () => {
+    const text = [
+      "Måndag 16 februari 2026",
+      "kl. 15:30 - 16:00",
+      "Sal 17",
+      "B 13832-25, Huvudförhandling",
+      "angående smuggling av explosiv vara",
+      "MALMÖ TINGSRÄTT Sida 3(8)",
+      "kl. 13:00 - 13:45",
+      "Sal 17",
+      "B 689-26, Huvudförhandling",
+      "angående vårdslöshet i trafik",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("smuggling av explosiv vara");
+    expect(result[0].room).toBe("Sal 17");
+    expect(result[1].saken).toBe("vårdslöshet i trafik");
+    expect(result[1].room).toBe("Sal 17");
+  });
+
   it("does not split on case number references inside parentheses", () => {
     const text = [
       "Tisdag 24 februari 2026",
