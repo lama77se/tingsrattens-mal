@@ -243,8 +243,23 @@ export const COURTS: CourtConfig[] = [
     ],
   },
   {
+    id: "malmo_tingsratt",
+    name: "Malmö tingsrätt",
+    formatFamily: "schema",
+    buildUrl: (week) =>
+      `${BASE}/malmo_tingsratt/veckans_forhandlingar/forhandlingar-vecka-${week}.pdf`,
+  },
+  {
     id: "lulea_tingsratt",
     name: "Luleå tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "lycksele_tingsratt",
+    name: "Lycksele tingsrätt",
     formatFamily: "standard",
     disabled: true,
     note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
