@@ -586,6 +586,50 @@ describe("formatTabular", () => {
     expect(result[2].room).toBe("Sal 6");
   });
 
+  it("parses field-per-line PDF output (Norrköping bi-weekly)", () => {
+    const text = [
+      "må 2026-02-",
+      "16",
+      "09:00 -",
+      "16:00",
+      "Huvudförhandling B 1795-25",
+      "",
+      " misshandel m m Sal 3",
+      "må 2026-02-",
+      "16",
+      "(dag 1/2)",
+      "09:00 -",
+      "16:00",
+      "Huvudförhandling B 3905-25",
+      "",
+      " misshandel m.m. Sal 4",
+      "ti 2026-02-",
+      "17",
+      "09:00 -",
+      "12:00",
+      "Huvudförhandling T 2784-25",
+      "T 1811-25",
+      "T 452-26",
+      " överflyttande av vårdnad Sal 6",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(3);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].time).toBe("09:00 - 16:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 1795-25");
+    expect(result[0].saken).toBe("misshandel m m");
+    expect(result[0].room).toBe("Sal 3");
+    expect(result[1].caseNumber).toBe("B 3905-25");
+    expect(result[1].saken).toBe("misshandel m.m");
+    expect(result[1].room).toBe("Sal 4");
+    expect(result[2].date).toBe("2026-02-17");
+    expect(result[2].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result[2].saken).toBe("överflyttande av vårdnad");
+    expect(result[2].room).toBe("Sal 6");
+  });
+
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
       "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",

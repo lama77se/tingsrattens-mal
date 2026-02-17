@@ -141,6 +141,60 @@ describe("preprocessLines", () => {
     expect(preprocessLines("to 2026\u201302\u201319 09:00")).toEqual(["to 2026-02-19 09:00"]);
   });
 
+  it("rejoins split ISO date across lines", () => {
+    const result = preprocessLines("må 2026-02-\n16");
+    expect(result).toEqual(["må 2026-02-16"]);
+  });
+
+  it("rejoins split time range across lines", () => {
+    const result = preprocessLines("09:00 -\n16:00");
+    expect(result).toEqual(["09:00 - 16:00"]);
+  });
+
+  it("reconstructs field-per-line hearings into single lines", () => {
+    const input = [
+      "må 2026-02-",
+      "16",
+      "09:00 -",
+      "16:00",
+      "Huvudförhandling B 1795-25",
+      "misshandel m m Sal 3",
+      "ti 2026-02-",
+      "17",
+      "09:00 -",
+      "11:30",
+      "Huvudförhandling B 4350-25",
+      "grovt djurplågeri Sal 7",
+    ].join("\n");
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toBe("må 2026-02-16 09:00 - 16:00 Huvudförhandling B 1795-25 misshandel m m Sal 3");
+    expect(result[1]).toBe("ti 2026-02-17 09:00 - 11:30 Huvudförhandling B 4350-25 grovt djurplågeri Sal 7");
+  });
+
+  it("reconstructs field-per-line with (dag X/Y)", () => {
+    const input = [
+      "må 2026-02-",
+      "16",
+      "(dag 1/2)",
+      "09:00 -",
+      "16:00",
+      "Huvudförhandling B 3905-25",
+      "misshandel m.m. Sal 4",
+    ].join("\n");
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+    // (dag X/Y) is stripped by per-line transform
+    expect(result[0]).toBe("må 2026-02-16 09:00 - 16:00 Huvudförhandling B 3905-25 misshandel m.m. Sal 4");
+  });
+
+  it("skips reconstruction when lines already have complete hearing patterns", () => {
+    const input = "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 1795-25 misshandel m m Sal 3";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(input);
+  });
+
   it("splits concatenated hearings at page boundaries", () => {
     const input = "häleri Sal 3 to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 stöld";
     const result = preprocessLines(input);
