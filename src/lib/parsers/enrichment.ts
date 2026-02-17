@@ -19,6 +19,11 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
     }
   }
 
+  // External court using this court's facilities (e.g. Solna tingsrätt heard at Stockholm)
+  if (raw.externalCourt) {
+    resolvedCourt = `${raw.externalCourt} (plats: ${courtName})`;
+  }
+
   // Detect another court in saken: "Uppsala tingsrätt - mord m.m."
   const courtInSaken = saken.match(COURT_IN_SAKEN_REGEX);
   if (courtInSaken) {
