@@ -234,6 +234,23 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/linkopings_tingsratt/veckans-forhandlingar/v${week}.pdf`,
   },
   {
+    id: "lunds_tingsratt",
+    name: "Lunds tingsrätt",
+    formatFamily: "schema",
+    buildUrl: (week) => [
+      `${BASE}/lunds_tingsratt/veckans-forhandlingar/vecka-${week}.pdf`,
+      `${BASE}/lunds_tingsratt/veckans-forhandlingar/vecka-${String(week).padStart(2, "0")}.pdf`,
+    ],
+  },
+  {
+    id: "lulea_tingsratt",
+    name: "Luleå tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
     id: "kalmar_tingsratt",
     name: "Kalmar tingsrätt",
     formatFamily: "standard",

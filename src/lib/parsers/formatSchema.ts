@@ -35,7 +35,7 @@ export const formatSchema: ParserStrategy = {
       .map((l) => l.trim())
       .filter(Boolean)
       // Normalize case number spaces: "B 784 -25" → "B 784-25"
-      .map((l) => l.replace(/([TBFTKÄ]\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2"));
+      .map((l) => l.replace(/((?:FT|[TBK\u00c4])\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2"));
 
     const hearings: RawHearing[] = [];
     let currentDate = "";
@@ -100,11 +100,14 @@ export const formatSchema: ParserStrategy = {
       if (angMatch) {
         const angText = angMatch[1];
         const embeddedCase = angText.match(CASE_NUMBER_REGEX);
-        // Case numbers inside parentheses are references, not separate cases
-        // e.g. "undanröjande av ungdomstjänst (B 512-25)"
-        const isReference = embeddedCase &&
+        // Case numbers that are references (not separate cases):
+        // 1. Inside parentheses: "undanröjande av ungdomstjänst (B 512-25)"
+        // 2. At end with no description after: "återvinning av tredskodom FT 5619-25"
+        const isParenRef = embeddedCase &&
           /\(\s*$/.test(angText.substring(0, angText.indexOf(embeddedCase[0])));
-        if (embeddedCase && !isReference) {
+        const isTrailingRef = embeddedCase &&
+          !angText.substring(angText.indexOf(embeddedCase[0]) + embeddedCase[0].length).replace(/^[\s,]+/, "").trim();
+        if (embeddedCase && !isParenRef && !isTrailingRef) {
           // Text before the embedded case number is saken for the current hearing
           const beforeCase = angText.substring(0, angText.indexOf(embeddedCase[0])).replace(/[,\s]+$/, "").trim();
           if (beforeCase) sakenParts = [beforeCase];
@@ -123,8 +126,10 @@ export const formatSchema: ParserStrategy = {
       }
 
       // Case number line: "B 784-25, Huvudförhandling"
+      // Only match when case number is at start of line — mid-line references
+      // (e.g. "återvinning av tredskodom i T 5137-25") are continuation text
       const caseMatch = line.match(CASE_NUMBER_REGEX);
-      if (caseMatch) {
+      if (caseMatch && caseMatch.index === 0) {
         flush();
         currentCaseNumber = caseMatch[1];
 
