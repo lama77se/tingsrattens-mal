@@ -537,6 +537,55 @@ describe("formatTabular", () => {
     expect(result[4].saken).toBe("skadegörelse m m");
   });
 
+  it("splits concatenated hearings at page boundaries", () => {
+    const text = "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 1795-25 misshandel m m Sal 3 to 2026-02-19 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6";
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("B 1795-25");
+    expect(result[0].saken).toBe("misshandel m m");
+    expect(result[0].room).toBe("Sal 3");
+    expect(result[1].caseNumber).toBe("B 199-26");
+    expect(result[1].saken).toBe("ringa stöld");
+    expect(result[1].room).toBe("Sal 6");
+  });
+
+  it("handles en-dash dates from PDF encoding", () => {
+    const text = "to 2026\u201302\u201319 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6";
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-19");
+    expect(result[0].caseNumber).toBe("B 199-26");
+    expect(result[0].saken).toBe("ringa stöld");
+  });
+
+  it("handles slash-separated case numbers", () => {
+    const text = "ti 2026-02-17 09:00 - 12:00 Huvudförhandling T 2784-25 / T 1811-25 / T 452-26 överflyttande av vårdnad Sal 6";
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result[0].saken).toBe("överflyttande av vårdnad");
+    expect(result[0].room).toBe("Sal 6");
+  });
+
+  it("handles multi-hearing page boundary with continuation saken", () => {
+    const text = [
+      "to 2026-02-12 08:00 - 09:00 Huvudförhandling B 4536-25",
+      "häleri Sal 7 to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 3 to 2026-02-12 09:00 - 10:30 Huvudförhandling B 4227-25 olaga hot Sal 6",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    // First hearing picks up "häleri" via continuation, then 2 split hearings = 3 total
+    expect(result).toHaveLength(3);
+    expect(result[0].caseNumber).toBe("B 4536-25");
+    expect(result[0].saken).toBe("häleri");
+    expect(result[0].room).toBe("Sal 7");
+    expect(result[1].caseNumber).toBe("B 5119-25");
+    expect(result[1].saken).toBe("brott mot lagen om förbud beträffande knivar och andra farliga föremål");
+    expect(result[1].room).toBe("Sal 3");
+    expect(result[2].caseNumber).toBe("B 4227-25");
+    expect(result[2].saken).toBe("olaga hot");
+    expect(result[2].room).toBe("Sal 6");
+  });
+
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
       "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",
