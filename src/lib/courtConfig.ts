@@ -58,6 +58,18 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/solna_tingsratt/veckans-forhandlingar/v${week}.${year}.pdf`,
   },
   {
+    id: "stockholms_tingsratt",
+    name: "Stockholms tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week, year) => {
+      const monday = getISOWeekMonday(week, year);
+      const friday = addDays(monday, 4);
+      const monStr = format(monday, "yyyy-MM-dd");
+      const friStr = format(friday, "yyyy-MM-dd");
+      return `${BASE}/stockholms_tingsratt/forhandlingar-${year}/forhandlingar-i-stockholms-tingsratt-vecka-${week}-${monStr}-till-och-med-${friStr}.pdf`;
+    },
+  },
+  {
     id: "skaraborgs_tingsratt",
     name: "Skaraborgs tingsrätt",
     formatFamily: "tabular",
@@ -318,6 +330,14 @@ export const COURTS: CourtConfig[] = [
   {
     id: "gotlands_tingsratt",
     name: "Gotlands tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "skelleftea_tingsratt",
+    name: "Skellefteå tingsrätt",
     formatFamily: "standard",
     disabled: true,
     note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",

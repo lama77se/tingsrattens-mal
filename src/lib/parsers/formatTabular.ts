@@ -9,7 +9,7 @@ import {
 /**
  * Regex matching a case number at the start of text (B, T, FT, K, Ä prefixes).
  */
-const CASE_AT_START_REGEX = /^((?:FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
+const CASE_AT_START_REGEX = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
 
 /**
  * Regex matching a hearing line: YYYY-MM-DD HH:MM - HH:MM <rest>
@@ -46,6 +46,12 @@ const DAY_ABBREV_REGEX = /^(m[åaö]|ti|on|to|fr|lö|sö)$/i;
  * Aliases mapping non-standard hearing type names to canonical types.
  */
 const TYPE_ALIASES: Record<string, string> = {
+  "muntlig förberedelse, eventuell huvudförhandling": "Muntlig förberedelse",
+  "muntlig förberedelse, eventuell huvuförhandling": "Muntlig förberedelse",
+  "huvudförhandling i förenklad form": "Huvudförhandling",
+  "fortsatt muntlig förberedelse": "Muntlig förberedelse",
+  "förberedande förhandling": "Förhandling",
+  "annan förhandling": "Förhandling",
   "fortsatt hf": "Huvudförhandling",
   "hf i förenklad form": "Huvudförhandling",
   "fortsatt muntlig förb": "Muntlig förberedelse",
@@ -205,6 +211,10 @@ export const formatTabular: ParserStrategy = {
         caseMatch = afterCase.match(CASE_AT_START_REGEX);
       }
       const caseNumber = caseNumbers.join(", ");
+
+      // Strip court references "(X tingsrätt)" and "med flera" after case numbers
+      afterCase = afterCase.replace(/^\([^)]*(?:tingsrätt|tingsratt)\)\s*/i, "");
+      afterCase = afterCase.replace(/^med\s+flera\s*/i, "");
 
       // Extract room and saken from the text after type (and case number)
       let room = extractRoomFromText(afterCase);
