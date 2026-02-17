@@ -464,6 +464,64 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("Utmätning av lös egendom");
   });
 
+  it("handles Norrköping (dag X/Y) between date and time", () => {
+    const text = [
+      "må 2026-02-16 (dag 1/2)    09:00 - 16:00    Huvudförhandling    B 3905-25    misshandel m.m.    Sal 4",
+      "ti 2026-02-17 (dag 2/2)    09:00 - 16:00    Huvudförhandling    B 3905-25    misshandel m.m.    Sal 4",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].time).toBe("09:00 - 16:00");
+    expect(result[0].caseNumber).toBe("B 3905-25");
+    expect(result[0].saken).toBe("misshandel m.m");
+    expect(result[0].room).toBe("Sal 4");
+    expect(result[1].date).toBe("2026-02-17");
+  });
+
+  it("handles multiple case numbers on one line (Norrköping)", () => {
+    const text = "ti 2026-02-17    09:00 - 12:00    Huvudförhandling    T 2784-25 T 1811-25 T 452-26    överflyttande av vårdnad    Sal 6";
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result[0].saken).toBe("överflyttande av vårdnad");
+    expect(result[0].room).toBe("Sal 6");
+  });
+
+  it("parses Bevisupptagning hearing type", () => {
+    const text = "må 2026-02-09  10:00 - 10:30  Bevisupptagning        B 4086-25   djurplågeri                                     Sal 3";
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Bevisupptagning");
+    expect(result[0].caseNumber).toBe("B 4086-25");
+    expect(result[0].saken).toBe("djurplågeri");
+  });
+
+  it("parses Norrköping full week with mixed types", () => {
+    const text = [
+      "må 2026-02-09  09:00 - 12:00  Huvudförhandling       B 1975-25   talan om självständigt förverkande              Sal 6",
+      "må 2026-02-09  10:00 - 10:20  Edgångssmtr            K 4290-25   konkurs                                         Sal 10",
+      "ti 2026-02-10  10:00 - 12:00  Muntlig förberedelse   FT 4966-25  fordran (överlämnat från KFM)                   Sal 1",
+      "on 2026-02-11  09:00 - 16:00  Huvudförhandling (dag 1/2)  B 3604-25   olaga förföljelse, olaga hot               Sal 8",
+      "fr 2026-02-13  13:00 - 14:00  Fortsatt hf            B 457-25    skadegörelse m m                                Sal 3",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(5);
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 1975-25");
+    expect(result[0].saken).toBe("talan om självständigt förverkande");
+    expect(result[1].type).toBe("Edgångssammanträde");
+    expect(result[1].caseNumber).toBe("K 4290-25");
+    expect(result[2].caseNumber).toBe("FT 4966-25");
+    expect(result[2].saken).toBe("fordran (överlämnat från KFM)");
+    expect(result[3].type).toBe("Huvudförhandling");
+    expect(result[3].saken).toBe("olaga förföljelse, olaga hot");
+    expect(result[4].type).toBe("Huvudförhandling");
+    expect(result[4].saken).toBe("skadegörelse m m");
+  });
+
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
       "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",
