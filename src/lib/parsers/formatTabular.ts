@@ -47,9 +47,11 @@ const DAY_ABBREV_REGEX = /^(m[åaö]|ti|on|to|fr|lö|sö)$/i;
  */
 const TYPE_ALIASES: Record<string, string> = {
   "fortsatt hf": "Huvudförhandling",
+  "hf i förenklad form": "Huvudförhandling",
   "fortsatt muntlig förb": "Muntlig förberedelse",
   "muntlig förberedelse och ev hf": "Muntlig förberedelse",
   "edgångssmtr": "Edgångssammanträde",
+  "förlikningssmtr": "Förlikningssammanträde",
 };
 
 // Pre-sorted aliases longest first for correct prefix matching
