@@ -766,4 +766,77 @@ describe("formatTabular", () => {
     expect(result[3].type).toBe("Muntlig förberedelse");
     expect(result[3].saken).toBe("vårdnad");
   });
+
+  it("parses Nyköping-style with Tingssal rooms and split room numbers", () => {
+    const text = [
+      "må 2026-02-09 09:00 - 10:30 Huvudförhandling B 4819-25",
+      "",
+      "ringa stöld Tingssal",
+      "5",
+      "må 2026-02-09 10:00 - 12:00 Förlikningssmtr K 1470-25",
+      "",
+      "ansökan om konkurs Tingssal",
+      "6",
+      "må 2026-02-09 13:00 - 14:00 Fortsatt hf B 4165-25",
+      "B 4675-25",
+      "misshandel Tingssal",
+      "1",
+      "Dag Datum Tid Mötestyp Målnummer Saken Lokal",
+      "ti 2026-02-10 10:00 - 12:00 Muntlig förberedelse FT 4566-25",
+      "",
+      "fordran Tingssal",
+      "6",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Nyköpings tingsrätt", text });
+    expect(result).toHaveLength(4);
+
+    expect(result[0].caseNumber).toBe("B 4819-25");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("ringa stöld");
+    expect(result[0].room).toBe("Tingssal 5");
+
+    expect(result[1].caseNumber).toBe("K 1470-25");
+    expect(result[1].type).toBe("Förlikningssammanträde");
+    expect(result[1].saken).toBe("ansökan om konkurs");
+    expect(result[1].room).toBe("Tingssal 6");
+
+    expect(result[2].caseNumber).toBe("B 4165-25, B 4675-25");
+    expect(result[2].type).toBe("Huvudförhandling");
+    expect(result[2].saken).toBe("misshandel");
+    expect(result[2].room).toBe("Tingssal 1");
+
+    expect(result[3].caseNumber).toBe("FT 4566-25");
+    expect(result[3].type).toBe("Muntlig förberedelse");
+    expect(result[3].saken).toBe("fordran");
+    expect(result[3].room).toBe("Tingssal 6");
+  });
+
+  it("parses Nyköping multi-line saken with (dag X/Y)", () => {
+    const text = [
+      "on 2026-02-11",
+      "(dag 1/3)",
+      "09:00 - 16:00 Huvudförhandling T 1157-24",
+      "",
+      "fordran Tingssal",
+      "3",
+      "on 2026-02-11 09:15 - 12:00 Muntlig förberedelse T 4288-25",
+      "",
+      "umgänge med barn m.m Tingssal",
+      "7",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Nyköpings tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].date).toBe("2026-02-11");
+    expect(result[0].caseNumber).toBe("T 1157-24");
+    expect(result[0].saken).toBe("fordran");
+    expect(result[0].room).toBe("Tingssal 3");
+
+    expect(result[1].caseNumber).toBe("T 4288-25");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].saken).toBe("umgänge med barn m.m");
+    expect(result[1].room).toBe("Tingssal 7");
+  });
 });

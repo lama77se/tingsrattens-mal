@@ -149,22 +149,32 @@ export function preprocessLines(text: string): string[] {
   const COMPLETE_HEARING_RE = /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const TIME_RANGE_RE = /^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const HAS_TIME_RE = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
+  // Page headers that appear at page boundaries — flush buffer and discard
+  const PAGE_HEADER_RE = /^(uppropslista|dag\s*datum|datum\s+tid|förhandlingar i|listan\s)/i;
+
+  // A line ending with a room (Sal/Tingssal + number) is truly complete.
+  const ENDS_WITH_ROOM_RE = /(?:Tings)?[Ss]al\s+\S+\s*$/;
 
   const hearingJoined: string[] = [];
   let buffer = "";
   for (const line of pageSplit) {
+    if (PAGE_HEADER_RE.test(line)) {
+      // Page header — flush buffer (don't include header in output)
+      if (buffer) { hearingJoined.push(buffer); buffer = ""; }
+      continue;
+    }
     if (DAY_DATE_RE.test(line)) {
-      // Day abbreviation + date line.  Determine whether the hearing type/saken
-      // are on THIS line (truly complete — push directly) or on subsequent lines
-      // (needs buffering).  Check by looking for content after the time range.
+      // Day abbreviation + date line.  Determine whether the hearing is fully
+      // contained on THIS line (push directly) or continues on subsequent lines
+      // (buffer to accumulate).  A line ending with a room is truly self-contained;
+      // otherwise, saken/room/extra case numbers may follow on subsequent lines.
       const cm = line.match(COMPLETE_HEARING_RE);
-      const afterTime = cm ? line.substring(cm.index! + cm[0].length).trim() : "";
-      if (cm && afterTime.length > 0) {
-        // Has content after date+time (e.g., type, saken) — truly complete
+      if (cm && ENDS_WITH_ROOM_RE.test(line)) {
+        // Has date+time AND ends with room — truly complete, push directly
         if (buffer) { hearingJoined.push(buffer); buffer = ""; }
         hearingJoined.push(line);
       } else {
-        // Day+date only, or day+date+time without content — buffer for accumulation
+        // Needs accumulation (no room at end, or no time yet)
         if (buffer) hearingJoined.push(buffer);
         buffer = line;
       }
