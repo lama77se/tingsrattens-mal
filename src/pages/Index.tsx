@@ -9,6 +9,7 @@ const Index = () => {
   const [hearings, setHearings] = useState<Hearing[]>([]);
   const [activeTab, setActiveTab] = useState("hearings");
   const [fetchAllTrigger, setFetchAllTrigger] = useState(0);
+  const [isLoadingAll, setIsLoadingAll] = useState(false);
 
   const handleFetchAll = useCallback(() => {
     setFetchAllTrigger((n) => n + 1);
@@ -44,11 +45,11 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="hearings">
-            <HearingsTab hearings={hearings} onFetchAll={handleFetchAll} />
+            <HearingsTab hearings={hearings} onFetchAll={handleFetchAll} isLoadingAll={isLoadingAll} />
           </TabsContent>
 
           <TabsContent value="loading">
-            <DataLoadingTab onHearingsFetched={setHearings} fetchAllTrigger={fetchAllTrigger} />
+            <DataLoadingTab onHearingsFetched={setHearings} fetchAllTrigger={fetchAllTrigger} onLoadingChange={setIsLoadingAll} />
           </TabsContent>
         </Tabs>
       </main>

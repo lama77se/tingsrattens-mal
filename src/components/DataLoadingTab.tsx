@@ -26,6 +26,7 @@ interface WeekFetch {
 interface DataLoadingTabProps {
   onHearingsFetched: (hearings: Hearing[]) => void;
   fetchAllTrigger?: number;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
 const STEP_LABELS = ["Beräknar URL", "Hämtar PDF", "Bearbetar", "Klar"];
@@ -71,7 +72,7 @@ function initAllCourts(): CourtWeeksState {
   return state;
 }
 
-export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger }: DataLoadingTabProps) {
+export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onLoadingChange }: DataLoadingTabProps) {
   const [courtWeeks, setCourtWeeks] = useState<CourtWeeksState>(initAllCourts);
   const [fetchingCourts, setFetchingCourts] = useState<Set<string>>(new Set());
   const [isFetchingAll, setIsFetchingAll] = useState(false);
@@ -248,6 +249,10 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger }: D
   };
 
   const anyFetching = isFetchingAll || fetchingCourts.size > 0;
+
+  useEffect(() => {
+    onLoadingChange?.(anyFetching);
+  }, [anyFetching, onLoadingChange]);
 
   // Allow external trigger (e.g. from HearingsTab empty state)
   useEffect(() => {
