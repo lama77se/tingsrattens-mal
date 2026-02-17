@@ -99,11 +99,27 @@ export function extractSwedishDate(line: string): string | null {
  * Pre-process PDF text into clean, trimmed, non-empty lines with case number prefix fixes.
  */
 export function preprocessLines(text: string): string[] {
-  return text
+  const rawLines = text
     .split("\n")
     .map((l) => l.trim())
-    .filter(Boolean)
-    .map((line) =>
+    .filter(Boolean);
+
+  // Re-join bare room numbers split across lines at page boundaries:
+  // "...Sal" + "10" → "...Sal 10"
+  const joined: string[] = [];
+  for (const line of rawLines) {
+    if (
+      /^\d{1,3}$/.test(line) &&
+      joined.length > 0 &&
+      /(?:Tings)?[Ss]al\s*$/i.test(joined[joined.length - 1])
+    ) {
+      joined[joined.length - 1] += " " + line;
+    } else {
+      joined.push(line);
+    }
+  }
+
+  return joined.map((line) =>
       line
         // pdf-parse gluing fixes: insert spaces at known boundaries
         // Day abbreviation glued to date: to2026 → to 2026, ma16 → ma 16

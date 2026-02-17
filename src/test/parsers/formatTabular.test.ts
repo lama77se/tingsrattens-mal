@@ -498,6 +498,21 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("djurplågeri");
   });
 
+  it("handles room number split across page boundary", () => {
+    const text = [
+      "må 2026-02-09  10:20 - 10:40  Edgångssmtr            K 3637-25   ansökan om konkurs                              Sal",
+      "10",
+      "må 2026-02-09  10:40 - 11:00  Edgångssmtr            K 4787-25   konkurs                                         Sal 10",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("ansökan om konkurs");
+    expect(result[0].room).toBe("Sal 10");
+    expect(result[1].saken).toBe("konkurs");
+    expect(result[1].room).toBe("Sal 10");
+  });
+
   it("parses Norrköping full week with mixed types", () => {
     const text = [
       "må 2026-02-09  09:00 - 12:00  Huvudförhandling       B 1975-25   talan om självständigt förverkande              Sal 6",
