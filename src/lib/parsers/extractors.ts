@@ -139,9 +139,12 @@ export function preprocessLines(text: string): string[] {
   }
 
   // Phase 2: Rejoin hearing fields split across lines (field-per-line PDF structure).
-  // Handles both complete hearing lines (pass through) and field-per-line entries.
-  // Starts a new buffer at: day+date lines, or time-range lines when buffer already has a time.
-  // This correctly splits multiple hearings on the same day (only first has day abbreviation).
+  // DAY_DATE_RE is checked BEFORE COMPLETE_HEARING_RE because Phase 1 can join
+  // day+date+time onto one line (e.g., "ti 2026-02-10 09:00 - 10:00") while the
+  // hearing type and saken remain on subsequent lines.  Pushing such a line directly
+  // would orphan those fields; using a buffer accumulates them correctly.
+  // Lines matching COMPLETE_HEARING_RE without a day abbreviation (e.g., from Phase 4
+  // transforms) are still pushed directly since they lack subsequent field lines.
   const DAY_DATE_RE = /^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}[-–—]\d{2}[-–—]\d{2}/i;
   const COMPLETE_HEARING_RE = /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const TIME_RANGE_RE = /^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
@@ -150,14 +153,25 @@ export function preprocessLines(text: string): string[] {
   const hearingJoined: string[] = [];
   let buffer = "";
   for (const line of pageSplit) {
-    if (COMPLETE_HEARING_RE.test(line)) {
-      // Line already has date + time range — output directly
+    if (DAY_DATE_RE.test(line)) {
+      // Day abbreviation + date line.  Determine whether the hearing type/saken
+      // are on THIS line (truly complete — push directly) or on subsequent lines
+      // (needs buffering).  Check by looking for content after the time range.
+      const cm = line.match(COMPLETE_HEARING_RE);
+      const afterTime = cm ? line.substring(cm.index! + cm[0].length).trim() : "";
+      if (cm && afterTime.length > 0) {
+        // Has content after date+time (e.g., type, saken) — truly complete
+        if (buffer) { hearingJoined.push(buffer); buffer = ""; }
+        hearingJoined.push(line);
+      } else {
+        // Day+date only, or day+date+time without content — buffer for accumulation
+        if (buffer) hearingJoined.push(buffer);
+        buffer = line;
+      }
+    } else if (COMPLETE_HEARING_RE.test(line)) {
+      // Date + time without day abbreviation — self-contained, output directly
       if (buffer) { hearingJoined.push(buffer); buffer = ""; }
       hearingJoined.push(line);
-    } else if (DAY_DATE_RE.test(line)) {
-      // New day+date — start new buffer
-      if (buffer) hearingJoined.push(buffer);
-      buffer = line;
     } else if (TIME_RANGE_RE.test(line) && buffer && HAS_TIME_RE.test(buffer)) {
       // Time range but buffer already has one — new hearing on same day
       hearingJoined.push(buffer);
