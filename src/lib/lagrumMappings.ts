@@ -236,6 +236,14 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["BrB 17 kap. 10 §"],
   },
+  "mened": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 1 §"],
+  },
+  "grov mened": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 2 §"],
+  },
   "olovligt förfogande": {
     sakomrade: "Förmögenhetsbrott",
     primart_lagrum: ["BrB 10 kap. 4 §"],
@@ -301,6 +309,18 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 13 §"],
     kommentar: "Avser underlåtenhet att följa föreläggande eller förbud som meddelats av myndighet och som är straffsanktionerat.",
+  },
+  "föregivande av allmän ställning": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 15 §"],
+  },
+  "tjänstefel": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 20 kap. 1 §"],
+  },
+  "grovt tjänstefel": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 20 kap. 1 §"],
   },
   "grov fridskränkning": {
     sakomrade: "Brott mot frihet och frid",
@@ -682,6 +702,30 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Straffprocessuella frågor",
     primart_lagrum: ["RB 47 kap."],
     kommentar: "Avser processformen där målsäganden själv väcker åtal. Inte ett materiellt brott.",
+  },
+  "grovt insiderbrott": {
+    sakomrade: "Marknadsmissbruksbrott / ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2016:1307) om straff för marknadsmissbruk på värdepappersmarknaden 2 kap. 2 §"],
+    kommentar: "Insiderbrott regleras i marknadsmissbrukslagen, inte i BrB.",
+  },
+  "märkesförfalskning": {
+    sakomrade: "Varumärkes- och känneteckensbrott",
+    primart_lagrum: ["BrB 14 kap. 7 §"],
+    kommentar: "Avser förfalskning eller obehörigt bruk av annans varumärke eller kännetecken.",
+  },
+  "förargelseväckande beteende": {
+    sakomrade: "Ordningsbrott",
+    primart_lagrum: ["BrB 16 kap. 16 §"],
+  },
+  "vårdslöshet i sjötrafik, grovt brott": {
+    sakomrade: "Trafikbrott (sjötrafik)",
+    primart_lagrum: ["Lag (1951:649) om straff för vissa trafikbrott 2 §"],
+    kommentar: "Sjötrafikbrott regleras i samma lag som vägtrafikbrott; graden avgörs enligt lagens bestämmelser.",
+  },
+  "brott mot taxitrafiklagen": {
+    sakomrade: "Trafik- och näringsregleringsbrott",
+    primart_lagrum: ["Taxitrafiklagen (2012:211) 5 kap."],
+    kommentar: "Exakt paragraf beror på överträdelsens art (tillstånd, legitimation m.m.).",
   },
 };
 
