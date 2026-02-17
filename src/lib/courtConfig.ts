@@ -259,6 +259,16 @@ export const COURTS: CourtConfig[] = [
     ],
   },
   {
+    id: "norrkopings_tingsratt",
+    name: "Norrköpings tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week, year) => [
+      `${BASE}/norrkopings_tingsratt/veckans_forhandlingar/schema-forhandlingar-vecka-${week}-${year}.pdf`,
+      `${BASE}/norrkopings_tingsratt/veckans_forhandlingar/schema-forhandlingar-vecka-${week}-${week + 1}-${year}.pdf`,
+      `${BASE}/norrkopings_tingsratt/veckans_forhandlingar/schema-forhandlingar-vecka-${week - 1}-${week}-${year}.pdf`,
+    ],
+  },
+  {
     id: "nacka_tingsratt",
     name: "Nacka tingsrätt",
     formatFamily: "tabular",
