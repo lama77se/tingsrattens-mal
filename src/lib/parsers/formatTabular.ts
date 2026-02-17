@@ -193,6 +193,8 @@ export const formatTabular: ParserStrategy = {
       while (caseMatch) {
         caseNumbers.push(caseMatch[1]);
         afterCase = afterCase.substring(caseMatch[0].length).trim();
+        // Strip slash or comma separator between multiple case numbers
+        afterCase = afterCase.replace(/^[/,]\s*/, "");
         caseMatch = afterCase.match(CASE_AT_START_REGEX);
       }
       const caseNumber = caseNumbers.join(", ");
