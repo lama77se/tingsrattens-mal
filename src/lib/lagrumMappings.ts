@@ -650,6 +650,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 6 kap. 8 §"],
     alternativa_lagrum: ["BrB 6 kap. 8 § (grovt brott)"],
   },
+  "enskilt åtal": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["RB 47 kap."],
+    kommentar: "Avser processformen där målsäganden själv väcker åtal. Inte ett materiellt brott.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"

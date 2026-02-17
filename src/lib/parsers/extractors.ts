@@ -122,20 +122,36 @@ export function preprocessLines(text: string): string[] {
     }
   }
 
+  // Phase 1.5: Split page boundary concatenations within lines.
+  // pdf-parse can join content across page breaks without newlines, producing lines like
+  // "konkurs Sal 1ti 2026-02-10" or "narkotikabrott on 2026-02-11 09:00..."
+  // Split before embedded day-abbreviation + date patterns (only when preceded by non-letter).
+  const pageSplit: string[] = [];
+  for (const line of tokenJoined) {
+    const split = line.replace(
+      /([\d\s.,;:)])\s*((?:må|ma|ti|on|to|fr|lö|lo|sö|so))\s*(\d{4}[-–—]\d{2}[-–—]\d{2})/gi,
+      "$1\n$2 $3"
+    );
+    for (const part of split.split("\n")) {
+      const trimmed = part.trim();
+      if (trimmed) pageSplit.push(trimmed);
+    }
+  }
+
   // Phase 2: Rejoin hearing fields split across lines (field-per-line PDF structure).
   // Only when no line already contains a complete hearing pattern (date + time range),
   // meaning the PDF has each field on its own line.
   // Each hearing starts with a day abbreviation + ISO date; everything else is continuation.
-  const hasCompleteHearingLine = tokenJoined.some((line) =>
+  const hasCompleteHearingLine = pageSplit.some((line) =>
     /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/.test(line)
   );
   let hearingJoined: string[];
   if (hasCompleteHearingLine) {
-    hearingJoined = tokenJoined;
+    hearingJoined = pageSplit;
   } else {
     hearingJoined = [];
     let buffer = "";
-    for (const line of tokenJoined) {
+    for (const line of pageSplit) {
       if (/^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}[-–—]\d{2}[-–—]\d{2}/i.test(line)) {
         if (buffer) hearingJoined.push(buffer);
         buffer = line;
