@@ -217,6 +217,43 @@ describe("preprocessLines", () => {
     const result = preprocessLines(input);
     expect(result).toHaveLength(1);
   });
+
+  it("splits page boundary concatenation before field-per-line reconstruction", () => {
+    // In field-per-line PDFs, page breaks can glue the tail of one hearing
+    // to the start of the next hearing's day abbreviation + date
+    const input = [
+      "må 2026-02-",
+      "16",
+      "09:00 -",
+      "16:00",
+      "Huvudförhandling B 1795-25",
+      "konkurs ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande",
+    ].join("\n");
+    const result = preprocessLines(input);
+    // "konkurs" should NOT be absorbed into the first hearing's saken
+    const konkursLine = result.find((l) => l.startsWith("konkurs"));
+    expect(konkursLine).toBeDefined();
+    // The second hearing starting with "ti 2026-02-10" should be separate
+    const tiLine = result.find((l) => /ti 2026-02-10/.test(l));
+    expect(tiLine).toBeDefined();
+  });
+
+  it("splits glued page boundary like 'Sal 7on 2026-02-18'", () => {
+    const input = "narkotikabrott Sal 7on 2026-02-18 09:00 - 10:00 Huvudförhandling";
+    const result = preprocessLines(input);
+    expect(result.length).toBeGreaterThanOrEqual(2);
+    expect(result[0]).toContain("narkotikabrott");
+    expect(result[0]).not.toContain("2026-02-18");
+    const onLine = result.find((l) => /on 2026-02-18/.test(l));
+    expect(onLine).toBeDefined();
+  });
+
+  it("does not split 'schema' or words containing day abbreviation substrings", () => {
+    // "ma" in "schema" should NOT trigger a split
+    const input = "schema-förhandlingar-vecka-8-9-2026";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+  });
 });
 
 describe("extractTime", () => {
