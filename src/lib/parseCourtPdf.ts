@@ -50,14 +50,9 @@ export function parseCourtPdf(text: string, court: string | CourtLike): import("
     return parseCourtPdf(text, courtName);
   }
 
-  console.log(`[parseCourtPdf] ${courtName} | format: ${formatFamily} | text length: ${text.length} | first 500 chars:`, text.substring(0, 500));
-
   const rawHearings = strategy.parse({ courtName, text });
-  console.log(`[parseCourtPdf] ${courtName} | raw hearings found: ${rawHearings.length}`);
 
   return rawHearings.map((raw, i) => {
-    const hearing = enrichHearing(raw, courtName, i + 1);
-    console.log("Parsed hearing:", hearing);
-    return hearing;
+    return enrichHearing(raw, courtName, i + 1);
   });
 }
