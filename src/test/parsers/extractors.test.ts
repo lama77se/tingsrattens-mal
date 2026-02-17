@@ -136,6 +136,33 @@ describe("preprocessLines", () => {
   it("splits month abbreviation glued to time", () => {
     expect(preprocessLines("16-feb09:00")).toEqual(["16-feb 09:00"]);
   });
+
+  it("normalizes en-dashes in ISO dates", () => {
+    expect(preprocessLines("to 2026\u201302\u201319 09:00")).toEqual(["to 2026-02-19 09:00"]);
+  });
+
+  it("splits concatenated hearings at page boundaries", () => {
+    const input = "häleri Sal 3 to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 stöld";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toBe("häleri Sal 3");
+    expect(result[1]).toContain("to 2026-02-12");
+  });
+
+  it("splits multiple concatenated hearings at page boundaries", () => {
+    const input = "häleri Sal 7 to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 stöld Sal 3 on 2026-02-13 10:00 - 11:00 Muntlig förberedelse";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toBe("häleri Sal 7");
+    expect(result[1]).toContain("to 2026-02-12");
+    expect(result[2]).toContain("on 2026-02-13");
+  });
+
+  it("does not split lines starting with a day abbreviation", () => {
+    const input = "to 2026-02-19 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+  });
 });
 
 describe("extractTime", () => {

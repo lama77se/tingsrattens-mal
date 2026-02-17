@@ -121,6 +121,8 @@ export function preprocessLines(text: string): string[] {
 
   return joined.map((line) =>
       line
+        // Normalize en-dashes/em-dashes to hyphens in ISO dates (some PDFs use –)
+        .replace(/(\d{4})[-–—](\d{2})[-–—](\d{2})/g, "$1-$2-$3")
         // pdf-parse gluing fixes: insert spaces at known boundaries
         // Day abbreviation glued to date: to2026 → to 2026, ma16 → ma 16
         .replace(/((?:må|ma|ti|on|to|fr|lö|lo|sö|so))(\d)/gi, "$1 $2")
@@ -142,7 +144,13 @@ export function preprocessLines(text: string): string[] {
         .replace(/([TBFTKÄ]\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
         // Bare sal number glued to text at end of line: Konkurs21 → Konkurs Sal 21, m.m.10 → m.m. Sal 10
         .replace(/([a-zA-ZåäöÅÄÖ.])(\d{1,2})$/, "$1 Sal $2")
-    );
+    ).flatMap((line) => {
+      // Split lines containing multiple hearings concatenated at page boundaries.
+      // pdf-parse can join content across page breaks without newlines.
+      // Pattern: split before a day abbreviation + ISO date when preceded by content.
+      const parts = line.split(/\s+(?=(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}-\d{2}-\d{2})/i);
+      return parts.filter(Boolean);
+    });
 }
 
 export function extractTime(line: string, prevLine?: string): string {
