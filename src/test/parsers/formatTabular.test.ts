@@ -644,4 +644,126 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("misshandel");
     expect(result[1].saken).toBe("stöld");
   });
+
+  it("splits Norrköping same-day concatenated hearings with repeated day+date", () => {
+    const text = [
+      "ti 2026-02-10 09:00 - 10:00 Konkursförhandling K 5555-25 konkurs Sal 1 ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande Sal 5 ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 3734-25 misshandel, ringa brott Sal 3 ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3996-24 vårdnad Sal 4 ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3776-25 vårdnad Sal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result.length).toBe(5);
+    expect(result[0].saken).toBe("konkurs");
+    expect(result[1].saken).toBe("ofredande");
+    expect(result[2].saken).toContain("misshandel");
+    expect(result[3].saken).toBe("vårdnad");
+    expect(result[4].saken).toBe("vårdnad");
+  });
+
+  it("reconstructs field-per-line hearings when Phase 1 joins day+date+time onto one line", () => {
+    // Exact raw text structure from Norrköping week 7 PDF:
+    // Phase 1 joins "ti 2026-02-10 09:00 -" + "10:00" into one line with date+time
+    // but hearing type and saken are on subsequent lines.
+    // Phase 2 must buffer (not push directly) to accumulate those fields.
+    const text = [
+      "må 2026-02-",
+      "09",
+      "10:40 - 11:00 Edgångssmtr K 4787-25",
+      "",
+      " konkurs Sal",
+      "10",
+      "ti 2026-02-10 09:00 -",
+      "10:00",
+      "Huvudförhandling B 2752-25",
+      "",
+      " ofredande Sal 3",
+      "ti 2026-02-10 09:00 -",
+      "10:00",
+      "Huvudförhandling B 3734-25",
+      "",
+      " misshandel, ringa brott Sal 7",
+      "ti 2026-02-10 09:00 -",
+      "16:00",
+      "Huvudförhandling T 3996-24",
+      "",
+      " vårdnad Sal 8",
+      "ti 2026-02-10 09:00 -",
+      "16:00",
+      "Huvudförhandling T 3776-25",
+      "",
+      " vårdnad Sal 9",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(5);
+
+    expect(result[0].date).toBe("2026-02-09");
+    expect(result[0].type).toBe("Edgångssammanträde");
+    expect(result[0].caseNumber).toBe("K 4787-25");
+    expect(result[0].saken).toBe("konkurs");
+    expect(result[0].room).toBe("Sal 10");
+
+    expect(result[1].date).toBe("2026-02-10");
+    expect(result[1].type).toBe("Huvudförhandling");
+    expect(result[1].caseNumber).toBe("B 2752-25");
+    expect(result[1].saken).toBe("ofredande");
+    expect(result[1].room).toBe("Sal 3");
+
+    expect(result[2].date).toBe("2026-02-10");
+    expect(result[2].caseNumber).toBe("B 3734-25");
+    expect(result[2].saken).toBe("misshandel, ringa brott");
+    expect(result[2].room).toBe("Sal 7");
+
+    expect(result[3].caseNumber).toBe("T 3996-24");
+    expect(result[3].saken).toBe("vårdnad");
+    expect(result[3].room).toBe("Sal 8");
+
+    expect(result[4].caseNumber).toBe("T 3776-25");
+    expect(result[4].saken).toBe("vårdnad");
+    expect(result[4].room).toBe("Sal 9");
+  });
+
+  it("reconstructs cross-day transition from field-per-line to joined format", () => {
+    // Tests the Wednesday→Thursday transition from the actual Norrköping PDF
+    // where on 2026-02-11 entries are field-per-line and to 2026-02-12 entries
+    // have day+date joined with time by Phase 1.
+    const text = [
+      "on 2026-02-11 15:30 - 16:00 Huvudförhandling B 3948-25",
+      "",
+      " häleri Sal 3",
+      "to 2026-02-12 09:00 -",
+      "09:30",
+      "Huvudförhandling B 5119-25",
+      "",
+      " brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 9",
+      "to 2026-02-12 09:00 -",
+      "10:30",
+      "Huvudförhandling B 4227-25",
+      "",
+      " olaga hot Sal 3",
+      "to 2026-02-12 09:00 -",
+      "12:00",
+      "Fortsatt muntlig",
+      "förb",
+      "T 5125-24",
+      "",
+      " vårdnad Sal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(4);
+
+    expect(result[0].date).toBe("2026-02-11");
+    expect(result[0].saken).toBe("häleri");
+
+    expect(result[1].date).toBe("2026-02-12");
+    expect(result[1].caseNumber).toBe("B 5119-25");
+    expect(result[1].saken).toContain("brott mot lagen om förbud");
+
+    expect(result[2].caseNumber).toBe("B 4227-25");
+    expect(result[2].saken).toBe("olaga hot");
+
+    expect(result[3].caseNumber).toBe("T 5125-24");
+    expect(result[3].type).toBe("Muntlig förberedelse");
+    expect(result[3].saken).toBe("vårdnad");
+  });
 });
