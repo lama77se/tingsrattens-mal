@@ -97,6 +97,10 @@ export function extractSwedishDate(line: string): string | null {
 
 /**
  * Pre-process PDF text into clean, trimmed, non-empty lines with case number prefix fixes.
+ *
+ * Handles two opposite pdf-parse failure modes:
+ * 1. Field-per-line splitting: date, time, type on separate lines → rejoin into hearing lines
+ * 2. Page boundary concatenation: multiple hearings on one line → split apart
  */
 export function preprocessLines(text: string): string[] {
   const rawLines = text
@@ -104,10 +108,50 @@ export function preprocessLines(text: string): string[] {
     .map((l) => l.trim())
     .filter(Boolean);
 
-  // Re-join bare room numbers split across lines at page boundaries:
+  // Phase 1: Rejoin tokens split across lines by pdf-parse
+  // "2026-02-" + "16" → "2026-02-16", "09:00 -" + "16:00" → "09:00 - 16:00"
+  const tokenJoined: string[] = [];
+  for (const line of rawLines) {
+    const prev = tokenJoined.length > 0 ? tokenJoined[tokenJoined.length - 1] : "";
+    if (/\d{4}[-–—]\d{2}[-–—]$/.test(prev) && /^\d{1,2}$/.test(line)) {
+      tokenJoined[tokenJoined.length - 1] += line;
+    } else if (/\d{1,2}:\d{2}\s*[-–—]\s*$/.test(prev) && /^\d{1,2}:\d{2}/.test(line)) {
+      tokenJoined[tokenJoined.length - 1] += " " + line;
+    } else {
+      tokenJoined.push(line);
+    }
+  }
+
+  // Phase 2: Rejoin hearing fields split across lines (field-per-line PDF structure).
+  // Only when no line already contains a complete hearing pattern (date + time range),
+  // meaning the PDF has each field on its own line.
+  // Each hearing starts with a day abbreviation + ISO date; everything else is continuation.
+  const hasCompleteHearingLine = tokenJoined.some((line) =>
+    /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/.test(line)
+  );
+  let hearingJoined: string[];
+  if (hasCompleteHearingLine) {
+    hearingJoined = tokenJoined;
+  } else {
+    hearingJoined = [];
+    let buffer = "";
+    for (const line of tokenJoined) {
+      if (/^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}[-–—]\d{2}[-–—]\d{2}/i.test(line)) {
+        if (buffer) hearingJoined.push(buffer);
+        buffer = line;
+      } else if (buffer) {
+        buffer += " " + line;
+      } else {
+        hearingJoined.push(line);
+      }
+    }
+    if (buffer) hearingJoined.push(buffer);
+  }
+
+  // Phase 3: Re-join bare room numbers split across lines at page boundaries:
   // "...Sal" + "10" → "...Sal 10"
   const joined: string[] = [];
-  for (const line of rawLines) {
+  for (const line of hearingJoined) {
     if (
       /^\d{1,3}$/.test(line) &&
       joined.length > 0 &&
@@ -119,6 +163,7 @@ export function preprocessLines(text: string): string[] {
     }
   }
 
+  // Phase 4: Per-line transforms
   return joined.map((line) =>
       line
         // Normalize en-dashes/em-dashes to hyphens in ISO dates (some PDFs use –)
@@ -145,7 +190,7 @@ export function preprocessLines(text: string): string[] {
         // Bare sal number glued to text at end of line: Konkurs21 → Konkurs Sal 21, m.m.10 → m.m. Sal 10
         .replace(/([a-zA-ZåäöÅÄÖ.])(\d{1,2})$/, "$1 Sal $2")
     ).flatMap((line) => {
-      // Split lines containing multiple hearings concatenated at page boundaries.
+      // Phase 5: Split lines containing multiple hearings concatenated at page boundaries.
       // pdf-parse can join content across page breaks without newlines.
       // Pattern: split before a day abbreviation + ISO date when preceded by content.
       const parts = line.split(/\s+(?=(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}-\d{2}-\d{2})/i);
