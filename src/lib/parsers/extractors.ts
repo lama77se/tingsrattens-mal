@@ -34,7 +34,7 @@ export const MONTH_MAP: Record<string, string> = {
   september: "09", oktober: "10", november: "11", december: "12",
 };
 
-export const CASE_NUMBER_REGEX = /\b((?:FT|[TBK\u00c4])\s?\d{1,6}[-\u2013\u2014]\d{2})\b/i;
+export const CASE_NUMBER_REGEX = /\b((?:PMT|FT|[TBK\u00c4])\s?\d{1,6}[-\u2013\u2014]\d{2})\b/i;
 
 export const TIME_RANGE_REGEX = /(\d{1,2}:\d{2})\s*[-\u2013\u2014]\s*(\d{1,2}:\d{2})/;
 
@@ -53,6 +53,7 @@ export const HEARING_TYPES = [
   "Edgångssammanträde",
   "Sammanträde",
   "Bevisupptagning",
+  "Föredragning",
   "Tredskodom",
   "Avgörande",
   "Förhandling",
@@ -146,7 +147,7 @@ export function preprocessLines(text: string): string[] {
   // would orphan those fields; using a buffer accumulates them correctly.
   // Lines matching COMPLETE_HEARING_RE without a day abbreviation (e.g., from Phase 4
   // transforms) are still pushed directly since they lack subsequent field lines.
-  const DAY_DATE_RE = /^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}[-–—]\d{2}[-–—]\d{2}/i;
+  const DAY_DATE_RE = /^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s*\d{4}[-–—]\d{2}[-–—]\d{2}/i;
   const COMPLETE_HEARING_RE = /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const TIME_RANGE_RE = /^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const HAS_TIME_RE = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
@@ -224,8 +225,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)(\d{1,2}:\d{2})/gi, "$1 $2")
         // Time glued to text: 09:45Huvudförhandling → 09:45 Huvudförhandling
         .replace(/(\d{1,2}:\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
-        // Text glued to case number prefix ((?<!F) prevents splitting "FT" case numbers)
-        .replace(/([a-zA-ZåäöÅÄÖ])((?:FT|(?<!F)[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
+        // Text glued to case number prefix ((?<!F) prevents splitting "FT"; (?<!PM) prevents splitting "PMT")
+        .replace(/([a-zA-ZåäöÅÄÖ])((?:PMT|FT|(?<!(?:F|PM))[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
         // Case number glued to text
         .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
         // Text glued to Sal/Tingssal: knivlagenSal → knivlagen Sal, textTingssal → text Tingssal

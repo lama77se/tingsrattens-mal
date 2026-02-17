@@ -140,9 +140,23 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 2 § (grovt brott)"],
   },
+  "sexuellt övergrepp mot barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 6 §"],
+    alternativa_lagrum: ["BrB 6 kap. 6 § (grovt brott)"],
+  },
   "vapenbrott": {
     sakomrade: "Vapenbrott",
     primart_lagrum: ["Vapenlagen (1996:67)"],
+  },
+  "brott mot vapenlagen": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Vapenlagen (1996:67) 9 kap. 1 §"],
+    alternativa_lagrum: [
+      "Vapenlagen 9 kap. 1 § (grovt vapenbrott)",
+      "Vapenlagen 9 kap. 1 § (synnerligen grovt vapenbrott)",
+    ],
+    kommentar: "Exakt grad beror på omständigheterna; straffbestämmelser finns i 9 kap. vapenlagen.",
   },
   "penningtvättsbrott": {
     sakomrade: "Ekonomisk brottslighet",
@@ -474,6 +488,15 @@ const mappings: Record<string, LagrumEntry> = {
       "BrB 36 kap. 7 §",
     ],
     kommentar: "Arbetsmiljöbrott bygger ofta på vållandebestämmelser i BrB (3 kap. 7–10 §§) i kombination med AML. Företagsbot regleras i 36 kap. BrB.",
+  },
+  "miljöbrott": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 1 §"],
+    alternativa_lagrum: [
+      "Miljöbalken 29 kap. 2 § (grovt miljöbrott)",
+      "Miljöbalken 29 kap. 4 § (vållande till miljöstörning)",
+    ],
+    kommentar: "Miljöbrott regleras i 29 kap. miljöbalken. Exakt paragraf beror på gärningens art och grad.",
   },
   "försök till mord": {
     sakomrade: "Brott mot liv och hälsa",
