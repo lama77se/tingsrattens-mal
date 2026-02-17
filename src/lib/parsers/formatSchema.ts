@@ -3,12 +3,12 @@ import { extractSwedishDate, CASE_NUMBER_REGEX } from "./extractors";
 
 /**
  * Schema format parser — for courts that publish date-heading-based schedules.
- * Used by Haparanda tingsrätt (with Kalix tingshus sub-court).
+ * Used by Haparanda (with sub-courts), Lund, and Malmö.
  *
  * Structure:
  *   [Swedish date heading]          "Tisdag 17 februari 2026"
  *   kl. HH:MM - HH:MM              "kl. 09:00 - 10:15"
- *   Location, Sal N                 "Haparanda tingsrätt, Sal 1"
+ *   Location, Sal N  or  Sal N      "Haparanda tingsrätt, Sal 1" / "Sal 09"
  *   CaseNumber, HearingType         "B 784-25, Huvudförhandling"
  *   angående saken text             "angående brott mot knivlagen"
  */
@@ -16,7 +16,7 @@ import { extractSwedishDate, CASE_NUMBER_REGEX } from "./extractors";
 const WEEKDAY_PREFIX = /^(måndag|tisdag|onsdag|torsdag|fredag|lördag|söndag)\s+/i;
 const KL_TIME_REGEX = /kl\.?\s*(\d{1,2}:\d{2})(?:\s*[-–—]\s*(\d{1,2}:\d{2}))?/i;
 const LOCATION_REGEX = /^(.+?(?:tingsrätt|tingshus))\s*[,.]?\s*(?:(?:[Tt]ings)?[Ss]al\s+(\S+))?/i;
-const ANGAENDE_REGEX = /^angående\s+(.+)/i;
+const ANGAENDE_REGEX = /^a?ngående\s+(.+)/i;
 const FORTSATT_REGEX = /^Fortsatt\s+/i;
 const DAG_AV_REGEX = /,?\s*[Dd]ag\s+\d+\s+av\s+\d+/;
 
@@ -88,9 +88,17 @@ export const formatSchema: ParserStrategy = {
         const locMatch = line.match(LOCATION_REGEX);
         if (locMatch) {
           currentLocation = locMatch[1].trim();
-          currentRoom = locMatch[2] ? `Sal ${locMatch[2]}` : "";
+          if (locMatch[2]) currentRoom = `Sal ${locMatch[2]}`;
           continue;
         }
+      }
+
+      // Bare room line (no court name): "Sal 09", "Sal 10 (säkerhetssal)"
+      const bareRoomMatch = line.match(/^((?:Tings)?[Ss]al)\s+(\d+)/);
+      if (bareRoomMatch) {
+        const prefix = bareRoomMatch[1].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+        currentRoom = `${prefix} ${bareRoomMatch[2]}`;
+        continue;
       }
 
       // "angående" line — check BEFORE case number since angående lines may contain
