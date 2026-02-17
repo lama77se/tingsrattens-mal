@@ -214,11 +214,30 @@ export function preprocessLines(text: string): string[] {
         // Strip pagination footers: "1-81 visas av 81" (Swedish "X-Y shown of Z")
         .replace(/\s*\d+[-–—]\d+\s+visas\s+av\s+\d+\s*$/, "")
     ).flatMap((line) => {
-      // Phase 5: Split lines containing multiple hearings concatenated at page boundaries.
-      // pdf-parse can join content across page breaks without newlines.
-      // Pattern: split before a day abbreviation + ISO date when preceded by content.
-      const parts = line.split(/\s+(?=(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}-\d{2}-\d{2})/i);
-      return parts.filter(Boolean);
+      // Phase 5: Split lines containing multiple hearings concatenated together.
+      // Step 1: Split before day abbreviation + ISO date (cross-day page boundaries).
+      const dayParts = line.split(/\s+(?=(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}-\d{2}-\d{2})/i);
+      // Step 2: Split each part at subsequent time ranges (2nd+ occurrence).
+      // Handles same-day hearings on one line: "09:00-10:00 Type1 saken1 Sal 1 09:00-11:00 Type2 saken2 Sal 2"
+      return dayParts.flatMap((part) => {
+        const timeRe = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/g;
+        let match;
+        let first = true;
+        const positions: number[] = [];
+        while ((match = timeRe.exec(part)) !== null) {
+          if (first) { first = false; continue; }
+          positions.push(match.index);
+        }
+        if (positions.length === 0) return [part];
+        const result: string[] = [];
+        let start = 0;
+        for (const pos of positions) {
+          result.push(part.substring(start, pos).trim());
+          start = pos;
+        }
+        result.push(part.substring(start).trim());
+        return result.filter(Boolean);
+      });
     });
 }
 
