@@ -58,6 +58,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/solna_tingsratt/veckans-forhandlingar/v${week}.${year}.pdf`,
   },
   {
+    id: "skaraborgs_tingsratt",
+    name: "Skaraborgs tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week}.pdf`,
+  },
+  {
     id: "boras_tingsratt",
     name: "Borås tingsrätt",
     formatFamily: "standard",

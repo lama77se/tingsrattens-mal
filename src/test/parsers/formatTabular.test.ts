@@ -812,6 +812,79 @@ describe("formatTabular", () => {
     expect(result[3].room).toBe("Tingssal 6");
   });
 
+  it("parses Skaraborgs glued single-line format with all hearing types", () => {
+    // Actual pdf-parse output from Skaraborgs tingsrätt — fields glued together,
+    // single-line entries, header without spaces, (dag X/Y) on separate lines,
+    // and "Muntlig förhandling" as a distinct type.
+    const text = [
+      "DagDatumTidTypMålnummerSakenSal",
+      "må  2026-02-0909:00 - 09:45HuvudförhandlingB 5730-25   grov olovlig körningSal 7",
+      "ti   2026-02-1010:00 - 12:00SammanträdeÄ 114-25   ansökan om god manSal 3",
+      "ti   2026-02-1009:00 - 16:00HuvudförhandlingB 1867-24   grovt bedrägeri m.m.Sal 8",
+      "(dag 3/8)",
+      "on  2026-02-1109:30 - 10:00KonkursförhandlingK 81-26    ansökan om konkursSal 1",
+      "fr   2026-02-1309:00 - 11:00Muntlig förhandlingT 226-26   vårdnad, boende och/eller umgängeSal 3",
+      "to  2026-02-1213:15 - 15:15Muntlig förhandlingT 4214-25   kontraktsrättSal 3",
+      "ti2026-02-1713:15 - 15:15Muntlig förberedelseT 5471-25kontraktsrätt överlämnat från kronofogdenSal 2",
+      "ti2026-02-1713:15 - 14:15Fortsatt hfB 3973-25misshandel m.m.Sal 4",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Skaraborgs tingsrätt", text });
+    expect(result).toHaveLength(8);
+
+    // Monday — Huvudförhandling
+    expect(result[0].date).toBe("2026-02-09");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 5730-25");
+    expect(result[0].saken).toBe("grov olovlig körning");
+    expect(result[0].room).toBe("Sal 7");
+
+    // Tuesday — Sammanträde with Ä-prefix case
+    expect(result[1].date).toBe("2026-02-10");
+    expect(result[1].type).toBe("Sammanträde");
+    expect(result[1].caseNumber).toBe("Ä 114-25");
+    expect(result[1].saken).toBe("ansökan om god man");
+    expect(result[1].room).toBe("Sal 3");
+
+    // Tuesday — multi-day hearing, (dag 3/8) discarded
+    expect(result[2].type).toBe("Huvudförhandling");
+    expect(result[2].caseNumber).toBe("B 1867-24");
+    expect(result[2].saken).toBe("grovt bedrägeri m.m");
+    expect(result[2].room).toBe("Sal 8");
+
+    // Wednesday — Konkursförhandling
+    expect(result[3].date).toBe("2026-02-11");
+    expect(result[3].type).toBe("Konkursförhandling");
+    expect(result[3].caseNumber).toBe("K 81-26");
+    expect(result[3].saken).toBe("ansökan om konkurs");
+
+    // Friday — Muntlig förhandling (distinct type)
+    expect(result[4].date).toBe("2026-02-13");
+    expect(result[4].type).toBe("Muntlig förhandling");
+    expect(result[4].caseNumber).toBe("T 226-26");
+    expect(result[4].saken).toBe("vårdnad, boende och/eller umgänge");
+    expect(result[4].room).toBe("Sal 3");
+
+    // Thursday — Muntlig förhandling
+    expect(result[5].date).toBe("2026-02-12");
+    expect(result[5].type).toBe("Muntlig förhandling");
+    expect(result[5].caseNumber).toBe("T 4214-25");
+    expect(result[5].saken).toBe("kontraktsrätt");
+
+    // No-space glued line — Muntlig förberedelse
+    expect(result[6].date).toBe("2026-02-17");
+    expect(result[6].type).toBe("Muntlig förberedelse");
+    expect(result[6].caseNumber).toBe("T 5471-25");
+    expect(result[6].saken).toBe("kontraktsrätt överlämnat från kronofogden");
+    expect(result[6].room).toBe("Sal 2");
+
+    // No-space glued line — Fortsatt hf alias
+    expect(result[7].type).toBe("Huvudförhandling");
+    expect(result[7].caseNumber).toBe("B 3973-25");
+    expect(result[7].saken).toBe("misshandel m.m");
+    expect(result[7].room).toBe("Sal 4");
+  });
+
   it("parses Nyköping multi-line saken with (dag X/Y)", () => {
     const text = [
       "on 2026-02-11",
