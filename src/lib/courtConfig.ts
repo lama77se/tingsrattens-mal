@@ -269,6 +269,15 @@ export const COURTS: CourtConfig[] = [
     ],
   },
   {
+    id: "nykopings_tingsratt",
+    name: "Nyköpings tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week, year) => [
+      `${BASE}/nykopings_tingsratt/veckans-forhandlingar/nykopings-tingsratt-schema-vecka-${week}-${year}.pdf`,
+      `${BASE}/nykopings_tingsratt/veckans-forhandlingar/schema-forhandlingar-vecka-${week}-${year}.pdf`,
+    ],
+  },
+  {
     id: "nacka_tingsratt",
     name: "Nacka tingsrätt",
     formatFamily: "tabular",
@@ -302,6 +311,14 @@ export const COURTS: CourtConfig[] = [
   {
     id: "gotlands_tingsratt",
     name: "Gotlands tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "norrtalje_tingsratt",
+    name: "Norrtälje tingsrätt",
     formatFamily: "standard",
     disabled: true,
     note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
