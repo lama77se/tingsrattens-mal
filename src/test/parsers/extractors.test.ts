@@ -306,6 +306,38 @@ describe("preprocessLines", () => {
     expect(result.find((l) => /to 2026-02-12.*stöld/.test(l))).toBeDefined();
     expect(result.find((l) => /ti 2026-02-10.*ofredande/.test(l))).toBeDefined();
   });
+
+  it("splits same-day hearings concatenated on one line at subsequent time ranges", () => {
+    // pdf-parse may put all same-day hearings on one line
+    const input = "ti 2026-02-10 09:00 - 10:00 Konkursförhandling K 5555-25 konkurs Sal 1 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande Sal 5 09:00 - 16:00 Huvudförhandling T 3996-24 vårdnad Sal 3";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toContain("konkurs");
+    expect(result[0]).not.toContain("ofredande");
+    expect(result[1]).toContain("ofredande");
+    expect(result[1]).not.toContain("vårdnad");
+    expect(result[2]).toContain("vårdnad");
+  });
+
+  it("splits cross-day and same-day concatenated hearings", () => {
+    // häleri (end of prev day) + multiple Thursday hearings
+    const input = "häleri Sal 3 to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 stöld Sal 6 09:00 - 10:30 Huvudförhandling B 4227-25 olaga hot Sal 7";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toBe("häleri Sal 3");
+    expect(result[1]).toContain("09:00 - 09:30");
+    expect(result[1]).toContain("stöld");
+    expect(result[1]).not.toContain("olaga hot");
+    expect(result[2]).toContain("09:00 - 10:30");
+    expect(result[2]).toContain("olaga hot");
+  });
+
+  it("does not split a single hearing with one time range", () => {
+    const input = "to 2026-02-19 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe(input);
+  });
 });
 
 describe("extractTime", () => {
