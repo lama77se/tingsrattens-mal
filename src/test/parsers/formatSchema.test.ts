@@ -197,6 +197,110 @@ describe("formatSchema", () => {
     expect(result[1].room).toBe("Sal 1");
   });
 
+  it("parses Lund-style hearing with FT case number", () => {
+    const text = [
+      "Måndag 16 februari 2026",
+      "kl. 09:00 - 12:00",
+      "Lunds tingsrätt, sal 08",
+      "FT 6974-25, Muntlig förberedelse",
+      "angående Trafikförsäkring (överlämnat från",
+      "Kronofogdemyndigheten)",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Lunds tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("FT 6974-25");
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("Trafikförsäkring (överlämnat från Kronofogdemyndigheten)");
+    expect(result[0].room).toBe("Sal 08");
+  });
+
+  it("handles Fortsatt muntlig förberedelse", () => {
+    const text = [
+      "Fredag 20 februari 2026",
+      "kl. 09:00 - 12:00",
+      "Lunds tingsrätt, sal 08",
+      "T 7708-25, Fortsatt muntlig förberedelse",
+      "angående Vårdnad, boende och/eller umgänge",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Lunds tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].saken).toBe("Vårdnad, boende och/eller umgänge");
+  });
+
+  it("handles Förlikningssammanträde", () => {
+    const text = [
+      "Fredag 20 februari 2026",
+      "kl. 13:45 - 14:30",
+      "Lunds tingsrätt, sal 14",
+      "K 142-25, Förlikningssammanträde",
+      "angående Konkurs",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Lunds tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Förlikningssammanträde");
+    expect(result[0].saken).toBe("Konkurs");
+  });
+
+  it("does not split on trailing case number reference in angående", () => {
+    const text = [
+      "Torsdag 12 februari 2026",
+      "kl. 13:00 - 16:00",
+      "Lunds tingsrätt, sal 06",
+      "FT 7213-25, Muntlig förberedelse",
+      "angående Kontraktsrätt, ansökan om återvinning av tredskodom FT 5619-25",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Lunds tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("FT 7213-25");
+    expect(result[0].saken).toBe("Kontraktsrätt, ansökan om återvinning av tredskodom FT 5619-25");
+  });
+
+  it("does not split on mid-line case number reference in continuation", () => {
+    const text = [
+      "Torsdag 19 februari 2026",
+      "kl. 09:00 - 12:00",
+      "Lunds tingsrätt, sal 13",
+      "T 6990-25, Muntlig förberedelse",
+      "angående Kontraktsrätt (överlämnat från Kronofogdemyndigheten):",
+      "återvinning av tredskodom i T 5137-25",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Lunds tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 6990-25");
+    expect(result[0].saken).toBe(
+      "Kontraktsrätt (överlämnat från Kronofogdemyndigheten): återvinning av tredskodom i T 5137-25"
+    );
+  });
+
+  it("handles Lund page headers without breaking hearings", () => {
+    const text = [
+      "Måndag 16 februari 2026",
+      "kl. 13:00 - 14:30",
+      "Lunds tingsrätt, sal 01",
+      "B 771-25, Huvudförhandling",
+      "angående olovlig körning, grovt brott m m",
+      "LUNDS TINGSRÄTT  Sida 2(5)",
+      "Tisdag 17 februari 2026",
+      "kl. 09:00 - 09:15",
+      "Lunds tingsrätt, sal 06",
+      "K 104-26, Konkursförhandling",
+      "angående Ansökan om konkurs",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Lunds tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("olovlig körning, grovt brott m m");
+    expect(result[1].date).toBe("2026-02-17");
+    expect(result[1].caseNumber).toBe("K 104-26");
+    expect(result[1].type).toBe("Konkursförhandling");
+  });
+
   it("does not split on case number references inside parentheses", () => {
     const text = [
       "Tisdag 24 februari 2026",
