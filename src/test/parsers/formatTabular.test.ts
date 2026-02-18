@@ -1056,4 +1056,54 @@ describe("formatTabular", () => {
     expect(result[2].saken).toBe("enskilt åtal");
     expect(result[2].room).toBe("Sal 16");
   });
+
+  it("parses Uddevalla 3-line format with multi-day and multi-case", () => {
+    const text = [
+      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
+      "ti2026-02-17 (dag 1/2)09:00 - 16:00Huvudförhandling",
+      "B 3608-25",
+      "grov fridskränkningSal 1",
+      "ti2026-02-1709:00 - 16:00Huvudförhandling",
+      "B 1852-25, B 3694-24",
+      "misshandel m mSal 2",
+      "on2026-02-1809:00 - 10:00Konkursförhandling",
+      "K 104-26",
+      "ansökan om konkursSal 5",
+      "on2026-02-1813:00 - 16:00Muntlig förberedelse och ev hf",
+      "FT 5432-25",
+      "fordranSal 6",
+      "to2026-02-1909:00 - 12:00Muntlig förberedelse",
+      "T 1887-25, Ä 1005-25",
+      "överflyttning av vårdnaden enligt 6 kap",
+      "8 § föräldrabalkenSal 7",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Uddevalla tingsrätt", text });
+    expect(result).toHaveLength(5);
+
+    expect(result[0].date).toBe("2026-02-17");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 3608-25");
+    expect(result[0].saken).toBe("grov fridskränkning");
+    expect(result[0].room).toBe("Sal 1");
+
+    expect(result[1].caseNumber).toBe("B 1852-25, B 3694-24");
+    expect(result[1].saken).toBe("misshandel m m");
+    expect(result[1].room).toBe("Sal 2");
+
+    expect(result[2].date).toBe("2026-02-18");
+    expect(result[2].type).toBe("Konkursförhandling");
+    expect(result[2].caseNumber).toBe("K 104-26");
+    expect(result[2].saken).toBe("ansökan om konkurs");
+
+    expect(result[3].type).toBe("Muntlig förberedelse");
+    expect(result[3].caseNumber).toBe("FT 5432-25");
+    expect(result[3].saken).toBe("fordran");
+
+    // Multi-line saken with mixed case numbers
+    expect(result[4].date).toBe("2026-02-19");
+    expect(result[4].caseNumber).toBe("T 1887-25, Ä 1005-25");
+    expect(result[4].saken).toContain("överflyttning av vårdnaden");
+    expect(result[4].room).toBe("Sal 7");
+  });
 });
