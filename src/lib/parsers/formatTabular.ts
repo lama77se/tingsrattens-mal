@@ -153,6 +153,12 @@ function stripRoom(text: string): string {
 const BARE_DATE_TIME_REGEX = /\d{4}-\d{2}-\d{2}.*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}\s*$/;
 
 /**
+ * Regex matching a standalone case number line (nothing else on the line).
+ * Used to stop the continuation loop when orphaned case numbers appear at page boundaries.
+ */
+const BARE_CASE_REGEX = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i;
+
+/**
  * Check if a line should stop the continuation loop.
  */
 function isContinuationBreak(line: string): boolean {
@@ -163,7 +169,8 @@ function isContinuationBreak(line: string): boolean {
     !!line.match(TIME_ONLY_REGEX) ||
     HEADER_REGEX.test(line) ||
     BARE_DATE_TIME_REGEX.test(line) ||
-    !!line.match(DAY_TIME_REGEX)
+    !!line.match(DAY_TIME_REGEX) ||
+    BARE_CASE_REGEX.test(line)
   );
 }
 
