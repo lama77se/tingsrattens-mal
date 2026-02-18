@@ -1121,26 +1121,27 @@ describe("formatTabular", () => {
     expect(result[5].saken).toBe("fordran");
   });
 
-  it("parses Varberg single-line glued format (no case numbers)", () => {
+  it("parses Varberg single-line glued format with short dates (no case numbers)", () => {
     const text = [
       "Förhandlingar i Varbergs tingsrätt, vecka 7-9, 10-28 februari 2026",
       "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
       "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
-      "ti2026-02-1009:00 - 16:00HuvudförhandlingfordranSal 5",
-      "ti2026-02-1009:00 - 16:00Huvudförhandlingsynnerligen grovt narkotikabrottSal 2",
-      "on2026-02-1109:00 - 11:00Muntlig förberedelsefordranSal 6",
-      "on2026-02-1111:00 - 11:15Konkursförhandlingansökan om konkursSal 3",
-      "on2026-02-1114:00 - 16:00Huvudförhandlingbrott mot lagen om förbud beträffande knivar och andra farliga föremålSal 4",
-      "to2026-02-1213:00 - 15:00Muntlig förberedelsefordranSal 6",
-      "fr2026-02-1309:00 - 10:30Muntlig förberedelse och ev hffordranSal 6",
-      "må2026-02-1613:00 - 15:00Fortsatt muntlig förbfordran och avhysningSal 6",
-      "ti2026-02-1713:00 - 15:00Sammanträdejämkning av godmanskap till förvaltarskapSal 6",
+      "ti10-feb09:00 - 16:00HuvudförhandlingfordranSal 5",
+      "ti10-feb09:00 - 16:00Huvudförhandlingsynnerligen grovt narkotikabrottSal 2",
+      "on11-feb09:00 - 11:00Muntlig förberedelsefordranSal 6",
+      "on11-feb11:00 - 11:15Konkursförhandlingansökan om konkursSal 3",
+      "on11-feb14:00 - 16:00Huvudförhandlingbrott mot lagen om förbud beträffande knivar och andra farliga föremålSal 4",
+      "to12-feb13:00 - 15:00Muntlig förberedelsefordranSal 6",
+      "fr13-feb09:00 - 10:30Muntlig förberedelse och ev hffordranSal 6",
+      "må16-feb13:00 - 15:00Fortsatt muntlig förbfordran och avhysningSal 6",
+      "ti17-feb13:00 - 15:00Sammanträdejämkning av godmanskap till förvaltarskapSal 6",
     ].join("\n");
 
+    const currentYear = new Date().getFullYear();
     const result = formatTabular.parse({ courtName: "Varbergs tingsrätt", text });
     expect(result).toHaveLength(9);
 
-    expect(result[0].date).toBe("2026-02-10");
+    expect(result[0].date).toBe(`${currentYear}-02-10`);
     expect(result[0].time).toBe("09:00 - 16:00");
     expect(result[0].type).toBe("Huvudförhandling");
     expect(result[0].saken).toBe("fordran");
@@ -1150,7 +1151,7 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("synnerligen grovt narkotikabrott");
     expect(result[1].room).toBe("Sal 2");
 
-    expect(result[2].date).toBe("2026-02-11");
+    expect(result[2].date).toBe(`${currentYear}-02-11`);
     expect(result[2].type).toBe("Muntlig förberedelse");
     expect(result[2].saken).toBe("fordran");
 
@@ -1165,12 +1166,12 @@ describe("formatTabular", () => {
     expect(result[6].saken).toBe("fordran");
 
     // Fortsatt muntlig förb → Muntlig förberedelse
-    expect(result[7].date).toBe("2026-02-16");
+    expect(result[7].date).toBe(`${currentYear}-02-16`);
     expect(result[7].type).toBe("Muntlig förberedelse");
     expect(result[7].saken).toBe("fordran och avhysning");
 
     // Sammanträde
-    expect(result[8].date).toBe("2026-02-17");
+    expect(result[8].date).toBe(`${currentYear}-02-17`);
     expect(result[8].type).toBe("Sammanträde");
     expect(result[8].saken).toBe("jämkning av godmanskap till förvaltarskap");
   });

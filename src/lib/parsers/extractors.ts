@@ -220,6 +220,11 @@ export function preprocessLines(text: string): string[] {
         // pdf-parse gluing fixes: insert spaces at known boundaries
         // Day abbreviation glued to date: to2026 → to 2026, ma16 → ma 16
         .replace(/((?:må|ma|ti|on|to|fr|lö|lo|sö|so))(\d)/gi, "$1 $2")
+        // Short date to ISO: 17-feb → 2026-02-17 (must come before date-time glue fix)
+        .replace(/\b(\d{1,2})[-–—](jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)/gi, (_m, day, month) => {
+          const mm = SHORT_MONTH_MAP[month.toLowerCase()];
+          return mm ? `${new Date().getFullYear()}-${mm}-${String(day).padStart(2, "0")}` : _m;
+        })
         // Strip (dag X/Y) annotations early — before date-time glue fix, because
         // stripping "(dag 1/2)" between date and time creates new adjacency: 2026-02-1709:00
         .replace(/\s*\(dag\s+\d+\/\d+\)/gi, "")
