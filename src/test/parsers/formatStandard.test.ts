@@ -187,4 +187,58 @@ describe("formatStandard", () => {
     expect(result[1].saken).toBe("misshandel");
     expect(result[1].room).toBe("Sal 1");
   });
+
+  it("parses Sundsvall 3-line format with short dates and m.fl suffix", () => {
+    const text = [
+      "DagDatumFörhandlingstidTyp av förhandlingMålnrSaken",
+      "må09-feb09:00 - 10:00Huvudförhandling",
+      "B 3312-25",
+      "våldsamt motstånd",
+      "må09-feb09:00 - 11:00Muntlig förberedelse",
+      "T 756-25 m.fl",
+      "fordran",
+      "må09-feb09:00 - 16:00Huvudförhandling",
+      "B 2979-25",
+      "narkotikabrott m m",
+      "ti10-feb09:00 - 09:30Huvudförhandling",
+      "B 2033-25",
+      "smuggling av explosiv vara",
+      "ti10-feb10:00 - 11:00Konkursförhandling",
+      "K 132-26",
+      "ansökan om konkurs",
+      "on11-feb09:00 - 16:00Fortsatt hf",
+      "B 1407-24 m.fl",
+      "narkotikabrott m m",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Sundsvalls tingsrätt", text });
+    expect(result).toHaveLength(6);
+
+    expect(result[0].date).toBe("2026-02-09");
+    expect(result[0].time).toBe("09:00 - 10:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 3312-25");
+    expect(result[0].saken).toBe("våldsamt motstånd");
+
+    // "m.fl" after case number should not become saken
+    expect(result[1].caseNumber).toBe("T 756-25");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].saken).toBe("fordran");
+
+    expect(result[2].caseNumber).toBe("B 2979-25");
+    expect(result[2].saken).toBe("narkotikabrott m m");
+
+    expect(result[3].date).toBe("2026-02-10");
+    expect(result[3].caseNumber).toBe("B 2033-25");
+    expect(result[3].saken).toBe("smuggling av explosiv vara");
+
+    expect(result[4].type).toBe("Konkursförhandling");
+    expect(result[4].caseNumber).toBe("K 132-26");
+    expect(result[4].saken).toBe("ansökan om konkurs");
+
+    // "Fortsatt hf" + "m.fl" suffix
+    expect(result[5].date).toBe("2026-02-11");
+    expect(result[5].caseNumber).toBe("B 1407-24");
+    expect(result[5].saken).toBe("narkotikabrott m m");
+  });
 });
