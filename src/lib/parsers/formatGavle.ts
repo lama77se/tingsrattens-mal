@@ -3,11 +3,8 @@ import type { ParserStrategy, RawHearing, ParserContext } from "./types";
 /**
  * Parser for Gävle tingsrätt format.
  *
- * pdf-parse produces text with NO whitespace between fields:
- *   to2026-02-0509:00 - 09:30brott mot knivlagenSal 5
- *
- * We preprocess each line to insert spaces at known boundaries,
- * then parse with a standard regex.
+ * With unpdf coordinate-based extraction, fields arrive with proper spacing:
+ *   to 2026-02-05 09:00 - 09:30 brott mot knivlagen Sal 5
  *
  * No case numbers, no explicit hearing type labels.
  * All entries are assumed to be "Huvudförhandling".
@@ -16,7 +13,7 @@ import type { ParserStrategy, RawHearing, ParserContext } from "./types";
 const DAY_ABBREVS = "(?:må|ti|on|to|fr|lö|sö)";
 
 /**
- * Matches a hearing line (after preprocessing):
+ * Matches a hearing line:
  *   Group 1: date (YYYY-MM-DD)
  *   Group 2: start time (HH:MM)
  *   Group 3: end time (HH:MM)
@@ -33,27 +30,6 @@ const HEARING_LINE_NO_DAY_REGEX =
 
 /** Room at end of line (with or without room number for truncated PDFs) */
 const ROOM_AT_END_REGEX = /(Sal\s*\d*)\s*$/i;
-
-/**
- * Preprocess a line to insert spaces where pdf-parse glues fields together.
- *
- * Handles patterns like:
- *   to2026-02-05  →  to 2026-02-05
- *   2026-02-0509:00  →  2026-02-05 09:00
- *   09:30brott  →  09:30 brott
- *   knivlagenSal 5  →  knivlagen Sal 5
- */
-function normalizeSpacing(line: string): string {
-  return line
-    // Day abbrev glued to date: to2026 → to 2026
-    .replace(/((?:må|ti|on|to|fr|lö|sö))(\d{4})/gi, "$1 $2")
-    // Date glued to time: 2026-02-0509:00 → 2026-02-05 09:00
-    .replace(/(\d{4}-\d{2}-\d{2})(\d{1,2}:\d{2})/g, "$1 $2")
-    // End time glued to text: 09:30brott → 09:30 brott
-    .replace(/(\d{1,2}:\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
-    // Text glued to Sal: knivlagenSal → knivlagen Sal
-    .replace(/([a-zA-ZåäöÅÄÖ.,])(Sal)/g, "$1 $2");
-}
 
 function parseHearingLine(rest: string): { saken: string; room: string } {
   const roomMatch = rest.match(ROOM_AT_END_REGEX);
@@ -78,7 +54,7 @@ function parse(ctx: ParserContext): RawHearing[] {
   const hearings: RawHearing[] = [];
 
   for (const line of lines) {
-    const trimmed = normalizeSpacing(line.trim());
+    const trimmed = line.trim();
     if (!trimmed) continue;
 
     // Try with day abbreviation prefix first, then without

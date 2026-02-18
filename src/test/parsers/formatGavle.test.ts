@@ -12,7 +12,7 @@ describe("formatGavle", () => {
   });
 
   it("parses a standard hearing line with day abbreviation", () => {
-    const text = "to  2026-02-05 09:00 - 09:30 brott mot knivlagen      Sal 5";
+    const text = "to 2026-02-05 09:00 - 09:30 brott mot knivlagen Sal 5";
     const result = formatGavle.parse({ courtName: "Gävle tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].date).toBe("2026-02-05");
@@ -25,7 +25,7 @@ describe("formatGavle", () => {
   });
 
   it("parses line without day abbreviation", () => {
-    const text = "2026-02-09 09:15 - 12:00 misshandel      Sal 5";
+    const text = "2026-02-09 09:15 - 12:00 misshandel Sal 5";
     const result = formatGavle.parse({ courtName: "Test", text });
     expect(result).toHaveLength(1);
     expect(result[0].date).toBe("2026-02-09");
@@ -48,7 +48,7 @@ describe("formatGavle", () => {
   });
 
   it("extracts room with multiple spaces separator", () => {
-    const text = "ti  2026-02-24 13:15 - 14:00 grovt olaga hot      Sal 5";
+    const text = "ti 2026-02-24 13:15 - 14:00 grovt olaga hot Sal 5";
     const result = formatGavle.parse({ courtName: "Test", text });
     expect(result).toHaveLength(1);
     expect(result[0].saken).toBe("grovt olaga hot");
@@ -56,7 +56,7 @@ describe("formatGavle", () => {
   });
 
   it("handles crime with m.m. suffix", () => {
-    const text = "må 2026-03-02 09:00 - 16:00 misshandel m.m.      Sal 5";
+    const text = "må 2026-03-02 09:00 - 16:00 misshandel m.m. Sal 5";
     const result = formatGavle.parse({ courtName: "Test", text });
     expect(result).toHaveLength(1);
     expect(result[0].saken).toBe("misshandel m.m.");
@@ -64,10 +64,10 @@ describe("formatGavle", () => {
 
   it("parses multiple hearings", () => {
     const text = [
-      "to  2026-02-05 09:00 - 09:30 brott mot knivlagen      Sal 5",
+      "to 2026-02-05 09:00 - 09:30 brott mot knivlagen Sal 5",
       "",
-      "må 2026-02-09 09:15 - 12:00 misshandel      Sal 5",
-      "ti  2026-02-10 09:00 - 16:00 grovt vapenbrott m.m.      Sal 5",
+      "må 2026-02-09 09:15 - 12:00 misshandel Sal 5",
+      "ti 2026-02-10 09:00 - 16:00 grovt vapenbrott m.m. Sal 5",
     ].join("\n");
 
     const result = formatGavle.parse({ courtName: "Test", text });
@@ -83,7 +83,7 @@ describe("formatGavle", () => {
       "",
       "OBS! Schemat är preliminärt.",
       "",
-      "to  2026-02-05 09:00 - 09:30 brott mot knivlagen      Sal 5",
+      "to 2026-02-05 09:00 - 09:30 brott mot knivlagen Sal 5",
     ].join("\n");
 
     const result = formatGavle.parse({ courtName: "Test", text });
@@ -103,52 +103,8 @@ describe("formatGavle", () => {
     }
   });
 
-  // --- pdf-parse output (no whitespace between fields) ---
-
-  it("parses pdf-parse output with glued fields", () => {
-    const text = "to2026-02-0509:00 - 09:30brott mot knivlagenSal 5";
-    const result = formatGavle.parse({ courtName: "Test", text });
-    expect(result).toHaveLength(1);
-    expect(result[0].date).toBe("2026-02-05");
-    expect(result[0].time).toBe("09:00 - 09:30");
-    expect(result[0].saken).toBe("brott mot knivlagen");
-    expect(result[0].room).toBe("Sal 5");
-  });
-
-  it("parses pdf-parse output with glued Sal (no space)", () => {
-    const text = "må2026-02-0909:15 - 12:00misshandelSal 5";
-    const result = formatGavle.parse({ courtName: "Test", text });
-    expect(result).toHaveLength(1);
-    expect(result[0].saken).toBe("misshandel");
-    expect(result[0].room).toBe("Sal 5");
-  });
-
-  it("parses pdf-parse output with m.m. suffix", () => {
-    const text = "ti2026-02-1009:00 - 16:00grovt vapenbrott m.m.Sal 5";
-    const result = formatGavle.parse({ courtName: "Test", text });
-    expect(result).toHaveLength(1);
-    expect(result[0].saken).toBe("grovt vapenbrott m.m.");
-    expect(result[0].room).toBe("Sal 5");
-  });
-
-  it("parses multiple pdf-parse lines", () => {
-    const text = [
-      "Förhandlingar februari-mars",
-      "OBS! Schemat är preliminärt.",
-      "to2026-02-0509:00 - 09:30brott mot knivlagenSal 5",
-      "må2026-02-0909:15 - 12:00misshandelSal 5",
-      "ti2026-02-1009:00 - 16:00grovt vapenbrott m.m.Sal 5",
-    ].join("\n");
-
-    const result = formatGavle.parse({ courtName: "Test", text });
-    expect(result).toHaveLength(3);
-    expect(result[0].date).toBe("2026-02-05");
-    expect(result[1].date).toBe("2026-02-09");
-    expect(result[2].saken).toBe("grovt vapenbrott m.m.");
-  });
-
-  it("handles truncated room at end of pdf-parse output", () => {
-    const text = "fr2026-03-2709:00 - 16:00skadegörelse m.m.Sal ";
+  it("handles truncated room at end of output", () => {
+    const text = "fr 2026-03-27 09:00 - 16:00 skadegörelse m.m. Sal ";
     const result = formatGavle.parse({ courtName: "Test", text });
     expect(result).toHaveLength(1);
     expect(result[0].saken).toBe("skadegörelse m.m.");

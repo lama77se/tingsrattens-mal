@@ -1,9 +1,46 @@
-import pdf from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
+import { getDocumentProxy } from "npm:unpdf";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+interface TextItem {
+  str: string;
+  transform: number[];
+}
+
+/**
+ * Group text items by y-coordinate into visual rows, then sort properly.
+ * Returns one string per visual row (top-to-bottom, left-to-right within each row).
+ */
+function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
+  // Filter out empty/whitespace-only items
+  const filtered = items.filter((item) => item.str.trim().length > 0);
+  if (filtered.length === 0) return [];
+
+  // Sort by y descending (top of page = highest y value in PDF coords)
+  const sorted = [...filtered].sort((a, b) => b.transform[5] - a.transform[5]);
+
+  // Group items within yTolerance into same row
+  const rows: { y: number; items: TextItem[] }[] = [];
+  for (const item of sorted) {
+    const y = item.transform[5];
+    const existingRow = rows.find((r) => Math.abs(r.y - y) <= yTolerance);
+    if (existingRow) {
+      existingRow.items.push(item);
+    } else {
+      rows.push({ y, items: [item] });
+    }
+  }
+
+  // Sort rows top-to-bottom (highest y first), items left-to-right within each row
+  rows.sort((a, b) => b.y - a.y);
+  return rows.map((row) => {
+    row.items.sort((a, b) => a.transform[4] - b.transform[4]);
+    return row.items.map((item) => item.str).join(" ");
+  });
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -87,11 +124,20 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse PDF text using pdf-parse
-    const buffer = new Uint8Array(pdfBytes);
-    const parsed = await pdf(buffer);
-    const extractedText = parsed.text || '';
-    const numPages = parsed.numpages || 0;
+    // Parse PDF text using unpdf (coordinate-based extraction)
+    const doc = await getDocumentProxy(new Uint8Array(pdfBytes));
+    const numPages = doc.numPages;
+    const allLines: string[] = [];
+
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await doc.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const items = textContent.items as TextItem[];
+      const pageLines = groupItemsIntoRows(items);
+      allLines.push(...pageLines);
+    }
+
+    const extractedText = allLines.join("\n");
 
     // Count hearings by looking for time patterns (e.g. 09:00, 13.30)
     const timePatterns = extractedText.match(/\d{2}[.:]\d{2}/g) || [];
