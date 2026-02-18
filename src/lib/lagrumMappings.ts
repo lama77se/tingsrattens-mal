@@ -737,6 +737,16 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2020:548) om omställningsstöd 30 §"],
     kommentar: "Omställningsstödsbrott regleras i speciallag kopplad till pandemistöden. Grov grad anges särskilt i lag.",
   },
+  "brott mot järnvägssäkerhetslagen": {
+    sakomrade: "Järnvägs- och transportreglering",
+    primart_lagrum: ["Järnvägssäkerhetslagen (1990:1157) 10 kap."],
+    kommentar: "Straffbestämmelser finns i järnvägssäkerhetslagen; exakt paragraf beror på överträdelsens art.",
+  },
+  "undanröjande av ungdomsvård": {
+    sakomrade: "Straffverkställighet",
+    primart_lagrum: ["BrB 32 kap. 4 §"],
+    kommentar: "Avser undanröjande av påföljden ungdomsvård och bestämmande av ny påföljd.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
