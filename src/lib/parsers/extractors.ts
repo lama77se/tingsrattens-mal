@@ -161,15 +161,42 @@ export function preprocessLines(text: string): string[] {
   const HAS_TIME_RE = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   // Page headers that appear at page boundaries — flush buffer and discard
   const PAGE_HEADER_RE = /^(uppropslista|dag\s*datum|datum\s+tid|förhandlingar\b|listan\s)/i;
+  // Pure (dag X/Y) lines — orphaned multi-day markers at page tops
+  const PURE_DAG_RE = /^\(dag\s+\d+\/\d+\)\s*$/i;
+  // Bare case number on its own line (orphaned at page boundary)
+  const BARE_CASE_PAGE_RE = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i;
 
   // A line ending with a room (Sal/Tingssal + number) is truly complete.
   const ENDS_WITH_ROOM_RE = /(?:Tings)?[Ss]al\s+\S+\s*$/;
 
   const hearingJoined: string[] = [];
   let buffer = "";
-  for (const line of pageSplit) {
+  for (let pi = 0; pi < pageSplit.length; pi++) {
+    const line = pageSplit[pi];
     if (PAGE_HEADER_RE.test(line)) {
-      // Page header — flush buffer (don't include header in output)
+      // Page header — skip consecutive headers and pure (dag X/Y) markers,
+      // then check if orphaned continuation text follows (pdf-parse page
+      // boundary recovery: saken/room from the last entry on the previous
+      // page can end up at the top of the next page).
+      while (pi + 1 < pageSplit.length &&
+             (PAGE_HEADER_RE.test(pageSplit[pi + 1]) || PURE_DAG_RE.test(pageSplit[pi + 1]))) {
+        pi++;
+      }
+      // If we have a buffer and the next line is orphaned saken text (not a
+      // hearing start or bare case number), append it to recover lost saken.
+      if (buffer && pi + 1 < pageSplit.length) {
+        const nextLine = pageSplit[pi + 1];
+        if (!DAY_DATE_RE.test(nextLine) &&
+            !DAY_TIME_RE.test(nextLine) &&
+            !COMPLETE_HEARING_RE.test(nextLine) &&
+            !TIME_RANGE_RE.test(nextLine) &&
+            !BARE_CASE_PAGE_RE.test(nextLine) &&
+            !PAGE_HEADER_RE.test(nextLine) &&
+            !PURE_DAG_RE.test(nextLine)) {
+          buffer += " " + nextLine;
+          pi++;
+        }
+      }
       if (buffer) { hearingJoined.push(buffer); buffer = ""; }
       continue;
     }
