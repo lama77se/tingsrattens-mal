@@ -189,7 +189,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       if (result?.success && result.text) {
         const parsed = parseCourtPdf(result.text, court);
         for (const h of parsed) {
-          const key = `${h.caseNumber}|${h.date}|${h.time}`;
+          const key = `${h.caseNumber}|${h.date}|${h.time}|${h.saken}`;
           if (seen.has(key)) continue;
           seen.add(key);
           h.id = `${court.id}-w${i}-${hearings.length}`;
