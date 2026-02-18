@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, Clock, MapPin } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
@@ -261,7 +262,7 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
               placeholder="Målnummer, parter, tingsrätt, saken..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-11 md:h-10 md:max-w-md"
+              className="pl-9 h-11 md:h-10"
             />
           </div>
         </div>
@@ -367,25 +368,25 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
           sorted.map((h) => (
             <Card key={h.id} className="overflow-hidden">
               <CardContent className="p-4 space-y-2">
-                {/* Top row: date/time + badge */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-medium">{h.date}</span>
-                    <span className="text-muted-foreground">{h.time}</span>
+                {/* Top row: date + time */}
+                <div className="flex items-center gap-1.5 text-sm">
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="font-medium">{h.date}</span>
+                  <span className="text-muted-foreground">{h.time}</span>
+                </div>
+
+                {/* Court + hearing type badge */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm min-w-0">
+                    <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate">{h.court}</span>
                   </div>
-                  <Badge variant={typeBadgeVariant(h.type) as any} className="shrink-0">
+                  <Badge variant={typeBadgeVariant(h.type) as any} className="shrink-0 text-xs">
                     {h.type}
                   </Badge>
                 </div>
 
-                {/* Court */}
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span>{h.court}</span>
-                </div>
-
-                {/* Case number + type */}
+                {/* Case number + måltyp */}
                 <div className="flex items-center gap-3 text-sm">
                   <span className="font-mono font-medium">{h.caseNumber}</span>
                   {h.maltyp && (
@@ -393,26 +394,36 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   )}
                 </div>
 
-                {/* Saken */}
+                {/* Saken — tappable for lagrum popup when available */}
                 {h.saken && (
                   <div className="text-sm">
                     <span className="text-muted-foreground">Saken: </span>
-                    <span>{h.saken}</span>
+                    {(h.lagrum || h.sakomrade) ? (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button className="text-left underline decoration-dotted underline-offset-2">
+                            {h.saken}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 text-sm space-y-1.5">
+                          {h.sakomrade && (
+                            <div><span className="text-muted-foreground">Sakområde: </span>{h.sakomrade}</div>
+                          )}
+                          {h.lagrum && (
+                            <div><span className="text-muted-foreground">Lagrum: </span>{h.lagrum}</div>
+                          )}
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      <span>{h.saken}</span>
+                    )}
                   </div>
                 )}
 
-                {/* Additional details row */}
-                {(h.sakomrade || h.lagrum || h.fleraSakfragor) && (
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground pt-1 border-t">
-                    {h.sakomrade && (
-                      <span>{h.sakomrade}</span>
-                    )}
-                    {h.lagrum && (
-                      <span>{h.lagrum}</span>
-                    )}
-                    {h.fleraSakfragor && (
-                      <span className="text-primary font-medium">Flera sakfrågor</span>
-                    )}
+                {/* Flera sakfrågor indicator */}
+                {h.fleraSakfragor && (
+                  <div className="text-xs text-primary font-medium pt-1 border-t">
+                    Flera sakfrågor
                   </div>
                 )}
               </CardContent>
