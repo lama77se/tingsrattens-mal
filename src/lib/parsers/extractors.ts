@@ -123,6 +123,8 @@ export function preprocessLines(text: string): string[] {
         // --- Deglue patterns for PDFs with missing inter-field spaces ---
         // Day abbreviation before date: "fr20-feb" → "fr 20-feb"
         .replace(/^(m[åaö]|ma|ti|on|to|fr|lö|lo|sö|so)(\d)/i, "$1 $2")
+        // ISO date glued to time: "2026-02-0509:00" → "2026-02-05 09:00"
+        .replace(/(\d{4}-\d{2}-\d{2})(\d)/g, "$1 $2")
         // Lowercase before time digit: "feb09:00" → "feb 09:00"
         .replace(/([a-zåäö])(\d{1,2}:\d{2})/g, "$1 $2")
         // Time before uppercase: "12:00Huvudförhandling" → "12:00 Huvudförhandling"
