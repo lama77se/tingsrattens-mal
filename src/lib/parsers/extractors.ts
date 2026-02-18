@@ -67,7 +67,7 @@ export const NORMALIZED_TYPES = HEARING_TYPES.map((ht) => ({
 
 export const COURT_IN_SAKEN_REGEX = /^(.+(?:tingsrätt|hovrätt|kammarrätt))\s*[-–—]\s*(.+)$/i;
 
-export const FLERA_SAKFRAGOR_REGEX = /m\s*\.?\s*m\s*\.?\s*$/i;
+export const FLERA_SAKFRAGOR_REGEX = /\bm\s*\.?\s*m\b\.?/i;
 
 // --- Extraction functions ---
 
