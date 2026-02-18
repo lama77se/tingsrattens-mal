@@ -99,220 +99,27 @@ export function extractSwedishDate(line: string): string | null {
 }
 
 /**
- * Pre-process PDF text into clean, trimmed, non-empty lines with case number prefix fixes.
+ * Pre-process PDF text into clean, trimmed, non-empty lines.
  *
- * Handles two opposite pdf-parse failure modes:
- * 1. Field-per-line splitting: date, time, type on separate lines → rejoin into hearing lines
- * 2. Page boundary concatenation: multiple hearings on one line → split apart
+ * With unpdf coordinate-based extraction, text arrives as proper visual rows
+ * with correct field spacing. Only minimal normalization is needed.
  */
 export function preprocessLines(text: string): string[] {
-  const rawLines = text
+  return text
     .split("\n")
     .map((l) => l.trim())
-    .filter(Boolean);
-
-  // Phase 1: Rejoin tokens split across lines by pdf-parse
-  // "2026-02-" + "16" → "2026-02-16", "09:00 -" + "16:00" → "09:00 - 16:00"
-  const tokenJoined: string[] = [];
-  for (const line of rawLines) {
-    const prev = tokenJoined.length > 0 ? tokenJoined[tokenJoined.length - 1] : "";
-    if (/\d{4}[-–—]\d{2}[-–—]$/.test(prev) && /^\d{1,2}$/.test(line)) {
-      tokenJoined[tokenJoined.length - 1] += line;
-    } else if (/\d{1,2}:\d{2}\s*[-–—]\s*$/.test(prev) && /^\d{1,2}:\d{2}/.test(line)) {
-      tokenJoined[tokenJoined.length - 1] += " " + line;
-    } else {
-      tokenJoined.push(line);
-    }
-  }
-
-  // Phase 1.5: Split page boundary concatenations within lines.
-  // pdf-parse can join content across page breaks without newlines, producing lines like
-  // "konkurs Sal 1ti 2026-02-10" or "narkotikabrott on 2026-02-11 09:00..."
-  // Split before embedded day-abbreviation + date patterns (only when preceded by non-letter).
-  // Also split before day-abbreviation + time (for date-less multi-day entries at page boundaries).
-  const pageSplit: string[] = [];
-  for (const line of tokenJoined) {
-    const split = line
-      .replace(
-        /([\d\s.,;:)])\s*((?:må|ma|ti|on|to|fr|lö|lo|sö|so))\s*(\d{4}[-–—]\d{2}[-–—]\d{2})/gi,
-        "$1\n$2 $3"
-      )
-      .replace(
-        /([\d\s.,;:)])((?:må|ma|mö|ti|on|to|fr|lö|lo|sö|so))(\d{1,2}:\d{2})/gi,
-        "$1\n$2 $3"
-      );
-    for (const part of split.split("\n")) {
-      const trimmed = part.trim();
-      if (trimmed) pageSplit.push(trimmed);
-    }
-  }
-
-  // Phase 2: Rejoin hearing fields split across lines (field-per-line PDF structure).
-  // DAY_DATE_RE is checked BEFORE COMPLETE_HEARING_RE because Phase 1 can join
-  // day+date+time onto one line (e.g., "ti 2026-02-10 09:00 - 10:00") while the
-  // hearing type and saken remain on subsequent lines.  Pushing such a line directly
-  // would orphan those fields; using a buffer accumulates them correctly.
-  // Lines matching COMPLETE_HEARING_RE without a day abbreviation (e.g., from Phase 4
-  // transforms) are still pushed directly since they lack subsequent field lines.
-  const DAY_DATE_RE = /^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s*\d{4}[-–—]\d{2}[-–—]\d{2}/i;
-  const DAY_TIME_RE = /^(?:må|ma|mö|ti|on|to|fr|lö|lo|sö|so)\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/i;
-  const COMPLETE_HEARING_RE = /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
-  const TIME_RANGE_RE = /^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
-  const HAS_TIME_RE = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
-  // Page headers that appear at page boundaries — flush buffer and discard
-  const PAGE_HEADER_RE = /^(uppropslista|dag\s*datum|datum\s+tid|förhandlingar\b|listan\s)/i;
-  // Pure (dag X/Y) lines — orphaned multi-day markers at page tops
-  const PURE_DAG_RE = /^\(dag\s+\d+\/\d+\)\s*$/i;
-  // Bare case number on its own line (orphaned at page boundary)
-  const BARE_CASE_PAGE_RE = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i;
-
-  // A line ending with a room (Sal/Tingssal + number) is truly complete.
-  const ENDS_WITH_ROOM_RE = /(?:Tings)?[Ss]al\s+\S+\s*$/;
-
-  const hearingJoined: string[] = [];
-  let buffer = "";
-  for (let pi = 0; pi < pageSplit.length; pi++) {
-    const line = pageSplit[pi];
-    if (PAGE_HEADER_RE.test(line)) {
-      // Page header — skip consecutive headers and pure (dag X/Y) markers,
-      // then check if orphaned continuation text follows (pdf-parse page
-      // boundary recovery: saken/room from the last entry on the previous
-      // page can end up at the top of the next page).
-      while (pi + 1 < pageSplit.length &&
-             (PAGE_HEADER_RE.test(pageSplit[pi + 1]) || PURE_DAG_RE.test(pageSplit[pi + 1]))) {
-        pi++;
-      }
-      // If we have a buffer and the next line is orphaned saken text (not a
-      // hearing start or bare case number), append it to recover lost saken.
-      if (buffer && pi + 1 < pageSplit.length) {
-        const nextLine = pageSplit[pi + 1];
-        if (!DAY_DATE_RE.test(nextLine) &&
-            !DAY_TIME_RE.test(nextLine) &&
-            !COMPLETE_HEARING_RE.test(nextLine) &&
-            !TIME_RANGE_RE.test(nextLine) &&
-            !BARE_CASE_PAGE_RE.test(nextLine) &&
-            !PAGE_HEADER_RE.test(nextLine) &&
-            !PURE_DAG_RE.test(nextLine)) {
-          buffer += " " + nextLine;
-          pi++;
-        }
-      }
-      if (buffer) { hearingJoined.push(buffer); buffer = ""; }
-      continue;
-    }
-    if (DAY_DATE_RE.test(line)) {
-      // Day abbreviation + date line.  Determine whether the hearing is fully
-      // contained on THIS line (push directly) or continues on subsequent lines
-      // (buffer to accumulate).  A line ending with a room is truly self-contained;
-      // otherwise, saken/room/extra case numbers may follow on subsequent lines.
-      const cm = line.match(COMPLETE_HEARING_RE);
-      if (cm && ENDS_WITH_ROOM_RE.test(line)) {
-        // Has date+time AND ends with room — truly complete, push directly
-        if (buffer) { hearingJoined.push(buffer); buffer = ""; }
-        hearingJoined.push(line);
-      } else {
-        // Needs accumulation (no room at end, or no time yet)
-        if (buffer) hearingJoined.push(buffer);
-        buffer = line;
-      }
-    } else if (DAY_TIME_RE.test(line)) {
-      // Day abbreviation + time range without date — date-less multi-day entries.
-      // Always buffer to accumulate case number, saken, room from subsequent lines.
-      if (buffer) hearingJoined.push(buffer);
-      buffer = line;
-    } else if (COMPLETE_HEARING_RE.test(line)) {
-      // Date + time without day abbreviation — self-contained, output directly
-      if (buffer) { hearingJoined.push(buffer); buffer = ""; }
-      hearingJoined.push(line);
-    } else if (TIME_RANGE_RE.test(line) && buffer && HAS_TIME_RE.test(buffer)) {
-      // Time range but buffer already has one — new hearing on same day
-      hearingJoined.push(buffer);
-      buffer = line;
-    } else if (buffer) {
-      buffer += " " + line;
-    } else {
-      hearingJoined.push(line);
-    }
-  }
-  if (buffer) hearingJoined.push(buffer);
-
-  // Phase 3: Re-join bare room numbers split across lines at page boundaries:
-  // "...Sal" + "10" → "...Sal 10"
-  const joined: string[] = [];
-  for (const line of hearingJoined) {
-    if (
-      /^\d{1,3}$/.test(line) &&
-      joined.length > 0 &&
-      /(?:Tings)?[Ss]al\s*$/i.test(joined[joined.length - 1])
-    ) {
-      joined[joined.length - 1] += " " + line;
-    } else {
-      joined.push(line);
-    }
-  }
-
-  // Phase 4: Per-line transforms
-  return joined.map((line) =>
+    .filter(Boolean)
+    .map((line) =>
       line
-        // Normalize en-dashes/em-dashes to hyphens in ISO dates (some PDFs use –)
+        // Normalize en-dashes/em-dashes to hyphens in ISO dates
         .replace(/(\d{4})[-–—](\d{2})[-–—](\d{2})/g, "$1-$2-$3")
-        // pdf-parse gluing fixes: insert spaces at known boundaries
-        // Day abbreviation glued to date: to2026 → to 2026, ma16 → ma 16
-        .replace(/((?:må|ma|ti|on|to|fr|lö|lo|sö|so))(\d)/gi, "$1 $2")
-        // Short date to ISO: 17-feb → 2026-02-17 (must come before date-time glue fix)
-        .replace(/\b(\d{1,2})[-–—](jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)/gi, (_m, day, month) => {
-          const mm = SHORT_MONTH_MAP[month.toLowerCase()];
-          return mm ? `${new Date().getFullYear()}-${mm}-${String(day).padStart(2, "0")}` : _m;
-        })
-        // Strip (dag X/Y) annotations early — before date-time glue fix, because
-        // stripping "(dag 1/2)" between date and time creates new adjacency: 2026-02-1709:00
+        // Strip (dag X/Y) annotations
         .replace(/\s*\(dag\s+\d+\/\d+\)/gi, "")
-        // Date glued to time: 2026-02-1609:00 → 2026-02-16 09:00
-        .replace(/(\d{4}-\d{2}-\d{2})(\d{1,2}:\d{2})/g, "$1 $2")
-        // Month abbreviation glued to time: feb09:00 → feb 09:00
-        .replace(/(jan|feb|mar|apr|maj|jun|jul|aug|sep|okt|nov|dec)(\d{1,2}:\d{2})/gi, "$1 $2")
-        // Time glued to text: 09:45Huvudförhandling → 09:45 Huvudförhandling
-        .replace(/(\d{1,2}:\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
-        // Text glued to case number prefix ((?<!F) prevents splitting "FT"; (?<!PM) prevents splitting "PMT")
-        .replace(/([a-zA-ZåäöÅÄÖ])((?:PMT|FT|(?<!(?:F|PM))[TBKÄ])\s?\d{1,6}[-–—]\d{2})/gi, "$1 $2")
-        // Case number glued to text
-        .replace(/(\d{2}[-–—]\d{2})([a-zA-ZåäöÅÄÖ])/g, "$1 $2")
-        // Text glued to Sal/Tingssal: knivlagenSal → knivlagen Sal, textTingssal → text Tingssal
-        .replace(/([a-zA-ZåäöÅÄÖ.,)])(Tingssal|Sal)/g, "$1 $2")
-        // Text glued to court name: konkursUppsala tingsrätt → konkurs Uppsala tingsrätt
-        .replace(/([a-zåäö.])([A-ZÅÄÖ]\w*\s+tingsrätt)/g, "$1 $2")
         // Case number space before dash: B 784 -25 → B 784-25
-        .replace(/([TBFTKÄ]\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
-        // Bare sal number glued to text at end of line: Konkurs21 → Konkurs Sal 21, m.m.10 → m.m. Sal 10
-        .replace(/([a-zA-ZåäöÅÄÖ.])(\d{1,2})$/, "$1 Sal $2")
-        // Strip pagination footers: "1-81 visas av 81" (Swedish "X-Y shown of Z")
+        .replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
+        // Strip pagination footers: "1-81 visas av 81"
         .replace(/\s*\d+[-–—]\d+\s+visas\s+av\s+\d+\s*$/, "")
-    ).flatMap((line) => {
-      // Phase 5: Split lines containing multiple hearings concatenated together.
-      // Step 1: Split before day abbreviation + ISO date (cross-day page boundaries).
-      const dayParts = line.split(/\s+(?=(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s+\d{4}-\d{2}-\d{2})/i);
-      // Step 2: Split each part at subsequent time ranges (2nd+ occurrence).
-      // Handles same-day hearings on one line: "09:00-10:00 Type1 saken1 Sal 1 09:00-11:00 Type2 saken2 Sal 2"
-      return dayParts.flatMap((part) => {
-        const timeRe = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/g;
-        let match;
-        let first = true;
-        const positions: number[] = [];
-        while ((match = timeRe.exec(part)) !== null) {
-          if (first) { first = false; continue; }
-          positions.push(match.index);
-        }
-        if (positions.length === 0) return [part];
-        const result: string[] = [];
-        let start = 0;
-        for (const pos of positions) {
-          result.push(part.substring(start, pos).trim());
-          start = pos;
-        }
-        result.push(part.substring(start).trim());
-        return result.filter(Boolean);
-      });
-    });
+    );
 }
 
 export function extractTime(line: string, prevLine?: string): string {

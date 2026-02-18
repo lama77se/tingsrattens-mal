@@ -2,6 +2,7 @@ import type { ParserStrategy, ParserContext, RawHearing } from "./types";
 import {
   normalize,
   preprocessLines,
+  extractShortDate,
   NORMALIZED_TYPES,
   ROOM_REGEX,
 } from "./extractors";
@@ -147,18 +148,6 @@ function stripRoom(text: string): string {
 }
 
 /**
- * Regex matching a bare date+time line (no content after the time range).
- * Safety net for lines like "ti 2026-02-10 09:00 - 10:00" that lack trailing text.
- */
-const BARE_DATE_TIME_REGEX = /\d{4}-\d{2}-\d{2}.*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}\s*$/;
-
-/**
- * Regex matching a standalone case number line (nothing else on the line).
- * Used to stop the continuation loop when orphaned case numbers appear at page boundaries.
- */
-const BARE_CASE_REGEX = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i;
-
-/**
  * Check if a line should stop the continuation loop.
  */
 function isContinuationBreak(line: string): boolean {
@@ -168,9 +157,7 @@ function isContinuationBreak(line: string): boolean {
     DATE_ONLY_REGEX.test(line) ||
     !!line.match(TIME_ONLY_REGEX) ||
     HEADER_REGEX.test(line) ||
-    BARE_DATE_TIME_REGEX.test(line) ||
-    !!line.match(DAY_TIME_REGEX) ||
-    BARE_CASE_REGEX.test(line)
+    !!line.match(DAY_TIME_REGEX)
   );
 }
 
@@ -192,7 +179,17 @@ export const formatTabular: ParserStrategy = {
 
     console.log("PDF text first 500 chars:", text.substring(0, 500));
 
-    const lines = preprocessLines(text);
+    const rawLines = preprocessLines(text);
+    // Convert short dates (e.g., "10-feb") to ISO dates for regex matching
+    const lines = rawLines.map(line => {
+      if (!/\d{4}-\d{2}-\d{2}/.test(line)) {
+        const isoDate = extractShortDate(line);
+        if (isoDate) {
+          return line.replace(/\b(\d{1,2})[-–](\w{3})\b/i, isoDate);
+        }
+      }
+      return line;
+    });
     const hearings: RawHearing[] = [];
     let currentDate = "";
 
@@ -272,7 +269,7 @@ export const formatTabular: ParserStrategy = {
         afterCase = afterCase.replace(/^[/,]\s*/, "");
         caseMatch = afterCase.match(CASE_AT_START_REGEX);
       }
-      const caseNumber = caseNumbers.join(", ");
+      let caseNumber = caseNumbers.join(", ");
 
       // Extract external court reference "(X tingsrätt)" after case numbers
       let externalCourt: string | undefined;
@@ -294,8 +291,35 @@ export const formatTabular: ParserStrategy = {
         // Skip (dag X/Y) annotations in continuation
         if (DAG_REGEX.test(nextLine)) continue;
         if (nextLine.length > 1) {
-          if (!room) room = extractRoomFromText(nextLine);
-          const cleaned = stripRoom(nextLine);
+          let lineText = nextLine;
+
+          // Extract case number(s) from continuation line if not yet found
+          if (!caseNumber) {
+            const caseCont = lineText.match(CASE_AT_START_REGEX);
+            if (caseCont) {
+              const cases: string[] = [];
+              let after = lineText;
+              let cm = after.match(CASE_AT_START_REGEX);
+              while (cm) {
+                cases.push(cm[1]);
+                after = after.substring(cm[0].length).trim();
+                after = after.replace(/^[/,]\s*/, "");
+                cm = after.match(CASE_AT_START_REGEX);
+              }
+              caseNumber = cases.join(", ");
+              // Extract external court reference from continuation
+              const courtRef2 = after.match(/^\(([^)]*(?:tingsrätt|tingsratt))\)\s*/i);
+              if (courtRef2) {
+                externalCourt = courtRef2[1].trim();
+                after = after.substring(courtRef2[0].length);
+              }
+              after = after.replace(/^med\s+flera\s*/i, "").replace(/^m\.?fl\.?\s*/i, "");
+              lineText = after;
+            }
+          }
+
+          if (!room) room = extractRoomFromText(lineText);
+          const cleaned = stripRoom(lineText);
           if (cleaned && !DAY_ABBREV_REGEX.test(cleaned)) {
             saken = saken ? `${saken} ${cleaned}` : cleaned;
           }

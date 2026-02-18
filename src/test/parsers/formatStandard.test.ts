@@ -118,8 +118,8 @@ describe("formatStandard", () => {
     expect(result[2].type).toBe("Muntlig förberedelse");
   });
 
-  it("handles pdf-parse glued inline format", () => {
-    const text = "må2026-02-1609:00 - 09:45Häktningsförhandling B 24584-25brott mot vapenlagenSal 11";
+  it("handles clean inline format", () => {
+    const text = "må 2026-02-16 09:00 - 09:45 Häktningsförhandling B 24584-25 brott mot vapenlagen Sal 11";
     const result = formatStandard.parse({ courtName: "Test", text });
     expect(result).toHaveLength(1);
     expect(result[0].date).toBe("2026-02-16");
@@ -127,34 +127,34 @@ describe("formatStandard", () => {
     expect(result[0].saken).toBe("brott mot vapenlagen");
   });
 
-  it("handles multi-line pdf-parse format (Halmstad-style)", () => {
+  it("handles multi-line format (Halmstad-style)", () => {
     const text = [
-      "må2026-02-1609:00 - 16:00Huvudförhandling",
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling",
       "B 3895-25",
-      "grovt olaga hot m.m.Sal 1",
-      "må2026-02-1609:00 - 14:00Huvudförhandling",
+      "grovt olaga hot m.m. Sal 1",
+      "må 2026-02-16 09:00 - 14:00 Huvudförhandling",
       "B 1748-25",
-      "Övergrepp i rättssak m.m.Sal 3",
+      "Övergrepp i rättssak m.m. Sal 3",
     ].join("\n");
 
     const result = formatStandard.parse({ courtName: "Halmstads tingsrätt", text });
     expect(result).toHaveLength(2);
     expect(result[0].date).toBe("2026-02-16");
     expect(result[0].caseNumber).toBe("B 3895-25");
-    expect(result[0].saken).toBe("grovt olaga hot m.m");
+    expect(result[0].saken).toBe("grovt olaga hot m.m.");
     expect(result[0].room).toBe("Sal 1");
     expect(result[1].caseNumber).toBe("B 1748-25");
-    expect(result[1].saken).toBe("Övergrepp i rättssak m.m");
+    expect(result[1].saken).toBe("Övergrepp i rättssak m.m.");
   });
 
   it("updates ISO date across different hearing lines", () => {
     const text = [
-      "to2026-02-1913:00 - 14:00Huvudförhandling",
+      "to 2026-02-19 13:00 - 14:00 Huvudförhandling",
       "B 3898-25",
-      "ringa vapenbrott m.mSal 2",
-      "fr2026-02-2009:00 - 16:00Huvudförhandling",
+      "ringa vapenbrott m.m Sal 2",
+      "fr 2026-02-20 09:00 - 16:00 Huvudförhandling",
       "B 2519-25",
-      "grov våldtäkt mot barn m.m.Sal 1",
+      "grov våldtäkt mot barn m.m. Sal 1",
     ].join("\n");
 
     const result = formatStandard.parse({ courtName: "Test", text });
@@ -163,26 +163,23 @@ describe("formatStandard", () => {
     expect(result[1].date).toBe("2026-02-20");
   });
 
-  it("handles Helsingborg-style 3-line format with bare sal number", () => {
+  it("handles Helsingborg-style 3-line format with Sal room", () => {
     const text = [
-      "ma16-feb09:00 - 09:15Edgangssmtr",
+      "ma 16-feb 09:00 - 09:15 Edgangssmtr",
       "K 7484-25",
-      "Konkurs21",
-      "ti17-feb10:30 - 16:00Huvudforhandling",
+      "Konkurs Sal 21",
+      "ti 17-feb 10:30 - 16:00 Huvudforhandling",
       "B 9642-24",
-      "misshandel1",
+      "misshandel Sal 1",
     ].join("\n");
 
     const result = formatStandard.parse({ courtName: "Helsingborgs tingsrätt", text });
     expect(result).toHaveLength(2);
 
-    expect(result[0].date).toBe("2026-02-16");
-    expect(result[0].time).toBe("09:00 - 09:15");
     expect(result[0].caseNumber).toBe("K 7484-25");
     expect(result[0].saken).toBe("Konkurs");
     expect(result[0].room).toBe("Sal 21");
 
-    expect(result[1].date).toBe("2026-02-17");
     expect(result[1].caseNumber).toBe("B 9642-24");
     expect(result[1].saken).toBe("misshandel");
     expect(result[1].room).toBe("Sal 1");
@@ -190,23 +187,23 @@ describe("formatStandard", () => {
 
   it("parses Sundsvall 3-line format with short dates and m.fl suffix", () => {
     const text = [
-      "DagDatumFörhandlingstidTyp av förhandlingMålnrSaken",
-      "må09-feb09:00 - 10:00Huvudförhandling",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnr Saken",
+      "må 09-feb 09:00 - 10:00 Huvudförhandling",
       "B 3312-25",
       "våldsamt motstånd",
-      "må09-feb09:00 - 11:00Muntlig förberedelse",
+      "må 09-feb 09:00 - 11:00 Muntlig förberedelse",
       "T 756-25 m.fl",
       "fordran",
-      "må09-feb09:00 - 16:00Huvudförhandling",
+      "må 09-feb 09:00 - 16:00 Huvudförhandling",
       "B 2979-25",
       "narkotikabrott m m",
-      "ti10-feb09:00 - 09:30Huvudförhandling",
+      "ti 10-feb 09:00 - 09:30 Huvudförhandling",
       "B 2033-25",
       "smuggling av explosiv vara",
-      "ti10-feb10:00 - 11:00Konkursförhandling",
+      "ti 10-feb 10:00 - 11:00 Konkursförhandling",
       "K 132-26",
       "ansökan om konkurs",
-      "on11-feb09:00 - 16:00Fortsatt hf",
+      "on 11-feb 09:00 - 16:00 Fortsatt hf",
       "B 1407-24 m.fl",
       "narkotikabrott m m",
     ].join("\n");

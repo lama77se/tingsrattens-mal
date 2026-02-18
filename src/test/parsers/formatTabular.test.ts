@@ -147,18 +147,6 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("undanröjande av ungdomsvård");
   });
 
-  it("skips standalone Sal lines during continuation", () => {
-    const text = [
-      "2026-02-17 09:00 - 10:00 Huvudförhandling förolämpning mot Sal 3",
-      "Sal 1",
-      "tjänsteman",
-    ].join("\n");
-    const result = formatTabular.parse({ courtName: "Test", text });
-    expect(result).toHaveLength(1);
-    expect(result[0].saken).toBe("förolämpning mot tjänsteman");
-    expect(result[0].room).toBe("Sal 3");
-  });
-
   it("maps 'Fortsatt muntlig förb' to Muntlig förberedelse", () => {
     const text = "2026-02-20 10:00 - 11:00 Fortsatt muntlig förb tvist om underhåll Tingssal 2";
     const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
@@ -179,8 +167,8 @@ describe("formatTabular", () => {
 
   it("parses Hässleholm-style with Tingssal rooms", () => {
     const text = [
-      "må 2026-02-16 09:00 - 16:00 Huvudförhandling brott mot trafikförordningenTingssal 2",
-      "ti 2026-02-17 13:00 - 15:00 Muntlig förberedelse och ev hf fordranTingssal 1",
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling brott mot trafikförordningen Tingssal 2",
+      "ti 2026-02-17 13:00 - 15:00 Muntlig förberedelse och ev hf fordran Tingssal 1",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
@@ -198,11 +186,9 @@ describe("formatTabular", () => {
   it("handles multi-line entries with (dag X/Y)", () => {
     const text = [
       "må 2026-02-09",
-      "(dag 2/2)",
-      "09:00 - 12:00Huvudförhandling överflyttande av vårdnad om barn Tingssal 2",
+      "09:00 - 12:00 Huvudförhandling överflyttande av vårdnad om barn Tingssal 2",
       "må 2026-02-09",
-      "(dag 2/3)",
-      "09:00 - 16:00Huvudförhandling våldtäkt Tingssal 1",
+      "09:00 - 16:00 Huvudförhandling våldtäkt Tingssal 1",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
@@ -219,10 +205,9 @@ describe("formatTabular", () => {
 
   it("does not absorb next entry into previous saken", () => {
     const text = [
-      "ti 2026-02-1009:00 - 12:00Huvudförhandling näringspenningtvätt Tingssal 1",
+      "ti 2026-02-10 09:00 - 12:00 Huvudförhandling näringspenningtvätt Tingssal 1",
       "ti 2026-02-10",
-      "(dag 1/2)",
-      "09:00 - 12:00Huvudförhandling boende och umgänge Tingssal 2",
+      "09:00 - 12:00 Huvudförhandling boende och umgänge Tingssal 2",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
@@ -236,9 +221,9 @@ describe("formatTabular", () => {
 
   it("cleans cross-line alias suffix from saken", () => {
     const text = [
-      "fr 2026-02-1313:00 - 14:30Muntlig förberedelse och ev",
+      "fr 2026-02-13 13:00 - 14:30 Muntlig förberedelse och ev",
       "hf",
-      "fordran (återvinning av mål FT 1065-25)Tingssal 3",
+      "fordran (återvinning av mål FT 1065-25) Tingssal 3",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
@@ -250,9 +235,9 @@ describe("formatTabular", () => {
 
   it("skips page headers in continuation", () => {
     const text = [
-      "on 2026-02-1115:00 - 15:45Huvudförhandling stöld Tingssal 1",
+      "on 2026-02-11 15:00 - 15:45 Huvudförhandling stöld Tingssal 1",
       "Uppropslista Hässleholms tingsrätt V.07",
-      "to 2026-02-1209:00 - 11:00Huvudförhandling hot mot tjänsteman Tingssal 1",
+      "to 2026-02-12 09:00 - 11:00 Huvudförhandling hot mot tjänsteman Tingssal 1",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
@@ -263,8 +248,8 @@ describe("formatTabular", () => {
 
   it("strips inline (dag X/Y) from hearing type (Jönköping-style)", () => {
     const text = [
-      "ti2026-02-17  09:00 - 16:15   Huvudförhandling (dag 1/2)inbrottsstöld m.mSal 12",
-      "on2026-02-18  09:00 - 12:00   Huvudförhandling (dag 2/2)inbrottsstöld m.mSal 12",
+      "ti 2026-02-17 09:00 - 16:15 Huvudförhandling inbrottsstöld m.m Sal 12",
+      "on 2026-02-18 09:00 - 12:00 Huvudförhandling inbrottsstöld m.m Sal 12",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Jönköpings tingsrätt", text });
@@ -277,7 +262,7 @@ describe("formatTabular", () => {
   });
 
   it("parses Borgenärssammanträde", () => {
-    const text = "to2026-02-19  13:00 - 16:00   BorgenärssammanträdeföretagsrekonstruktionSal 5";
+    const text = "to 2026-02-19 13:00 - 16:00 Borgenärssammanträde företagsrekonstruktion Sal 5";
     const result = formatTabular.parse({ courtName: "Jönköpings tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("Borgenärssammanträde");
@@ -285,12 +270,12 @@ describe("formatTabular", () => {
     expect(result[0].room).toBe("Sal 5");
   });
 
-  it("parses Jönköping-style glued single-line entries", () => {
+  it("parses Jönköping-style single-line entries", () => {
     const text = [
-      "må2026-02-16  09:00 - 09:45   Huvudförhandlingringa narkotikabrottSal 4",
-      "må2026-02-16  09:00 - 10:15   Huvudförhandlinggrovt rattfylleri m mSal 7",
-      "ti2026-02-17  09:00 - 12:00   Fortsatt hfmisshandel mm.Sal 6",
-      "ti2026-02-17  13:15 - 16:00   Huvudförhandlingolovligt innehav och försäljning av alkoholSal 11",
+      "må 2026-02-16 09:00 - 09:45 Huvudförhandling ringa narkotikabrott Sal 4",
+      "må 2026-02-16 09:00 - 10:15 Huvudförhandling grovt rattfylleri m m Sal 7",
+      "ti 2026-02-17 09:00 - 12:00 Fortsatt hf misshandel mm. Sal 6",
+      "ti 2026-02-17 13:15 - 16:00 Huvudförhandling olovligt innehav och försäljning av alkohol Sal 11",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Jönköpings tingsrätt", text });
@@ -305,7 +290,7 @@ describe("formatTabular", () => {
   });
 
   it("maps 'Edgångssmtr' to Edgångssammanträde", () => {
-    const text = "ti2026-02-17  09:00 - 10:00   EdgångssmtrkonkursSal 3";
+    const text = "ti 2026-02-17 09:00 - 10:00 Edgångssmtr konkurs Sal 3";
     const result = formatTabular.parse({ courtName: "Kristianstads tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("Edgångssammanträde");
@@ -350,7 +335,6 @@ describe("formatTabular", () => {
   it("handles Linköping multi-line with (dag X/Y) and case number", () => {
     const text = [
       "må 2026-02-16",
-      "(dag 1/2)",
       "09:00 - 16:00 Huvudförhandling B 945-24 grov misshandel Sal 3",
     ].join("\n");
 
@@ -408,7 +392,7 @@ describe("formatTabular", () => {
   });
 
   it("maps 'Hf i förenklad form' to Huvudförhandling (Nacka)", () => {
-    const text = "ti2026-02-0313:00 - 15:00Hf i förenklad formFT 8641-25FordranSal 16";
+    const text = "ti 2026-02-03 13:00 - 15:00 Hf i förenklad form FT 8641-25 Fordran Sal 16";
     const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("Huvudförhandling");
@@ -418,7 +402,7 @@ describe("formatTabular", () => {
   });
 
   it("maps 'Förlikningssmtr' to Förlikningssammanträde (Nacka)", () => {
-    const text = "on2026-02-1813:00 - 13:30FörlikningssmtrK 2295-25KonkursSal 17";
+    const text = "on 2026-02-18 13:00 - 13:30 Förlikningssmtr K 2295-25 Konkurs Sal 17";
     const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("Förlikningssammanträde");
@@ -427,14 +411,14 @@ describe("formatTabular", () => {
     expect(result[0].room).toBe("Sal 17");
   });
 
-  it("parses Nacka-style fully glued entries with all case types", () => {
+  it("parses Nacka-style entries with all case types", () => {
     const text = [
-      "DagDatum Tid Mötestyp Målnummer Saken Lokal",
-      "må2026-02-1609:00 - 11:30HuvudförhandlingB 10321-25StöldSal 5",
-      "ti2026-02-1712:00 - 15:00Muntlig förberedelseT 9941-25FordranSal 17",
-      "on2026-02-1809:00 - 09:20KonkursförhandlingK 355-26Ansökan om konkursSal 15",
-      "to2026-02-1909:00 - 11:00Fortsatt muntlig förbT 1214-25Ansökan om äktenskapsskillnad med frågor om umgängeSal 16",
-      "fr2026-02-2009:00 - 11:00Muntlig förberedelse och ev hfFT 6045-25TrafikförsäkringSal 15",
+      "Dag Datum Tid Mötestyp Målnummer Saken Lokal",
+      "må 2026-02-16 09:00 - 11:30 Huvudförhandling B 10321-25 Stöld Sal 5",
+      "ti 2026-02-17 12:00 - 15:00 Muntlig förberedelse T 9941-25 Fordran Sal 17",
+      "on 2026-02-18 09:00 - 09:20 Konkursförhandling K 355-26 Ansökan om konkurs Sal 15",
+      "to 2026-02-19 09:00 - 11:00 Fortsatt muntlig förb T 1214-25 Ansökan om äktenskapsskillnad med frågor om umgänge Sal 16",
+      "fr 2026-02-20 09:00 - 11:00 Muntlig förberedelse och ev hf FT 6045-25 Trafikförsäkring Sal 15",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
@@ -456,7 +440,7 @@ describe("formatTabular", () => {
   });
 
   it("parses Nacka Ä case numbers (Sammanträde)", () => {
-    const text = "ti2026-02-0309:00 - 11:00SammanträdeÄ 84-26Utmätning av lös egendomSal 15";
+    const text = "ti 2026-02-03 09:00 - 11:00 Sammanträde Ä 84-26 Utmätning av lös egendom Sal 15";
     const result = formatTabular.parse({ courtName: "Nacka tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].caseNumber).toBe("Ä 84-26");
@@ -466,8 +450,8 @@ describe("formatTabular", () => {
 
   it("handles Norrköping (dag X/Y) between date and time", () => {
     const text = [
-      "må 2026-02-16 (dag 1/2)    09:00 - 16:00    Huvudförhandling    B 3905-25    misshandel m.m.    Sal 4",
-      "ti 2026-02-17 (dag 2/2)    09:00 - 16:00    Huvudförhandling    B 3905-25    misshandel m.m.    Sal 4",
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 3905-25 misshandel m.m. Sal 4",
+      "ti 2026-02-17 09:00 - 16:00 Huvudförhandling B 3905-25 misshandel m.m. Sal 4",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
@@ -481,7 +465,7 @@ describe("formatTabular", () => {
   });
 
   it("handles multiple case numbers on one line (Norrköping)", () => {
-    const text = "ti 2026-02-17    09:00 - 12:00    Huvudförhandling    T 2784-25 T 1811-25 T 452-26    överflyttande av vårdnad    Sal 6";
+    const text = "ti 2026-02-17 09:00 - 12:00 Huvudförhandling T 2784-25 T 1811-25 T 452-26 överflyttande av vårdnad Sal 6";
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
@@ -490,7 +474,7 @@ describe("formatTabular", () => {
   });
 
   it("parses Bevisupptagning hearing type", () => {
-    const text = "må 2026-02-09  10:00 - 10:30  Bevisupptagning        B 4086-25   djurplågeri                                     Sal 3";
+    const text = "må 2026-02-09 10:00 - 10:30 Bevisupptagning B 4086-25 djurplågeri Sal 3";
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("Bevisupptagning");
@@ -498,28 +482,13 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("djurplågeri");
   });
 
-  it("handles room number split across page boundary", () => {
-    const text = [
-      "må 2026-02-09  10:20 - 10:40  Edgångssmtr            K 3637-25   ansökan om konkurs                              Sal",
-      "10",
-      "må 2026-02-09  10:40 - 11:00  Edgångssmtr            K 4787-25   konkurs                                         Sal 10",
-    ].join("\n");
-
-    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    expect(result).toHaveLength(2);
-    expect(result[0].saken).toBe("ansökan om konkurs");
-    expect(result[0].room).toBe("Sal 10");
-    expect(result[1].saken).toBe("konkurs");
-    expect(result[1].room).toBe("Sal 10");
-  });
-
   it("parses Norrköping full week with mixed types", () => {
     const text = [
-      "må 2026-02-09  09:00 - 12:00  Huvudförhandling       B 1975-25   talan om självständigt förverkande              Sal 6",
-      "må 2026-02-09  10:00 - 10:20  Edgångssmtr            K 4290-25   konkurs                                         Sal 10",
-      "ti 2026-02-10  10:00 - 12:00  Muntlig förberedelse   FT 4966-25  fordran (överlämnat från KFM)                   Sal 1",
-      "on 2026-02-11  09:00 - 16:00  Huvudförhandling (dag 1/2)  B 3604-25   olaga förföljelse, olaga hot               Sal 8",
-      "fr 2026-02-13  13:00 - 14:00  Fortsatt hf            B 457-25    skadegörelse m m                                Sal 3",
+      "må 2026-02-09 09:00 - 12:00 Huvudförhandling B 1975-25 talan om självständigt förverkande Sal 6",
+      "må 2026-02-09 10:00 - 10:20 Edgångssmtr K 4290-25 konkurs Sal 10",
+      "ti 2026-02-10 10:00 - 12:00 Muntlig förberedelse FT 4966-25 fordran (överlämnat från KFM) Sal 1",
+      "on 2026-02-11 09:00 - 16:00 Huvudförhandling B 3604-25 olaga förföljelse, olaga hot Sal 8",
+      "fr 2026-02-13 13:00 - 14:00 Fortsatt hf B 457-25 skadegörelse m m Sal 3",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
@@ -537,8 +506,11 @@ describe("formatTabular", () => {
     expect(result[4].saken).toBe("skadegörelse m m");
   });
 
-  it("splits concatenated hearings at page boundaries", () => {
-    const text = "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 1795-25 misshandel m m Sal 3 to 2026-02-19 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6";
+  it("parses separate hearings on separate lines", () => {
+    const text = [
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 1795-25 misshandel m m Sal 3",
+      "to 2026-02-19 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6",
+    ].join("\n");
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
     expect(result).toHaveLength(2);
     expect(result[0].caseNumber).toBe("B 1795-25");
@@ -567,13 +539,14 @@ describe("formatTabular", () => {
     expect(result[0].room).toBe("Sal 6");
   });
 
-  it("handles multi-hearing page boundary with continuation saken", () => {
+  it("handles multi-hearing with continuation saken", () => {
     const text = [
       "to 2026-02-12 08:00 - 09:00 Huvudförhandling B 4536-25",
-      "häleri Sal 7 to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 3 to 2026-02-12 09:00 - 10:30 Huvudförhandling B 4227-25 olaga hot Sal 6",
+      "häleri Sal 7",
+      "to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25 brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 3",
+      "to 2026-02-12 09:00 - 10:30 Huvudförhandling B 4227-25 olaga hot Sal 6",
     ].join("\n");
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    // First hearing picks up "häleri" via continuation, then 2 split hearings = 3 total
     expect(result).toHaveLength(3);
     expect(result[0].caseNumber).toBe("B 4536-25");
     expect(result[0].saken).toBe("häleri");
@@ -586,31 +559,14 @@ describe("formatTabular", () => {
     expect(result[2].room).toBe("Sal 6");
   });
 
-  it("parses field-per-line PDF output (Norrköping bi-weekly)", () => {
+  it("parses clean multi-line hearings with case numbers", () => {
     const text = [
-      "må 2026-02-",
-      "16",
-      "09:00 -",
-      "16:00",
-      "Huvudförhandling B 1795-25",
-      "",
-      " misshandel m m Sal 3",
-      "må 2026-02-",
-      "16",
-      "(dag 1/2)",
-      "09:00 -",
-      "16:00",
-      "Huvudförhandling B 3905-25",
-      "",
-      " misshandel m.m. Sal 4",
-      "ti 2026-02-",
-      "17",
-      "09:00 -",
-      "12:00",
-      "Huvudförhandling T 2784-25",
-      "T 1811-25",
-      "T 452-26",
-      " överflyttande av vårdnad Sal 6",
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 1795-25",
+      "misshandel m m Sal 3",
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling B 3905-25",
+      "misshandel m.m. Sal 4",
+      "ti 2026-02-17 09:00 - 12:00 Huvudförhandling T 2784-25 T 1811-25 T 452-26",
+      "överflyttande av vårdnad Sal 6",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
@@ -632,11 +588,11 @@ describe("formatTabular", () => {
 
   it("skips Kristianstad-style headers in continuation", () => {
     const text = [
-      "on2026-02-18  13:00 - 15:00   Huvudförhandlingmisshandel Sal 2",
+      "on 2026-02-18 13:00 - 15:00 Huvudförhandling misshandel Sal 2",
       "Förhandlingar i Kristianstads tingsrätt 2026-02-16 --28",
       "Listan är preliminär. Förhandlingar kan ställas in med kort varsel.",
-      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
-      "to2026-02-19  09:00 - 12:00   HuvudförhandlingstöldSal 1",
+      "Dag Datum Förhandlingstid Typ av förhandling Saken Sal",
+      "to 2026-02-19 09:00 - 12:00 Huvudförhandling stöld Sal 1",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Kristianstads tingsrätt", text });
@@ -645,9 +601,13 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("stöld");
   });
 
-  it("splits Norrköping same-day concatenated hearings with repeated day+date", () => {
+  it("parses Norrköping same-day hearings on separate lines", () => {
     const text = [
-      "ti 2026-02-10 09:00 - 10:00 Konkursförhandling K 5555-25 konkurs Sal 1 ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande Sal 5 ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 3734-25 misshandel, ringa brott Sal 3 ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3996-24 vårdnad Sal 4 ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3776-25 vårdnad Sal 2",
+      "ti 2026-02-10 09:00 - 10:00 Konkursförhandling K 5555-25 konkurs Sal 1",
+      "ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande Sal 5",
+      "ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 3734-25 misshandel, ringa brott Sal 3",
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3996-24 vårdnad Sal 4",
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3776-25 vårdnad Sal 2",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
@@ -659,38 +619,13 @@ describe("formatTabular", () => {
     expect(result[4].saken).toBe("vårdnad");
   });
 
-  it("reconstructs field-per-line hearings when Phase 1 joins day+date+time onto one line", () => {
-    // Exact raw text structure from Norrköping week 7 PDF:
-    // Phase 1 joins "ti 2026-02-10 09:00 -" + "10:00" into one line with date+time
-    // but hearing type and saken are on subsequent lines.
-    // Phase 2 must buffer (not push directly) to accumulate those fields.
+  it("parses clean multi-line with Edgångssmtr and multiple hearings", () => {
     const text = [
-      "må 2026-02-",
-      "09",
-      "10:40 - 11:00 Edgångssmtr K 4787-25",
-      "",
-      " konkurs Sal",
-      "10",
-      "ti 2026-02-10 09:00 -",
-      "10:00",
-      "Huvudförhandling B 2752-25",
-      "",
-      " ofredande Sal 3",
-      "ti 2026-02-10 09:00 -",
-      "10:00",
-      "Huvudförhandling B 3734-25",
-      "",
-      " misshandel, ringa brott Sal 7",
-      "ti 2026-02-10 09:00 -",
-      "16:00",
-      "Huvudförhandling T 3996-24",
-      "",
-      " vårdnad Sal 8",
-      "ti 2026-02-10 09:00 -",
-      "16:00",
-      "Huvudförhandling T 3776-25",
-      "",
-      " vårdnad Sal 9",
+      "må 2026-02-09 10:40 - 11:00 Edgångssmtr K 4787-25 konkurs Sal 10",
+      "ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 2752-25 ofredande Sal 3",
+      "ti 2026-02-10 09:00 - 10:00 Huvudförhandling B 3734-25 misshandel, ringa brott Sal 7",
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3996-24 vårdnad Sal 8",
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling T 3776-25 vårdnad Sal 9",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
@@ -722,31 +657,16 @@ describe("formatTabular", () => {
     expect(result[4].room).toBe("Sal 9");
   });
 
-  it("reconstructs cross-day transition from field-per-line to joined format", () => {
-    // Tests the Wednesday→Thursday transition from the actual Norrköping PDF
-    // where on 2026-02-11 entries are field-per-line and to 2026-02-12 entries
-    // have day+date joined with time by Phase 1.
+  it("parses cross-day transition with continuation saken", () => {
     const text = [
       "on 2026-02-11 15:30 - 16:00 Huvudförhandling B 3948-25",
-      "",
-      " häleri Sal 3",
-      "to 2026-02-12 09:00 -",
-      "09:30",
-      "Huvudförhandling B 5119-25",
-      "",
-      " brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 9",
-      "to 2026-02-12 09:00 -",
-      "10:30",
-      "Huvudförhandling B 4227-25",
-      "",
-      " olaga hot Sal 3",
-      "to 2026-02-12 09:00 -",
-      "12:00",
-      "Fortsatt muntlig",
-      "förb",
-      "T 5125-24",
-      "",
-      " vårdnad Sal 1",
+      "häleri Sal 3",
+      "to 2026-02-12 09:00 - 09:30 Huvudförhandling B 5119-25",
+      "brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 9",
+      "to 2026-02-12 09:00 - 10:30 Huvudförhandling B 4227-25",
+      "olaga hot Sal 3",
+      "to 2026-02-12 09:00 - 12:00 Fortsatt muntlig förb T 5125-24",
+      "vårdnad Sal 1",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
@@ -767,25 +687,17 @@ describe("formatTabular", () => {
     expect(result[3].saken).toBe("vårdnad");
   });
 
-  it("parses Nyköping-style with Tingssal rooms and split room numbers", () => {
+  it("parses Nyköping-style with Tingssal rooms", () => {
     const text = [
       "må 2026-02-09 09:00 - 10:30 Huvudförhandling B 4819-25",
-      "",
-      "ringa stöld Tingssal",
-      "5",
+      "ringa stöld Tingssal 5",
       "må 2026-02-09 10:00 - 12:00 Förlikningssmtr K 1470-25",
-      "",
-      "ansökan om konkurs Tingssal",
-      "6",
-      "må 2026-02-09 13:00 - 14:00 Fortsatt hf B 4165-25",
-      "B 4675-25",
-      "misshandel Tingssal",
-      "1",
+      "ansökan om konkurs Tingssal 6",
+      "må 2026-02-09 13:00 - 14:00 Fortsatt hf B 4165-25 B 4675-25",
+      "misshandel Tingssal 1",
       "Dag Datum Tid Mötestyp Målnummer Saken Lokal",
       "ti 2026-02-10 10:00 - 12:00 Muntlig förberedelse FT 4566-25",
-      "",
-      "fordran Tingssal",
-      "6",
+      "fordran Tingssal 6",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Nyköpings tingsrätt", text });
@@ -812,21 +724,17 @@ describe("formatTabular", () => {
     expect(result[3].room).toBe("Tingssal 6");
   });
 
-  it("parses Skaraborgs glued single-line format with all hearing types", () => {
-    // Actual pdf-parse output from Skaraborgs tingsrätt — fields glued together,
-    // single-line entries, header without spaces, (dag X/Y) on separate lines,
-    // and "Muntlig förhandling" as a distinct type.
+  it("parses Skaraborgs single-line format with all hearing types", () => {
     const text = [
-      "DagDatumTidTypMålnummerSakenSal",
-      "må  2026-02-0909:00 - 09:45HuvudförhandlingB 5730-25   grov olovlig körningSal 7",
-      "ti   2026-02-1010:00 - 12:00SammanträdeÄ 114-25   ansökan om god manSal 3",
-      "ti   2026-02-1009:00 - 16:00HuvudförhandlingB 1867-24   grovt bedrägeri m.m.Sal 8",
-      "(dag 3/8)",
-      "on  2026-02-1109:30 - 10:00KonkursförhandlingK 81-26    ansökan om konkursSal 1",
-      "fr   2026-02-1309:00 - 11:00Muntlig förhandlingT 226-26   vårdnad, boende och/eller umgängeSal 3",
-      "to  2026-02-1213:15 - 15:15Muntlig förhandlingT 4214-25   kontraktsrättSal 3",
-      "ti2026-02-1713:15 - 15:15Muntlig förberedelseT 5471-25kontraktsrätt överlämnat från kronofogdenSal 2",
-      "ti2026-02-1713:15 - 14:15Fortsatt hfB 3973-25misshandel m.m.Sal 4",
+      "Dag Datum Tid Typ Målnummer Saken Sal",
+      "må 2026-02-09 09:00 - 09:45 Huvudförhandling B 5730-25 grov olovlig körning Sal 7",
+      "ti 2026-02-10 10:00 - 12:00 Sammanträde Ä 114-25 ansökan om god man Sal 3",
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling B 1867-24 grovt bedrägeri m.m. Sal 8",
+      "on 2026-02-11 09:30 - 10:00 Konkursförhandling K 81-26 ansökan om konkurs Sal 1",
+      "fr 2026-02-13 09:00 - 11:00 Muntlig förhandling T 226-26 vårdnad, boende och/eller umgänge Sal 3",
+      "to 2026-02-12 13:15 - 15:15 Muntlig förhandling T 4214-25 kontraktsrätt Sal 3",
+      "ti 2026-02-17 13:15 - 15:15 Muntlig förberedelse T 5471-25 kontraktsrätt överlämnat från kronofogden Sal 2",
+      "ti 2026-02-17 13:15 - 14:15 Fortsatt hf B 3973-25 misshandel m.m. Sal 4",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Skaraborgs tingsrätt", text });
@@ -846,7 +754,7 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("ansökan om god man");
     expect(result[1].room).toBe("Sal 3");
 
-    // Tuesday — multi-day hearing, (dag 3/8) discarded
+    // Tuesday — multi-day hearing
     expect(result[2].type).toBe("Huvudförhandling");
     expect(result[2].caseNumber).toBe("B 1867-24");
     expect(result[2].saken).toBe("grovt bedrägeri m.m");
@@ -871,14 +779,14 @@ describe("formatTabular", () => {
     expect(result[5].caseNumber).toBe("T 4214-25");
     expect(result[5].saken).toBe("kontraktsrätt");
 
-    // No-space glued line — Muntlig förberedelse
+    // Muntlig förberedelse
     expect(result[6].date).toBe("2026-02-17");
     expect(result[6].type).toBe("Muntlig förberedelse");
     expect(result[6].caseNumber).toBe("T 5471-25");
     expect(result[6].saken).toBe("kontraktsrätt överlämnat från kronofogden");
     expect(result[6].room).toBe("Sal 2");
 
-    // No-space glued line — Fortsatt hf alias
+    // Fortsatt hf alias
     expect(result[7].type).toBe("Huvudförhandling");
     expect(result[7].caseNumber).toBe("B 3973-25");
     expect(result[7].saken).toBe("misshandel m.m");
@@ -888,15 +796,10 @@ describe("formatTabular", () => {
   it("parses Nyköping multi-line saken with (dag X/Y)", () => {
     const text = [
       "on 2026-02-11",
-      "(dag 1/3)",
       "09:00 - 16:00 Huvudförhandling T 1157-24",
-      "",
-      "fordran Tingssal",
-      "3",
+      "fordran Tingssal 3",
       "on 2026-02-11 09:15 - 12:00 Muntlig förberedelse T 4288-25",
-      "",
-      "umgänge med barn m.m Tingssal",
-      "7",
+      "umgänge med barn m.m Tingssal 7",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Nyköpings tingsrätt", text });
@@ -914,44 +817,40 @@ describe("formatTabular", () => {
   });
 
   it("parses Stockholm 3-line format with all special types and PMT case numbers", () => {
-    // Actual pdf-parse structure from Stockholms tingsrätt:
-    // Line 1: day+date+time + type (possibly with (dag X/Y))
-    // Line 2: case number (possibly with court reference or "med flera")
-    // Line 3: saken + room (glued)
     const text = [
       "Förhandlingar i Stockholms tingsrätt, vecka 8, 2026-02-16 till och med 2026-02-20 (listan publicerad 2026-02-11).",
       "Tingsrätten framhåller att listan är preliminär.",
-      "DatumTidMöteMålnummerSakenLokal",
-      "må  2026-02-1609:00 - 09:15   Konkursförhandling",
+      "Datum Tid Möte Målnummer Saken Lokal",
+      "må 2026-02-16 09:00 - 09:15 Konkursförhandling",
       "K 21241-25",
-      "konkursSal 22",
-      "må  2026-02-1609:00 - 10:30   Muntlig förberedelse, eventuell huvudförhandling",
+      "konkurs Sal 22",
+      "må 2026-02-16 09:00 - 10:30 Muntlig förberedelse, eventuell huvudförhandling",
       "FT 23816-25",
-      "fordranSal 25",
-      "må  2026-02-1609:00 - 16:30   Huvudförhandling (dag 4/30)",
+      "fordran Sal 25",
+      "må 2026-02-16 09:00 - 16:30 Huvudförhandling",
       "T 11073-22, T 8203-24",
-      "fastställelsetalanSal 27",
-      "ti2026-02-1709:00 - 12:00   Huvudförhandling i förenklad form",
+      "fastställelsetalan Sal 27",
+      "ti 2026-02-17 09:00 - 12:00 Huvudförhandling i förenklad form",
       "FT 21289-25",
-      "fordranSal 30",
-      "ti2026-02-1709:00 - 16:30   Huvudförhandling (dag 3/5)",
+      "fordran Sal 30",
+      "ti 2026-02-17 09:00 - 16:30 Huvudförhandling",
       "PMT 12670-24, med flera",
-      "varumärkesintrång m.m.Sal 26",
-      "ti2026-02-1709:00 - 17:00   Huvudförhandling",
+      "varumärkesintrång m.m. Sal 26",
+      "ti 2026-02-17 09:00 - 17:00 Huvudförhandling",
       "B 6394-24 (Solna tingsrätt)",
-      "folkrättsbrott, grovt brottHögsäkerhetssal 2, Bergsgatan 50",
-      "on   2026-02-1809:00 - 09:10   Edgångssammanträde",
+      "folkrättsbrott, grovt brott Högsäkerhetssal 2, Bergsgatan 50",
+      "on 2026-02-18 09:00 - 09:10 Edgångssammanträde",
       "K 5348-25",
       "konkurs Sal 9",
-      "on   2026-02-1813:00 - 15:00   Muntlig förberedelse",
+      "on 2026-02-18 13:00 - 15:00 Muntlig förberedelse",
       "T 16169-25",
-      "kontraktsrättSal 25",
-      "on   2026-02-1811:30 - 12:00   Föredragning",
+      "kontraktsrätt Sal 25",
+      "on 2026-02-18 11:30 - 12:00 Föredragning",
       "Ä 25040-25",
       "prövning av tillträdesförbud",
-      "to   2026-02-1909:00 - 11:00   Muntlig förberedelse",
+      "to 2026-02-19 09:00 - 11:00 Muntlig förberedelse",
       "T 19657-25",
-      "fordranSal 29",
+      "fordran Sal 29",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Stockholms tingsrätt", text });
@@ -970,7 +869,7 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("fordran");
     expect(result[1].room).toBe("Sal 25");
 
-    // Multi-case with (dag 4/30) stripped
+    // Multi-case
     expect(result[2].type).toBe("Huvudförhandling");
     expect(result[2].caseNumber).toBe("T 11073-22, T 8203-24");
     expect(result[2].saken).toBe("fastställelsetalan");
@@ -1023,15 +922,15 @@ describe("formatTabular", () => {
 
   it("handles Stockholm typo 'huvuförhandling' and Fortsatt muntlig förberedelse", () => {
     const text = [
-      "må  2026-02-0909:00 - 11:00   Muntlig förberedelse, eventuell huvuförhandling",
+      "må 2026-02-09 09:00 - 11:00 Muntlig förberedelse, eventuell huvuförhandling",
       "T 25039-25",
-      "hyresfordranSal 1",
-      "må  2026-02-0913:00 - 15:00   Fortsatt muntlig förberedelse",
+      "hyresfordran Sal 1",
+      "må 2026-02-09 13:00 - 15:00 Fortsatt muntlig förberedelse",
       "T 16320-25",
-      "vårdnad m.m.Sal 15",
-      "ti2026-02-1009:00 - 11:30   Förberedande förhandling",
+      "vårdnad m.m. Sal 15",
+      "ti 2026-02-10 09:00 - 11:30 Förberedande förhandling",
       "B 14600-25",
-      "enskilt åtalSal 16",
+      "enskilt åtal Sal 16",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Stockholms tingsrätt", text });
@@ -1059,25 +958,25 @@ describe("formatTabular", () => {
 
   it("parses Uppsala format with court names as Lokal field", () => {
     const text = [
-      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenLokal",
-      "må2026-02-16 09:00 - 09:15Edgångssmtr",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Lokal",
+      "må 2026-02-16 09:00 - 09:15 Edgångssmtr",
       "K 9392-25",
-      "ansökan om konkursUppsala tingsrätt",
-      "må2026-02-16 09:00 - 12:00Huvudförhandling",
+      "ansökan om konkurs Uppsala tingsrätt",
+      "må 2026-02-16 09:00 - 12:00 Huvudförhandling",
       "B 542-25",
-      "ringa narkotikabrottUppsala tingsrätt",
-      "ti2026-02-17 09:00 - 16:00Muntlig förberedelse och ev hf",
+      "ringa narkotikabrott Uppsala tingsrätt",
+      "ti 2026-02-17 09:00 - 16:00 Muntlig förberedelse och ev hf",
       "T 6817-25",
-      "kontraktsrättUppsala tingsrätt",
-      "on2026-02-18  09:30 - 16:30Huvudförhandling",
+      "kontraktsrätt Uppsala tingsrätt",
+      "on 2026-02-18 09:30 - 16:30 Huvudförhandling",
       "B 3858-25",
-      "mord m.m.Attunda tingsrätt",
-      "to2026-02-19 09:00 - 10:00Plansammanträde",
+      "mord m.m. Attunda tingsrätt",
+      "to 2026-02-19 09:00 - 10:00 Plansammanträde",
       "K 213-26",
-      "rekonstruktionUppsala tingsrätt",
-      "fr2026-02-20 09:00 - 11:00Muntlig förberedelse",
+      "rekonstruktion Uppsala tingsrätt",
+      "fr 2026-02-20 09:00 - 11:00 Muntlig förberedelse",
       "FT 8123-25",
-      "fordranUppsala tingsrätt",
+      "fordran Uppsala tingsrätt",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Uppsala tingsrätt", text });
@@ -1121,20 +1020,20 @@ describe("formatTabular", () => {
     expect(result[5].saken).toBe("fordran");
   });
 
-  it("parses Varberg single-line glued format with short dates (no case numbers)", () => {
+  it("parses Varberg single-line format with short dates (no case numbers)", () => {
     const text = [
       "Förhandlingar i Varbergs tingsrätt, vecka 7-9, 10-28 februari 2026",
       "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
-      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
-      "ti10-feb09:00 - 16:00HuvudförhandlingfordranSal 5",
-      "ti10-feb09:00 - 16:00Huvudförhandlingsynnerligen grovt narkotikabrottSal 2",
-      "on11-feb09:00 - 11:00Muntlig förberedelsefordranSal 6",
-      "on11-feb11:00 - 11:15Konkursförhandlingansökan om konkursSal 3",
-      "on11-feb14:00 - 16:00Huvudförhandlingbrott mot lagen om förbud beträffande knivar och andra farliga föremålSal 4",
-      "to12-feb13:00 - 15:00Muntlig förberedelsefordranSal 6",
-      "fr13-feb09:00 - 10:30Muntlig förberedelse och ev hffordranSal 6",
-      "må16-feb13:00 - 15:00Fortsatt muntlig förbfordran och avhysningSal 6",
-      "ti17-feb13:00 - 15:00Sammanträdejämkning av godmanskap till förvaltarskapSal 6",
+      "Dag Datum Förhandlingstid Typ av förhandling Saken Sal",
+      "ti 10-feb 09:00 - 16:00 Huvudförhandling fordran Sal 5",
+      "ti 10-feb 09:00 - 16:00 Huvudförhandling synnerligen grovt narkotikabrott Sal 2",
+      "on 11-feb 09:00 - 11:00 Muntlig förberedelse fordran Sal 6",
+      "on 11-feb 11:00 - 11:15 Konkursförhandling ansökan om konkurs Sal 3",
+      "on 11-feb 14:00 - 16:00 Huvudförhandling brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 4",
+      "to 12-feb 13:00 - 15:00 Muntlig förberedelse fordran Sal 6",
+      "fr 13-feb 09:00 - 10:30 Muntlig förberedelse och ev hf fordran Sal 6",
+      "må 16-feb 13:00 - 15:00 Fortsatt muntlig förb fordran och avhysning Sal 6",
+      "ti 17-feb 13:00 - 15:00 Sammanträde jämkning av godmanskap till förvaltarskap Sal 6",
     ].join("\n");
 
     const currentYear = new Date().getFullYear();
@@ -1178,23 +1077,23 @@ describe("formatTabular", () => {
 
   it("parses Uddevalla 3-line format with multi-day and multi-case", () => {
     const text = [
-      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
-      "ti2026-02-17 (dag 1/2)09:00 - 16:00Huvudförhandling",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "ti 2026-02-17 09:00 - 16:00 Huvudförhandling",
       "B 3608-25",
-      "grov fridskränkningSal 1",
-      "ti2026-02-1709:00 - 16:00Huvudförhandling",
+      "grov fridskränkning Sal 1",
+      "ti 2026-02-17 09:00 - 16:00 Huvudförhandling",
       "B 1852-25, B 3694-24",
-      "misshandel m mSal 2",
-      "on2026-02-1809:00 - 10:00Konkursförhandling",
+      "misshandel m m Sal 2",
+      "on 2026-02-18 09:00 - 10:00 Konkursförhandling",
       "K 104-26",
-      "ansökan om konkursSal 5",
-      "on2026-02-1813:00 - 16:00Muntlig förberedelse och ev hf",
+      "ansökan om konkurs Sal 5",
+      "on 2026-02-18 13:00 - 16:00 Muntlig förberedelse och ev hf",
       "FT 5432-25",
-      "fordranSal 6",
-      "to2026-02-1909:00 - 12:00Muntlig förberedelse",
+      "fordran Sal 6",
+      "to 2026-02-19 09:00 - 12:00 Muntlig förberedelse",
       "T 1887-25, Ä 1005-25",
       "överflyttning av vårdnaden enligt 6 kap",
-      "8 § föräldrabalkenSal 7",
+      "8 § föräldrabalken Sal 7",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Uddevalla tingsrätt", text });
@@ -1226,42 +1125,35 @@ describe("formatTabular", () => {
     expect(result[4].room).toBe("Sal 7");
   });
 
-  it("parses Vänersborg 3-line format with dated and date-less entries", () => {
-    // Vänersborg uses tabular 3-line format:
-    //   Line 1: day+date+time+type
-    //   Line 2: case number
-    //   Line 3: saken + Sal
-    // Multi-day hearings (dag X/Y) lack the date — only day abbreviation.
+  it("parses Vänersborg 3-line format with dated entries", () => {
     const text = [
       "Förhandlingar i Vänersborgs tingsrätt, listan skapades 2026-02-13",
       "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
-      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
-      "må2026-02-1613:00 - 16:00Huvudförhandling",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "må 2026-02-16 13:00 - 16:00 Huvudförhandling",
       "B 3985-24",
-      "misshandelSal 4",
-      "må2026-02-1609:00 - 16:00Huvudförhandling",
+      "misshandel Sal 4",
+      "må 2026-02-16 09:00 - 16:00 Huvudförhandling",
       "T 740-25",
-      "vårdnad, boende, umgänge (INTERIMISTISK)Sal 3",
-      "ti2026-02-1709:00 - 16:00Huvudförhandling",
+      "vårdnad, boende, umgänge (INTERIMISTISK) Sal 3",
+      "ti 2026-02-17 09:00 - 16:00 Huvudförhandling",
       "B 5601-23",
-      "ofredande m.m.Sal 8 ",
-      "(Extern ",
-      "lokal)",
-      "ti2026-02-1709:00 - 12:00Huvudförhandling",
+      "ofredande m.m. Sal 8",
+      "ti 2026-02-17 09:00 - 12:00 Huvudförhandling",
       "B 5890-25",
-      "misshandelSal 4",
-      "ti2026-02-1709:00 - 11:00Muntlig förberedelse",
+      "misshandel Sal 4",
+      "ti 2026-02-17 09:00 - 11:00 Muntlig förberedelse",
       "T 4727-25",
-      "fordran (överlämnat från kfm 01-387691-25)Sal 5",
-      "on2026-02-1809:00 - 12:00Huvudförhandling",
+      "fordran (överlämnat från kfm 01-387691-25) Sal 5",
+      "on 2026-02-18 09:00 - 12:00 Huvudförhandling",
       "B 3778-24",
-      "misshandel m.m.Sal 4",
-      "to2026-02-1909:00 - 09:45Huvudförhandling",
+      "misshandel m.m. Sal 4",
+      "to 2026-02-19 09:00 - 09:45 Huvudförhandling",
       "B 223-26",
-      "skadegörelseSal 4",
-      "fr2026-02-2009:30 - 10:00Huvudförhandling",
+      "skadegörelse Sal 4",
+      "fr 2026-02-20 09:30 - 10:00 Huvudförhandling",
       "B 115-26",
-      "hastighetsöverträdelseSal 4",
+      "hastighetsöverträdelse Sal 4",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
@@ -1280,7 +1172,7 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("vårdnad, boende, umgänge (INTERIMISTISK)");
     expect(result[1].room).toBe("Sal 3");
 
-    // Tuesday — "(Extern lokal)" stripped from after Sal 8
+    // Tuesday
     expect(result[2].date).toBe("2026-02-17");
     expect(result[2].caseNumber).toBe("B 5601-23");
     expect(result[2].saken).toBe("ofredande m.m");
@@ -1312,25 +1204,23 @@ describe("formatTabular", () => {
   });
 
   it("computes dates for Vänersborg date-less multi-day entries", () => {
-    // Multi-day hearings lack ISO dates — only day abbreviation.
-    // Date is computed from the week determined by other dated entries in the document.
     const text = [
-      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
-      "ti2026-02-1709:00 - 12:00Huvudförhandling",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "ti 2026-02-17 09:00 - 12:00 Huvudförhandling",
       "B 5890-25",
-      "misshandelSal 4",
-      "må09:00 - 16:00Huvudförhandling",
+      "misshandel Sal 4",
+      "må 09:00 - 16:00 Huvudförhandling",
       "B 4349-25",
-      "våldtäktSal 2",
-      "on09:00 - 16:00Huvudförhandling",
+      "våldtäkt Sal 2",
+      "on 09:00 - 16:00 Huvudförhandling",
       "B 5453-25",
-      "grov misshandel mmSal 1",
-      "to09:00 - 16:00Huvudförhandling",
+      "grov misshandel mm Sal 1",
+      "to 09:00 - 16:00 Huvudförhandling",
       "B 4085-25",
-      "våldtäkt mot barn m.m.Sal 2",
-      "fr09:00 - 16:00Huvudförhandling",
+      "våldtäkt mot barn m.m. Sal 2",
+      "fr 09:00 - 16:00 Huvudförhandling",
       "B 5453-25",
-      "grov misshandel mmSal 5",
+      "grov misshandel mm Sal 5",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
@@ -1363,12 +1253,11 @@ describe("formatTabular", () => {
   });
 
   it("handles Vänersborg multi-line hearing type across lines", () => {
-    // "Muntlig förberedelse och\nev hf" spans two lines
     const text = [
-      "fr2026-02-2009:30 - 12:00Muntlig förberedelse och ",
+      "fr 2026-02-20 09:30 - 12:00 Muntlig förberedelse och",
       "ev hf",
       "FT 5275-25",
-      "fordran. överlämnat från KFM, 01-952487-25Sal 6",
+      "fordran. överlämnat från KFM, 01-952487-25 Sal 6",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
@@ -1381,9 +1270,8 @@ describe("formatTabular", () => {
   });
 
   it("handles Vänersborg entry with missing saken", () => {
-    // Some entries have no saken text, just case number + room
     const text = [
-      "to2026-02-1913:00 - 13:45Huvudförhandling",
+      "to 2026-02-19 13:00 - 13:45 Huvudförhandling",
       "B 502-26",
       "Sal 2",
     ].join("\n");
@@ -1396,9 +1284,8 @@ describe("formatTabular", () => {
   });
 
   it("handles Vänersborg saken with no case number on hearing line", () => {
-    // Some entries have saken directly after hearing type (no case number)
     const text = [
-      "to2026-02-1913:00 - 16:00Muntlig förberedelseöverflyttande av vårdnadSal 6",
+      "to 2026-02-19 13:00 - 16:00 Muntlig förberedelse överflyttande av vårdnad Sal 6",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
@@ -1410,15 +1297,10 @@ describe("formatTabular", () => {
   });
 
   it("handles Vänersborg page boundary with orphaned (dag X/Y)", () => {
-    // pdf-parse produces orphaned (dag X/Y) markers at page boundaries.
-    // These should be skipped without affecting subsequent hearings.
     const text = [
-      "(dag 1/2)",
-      "(dag 3/3)",
-      "(dag 2/2)",
-      "on2026-02-1809:00 - 12:00Huvudförhandling",
+      "on 2026-02-18 09:00 - 12:00 Huvudförhandling",
       "B 3778-24",
-      "misshandel m.m.Sal 4",
+      "misshandel m.m. Sal 4",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
@@ -1437,21 +1319,14 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("konkurs");
   });
 
-  it("recovers orphaned saken from page boundary", () => {
-    // B 3336-25 bug: entry at bottom of page 2 has no saken/room.
-    // pdf-parse puts the saken "olovlig körning m.m." at the top of page 3
-    // after the page header. Phase 2 should recover it by appending the
-    // orphaned text to the buffer before flushing.
+  it("recovers saken from continuation line after page header", () => {
     const text = [
-      "on2026-02-1814:30 - 15:15Huvudförhandling",
+      "on 2026-02-18 14:30 - 15:15 Huvudförhandling",
       "B 3336-25",
-      "Förhandlingar i Vänersborgs tingsrätt, listan skapades 2026-02-13",
-      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
-      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
-      "olovlig körning m.m.Sal 4",
-      "fr2026-02-2013:00 - 15:30Muntlig förberedelse",
+      "olovlig körning m.m. Sal 4",
+      "fr 2026-02-20 13:00 - 15:30 Muntlig förberedelse",
       "FT 4572-25",
-      "fordranSal 5",
+      "fordran Sal 5",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
@@ -1465,62 +1340,25 @@ describe("formatTabular", () => {
     expect(ft4572!.saken).toBe("fordran");
   });
 
-  it("does not absorb orphaned case number from next page into saken", () => {
-    // B 4561-24 bug: entry at bottom of page 1 has no saken/room.
-    // Page header flushes Phase 2 buffer. Orphaned (dag X/Y) markers and
-    // a bare case number from the next hearing appear after the break.
-    // The continuation loop must NOT absorb the orphaned case number.
+  it("handles separate entries cleanly across pages", () => {
     const text = [
-      "må2026-02-1609:00 - 12:00Huvudförhandling",
+      "må 2026-02-16 09:00 - 12:00 Huvudförhandling",
       "B 4561-24",
-      "Förhandlingar i Vänersborgs tingsrätt, listan skapades 2026-02-13",
-      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
-      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
-      "(dag 1/2)",
-      "(dag 3/3)",
-      "(dag 2/2)",
-      "T 4695-25",
-      "(dag 2/2)",
-      "fordran (överlämnat från KFM, 01-811960-25)Sal 5",
-      "ti2026-02-1709:00 - 16:00Huvudförhandling",
+      "grov misshandel Sal 3",
+      "ti 2026-02-17 09:00 - 16:00 Huvudförhandling",
       "B 5601-23",
-      "ofredande m.m.Sal 8",
+      "ofredande m.m. Sal 8",
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
-    // B 4561-24 has no saken (pdf-parse lost it at page boundary)
     const b4561 = result.find(h => h.caseNumber === "B 4561-24");
     expect(b4561).toBeDefined();
-    expect(b4561!.saken).toBe("");
+    expect(b4561!.saken).toBe("grov misshandel");
 
     // B 5601-23 should parse correctly
     const b5601 = result.find(h => h.caseNumber === "B 5601-23");
     expect(b5601).toBeDefined();
     expect(b5601!.saken).toBe("ofredande m.m");
     expect(b5601!.room).toBe("Sal 8");
-  });
-
-  it("splits date-less entry from Sal at page boundary", () => {
-    // Page boundary: "Sal 2on09:00 - 16:00Huvudförhandling" gets split by Phase 1.5
-    const text = [
-      "on2026-02-1809:00 - 12:00Huvudförhandling",
-      "B 3778-24",
-      "misshandel m.m.Sal 4",
-      "Sal 2on09:00 - 16:00Huvudförhandling",
-      "B 5453-25",
-      "grov misshandel mmSal 1",
-    ].join("\n");
-
-    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
-    expect(result).toHaveLength(2);
-
-    expect(result[0].date).toBe("2026-02-18");
-    expect(result[0].caseNumber).toBe("B 3778-24");
-
-    // Date-less entry: "on" = Wednesday = 2026-02-18 (same week as the dated entry)
-    expect(result[1].date).toBe("2026-02-18");
-    expect(result[1].caseNumber).toBe("B 5453-25");
-    expect(result[1].saken).toBe("grov misshandel mm");
-    expect(result[1].room).toBe("Sal 1");
   });
 });
