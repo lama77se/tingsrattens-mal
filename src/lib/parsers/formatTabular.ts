@@ -154,7 +154,6 @@ export const formatTabular: ParserStrategy = {
     if (!text || text.trim().length === 0) return [];
 
     const lines = preprocessLines(text);
-    console.log(`[tabular] preprocessed ${lines.length} lines, first 5:`, lines.slice(0, 5));
     const hearings: RawHearing[] = [];
     let currentDate = "";
 
