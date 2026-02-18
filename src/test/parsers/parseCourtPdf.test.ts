@@ -105,6 +105,30 @@ describe("parseCourtPdf dispatcher", () => {
     expect(result[0].caseNumber).toBe("B 6394-24");
   });
 
+  it("resolves location from tabular format (Uppsala)", () => {
+    const text = [
+      "on2026-02-18  09:30 - 16:30Huvudförhandling",
+      "B 3858-25",
+      "mord m.m.Attunda tingsrätt",
+    ].join("\n");
+    const result = parseCourtPdf(text, { name: "Uppsala tingsrätt", formatFamily: "tabular" });
+    expect(result).toHaveLength(1);
+    expect(result[0].court).toBe("Uppsala tingsrätt (plats: Attunda tingsrätt)");
+    expect(result[0].saken).toBe("mord m.m");
+  });
+
+  it("keeps court unchanged when location matches court (Uppsala)", () => {
+    const text = [
+      "må2026-02-16 09:00 - 12:00Huvudförhandling",
+      "B 542-25",
+      "ringa narkotikabrottUppsala tingsrätt",
+    ].join("\n");
+    const result = parseCourtPdf(text, { name: "Uppsala tingsrätt", formatFamily: "tabular" });
+    expect(result).toHaveLength(1);
+    expect(result[0].court).toBe("Uppsala tingsrätt");
+    expect(result[0].saken).toBe("ringa narkotikabrott");
+  });
+
   it("enriches lagrum for tabular format (no case number)", () => {
     const text = "2026-02-17 09:00 - 16:00 Huvudförhandling narkotikabrott Sal 1";
     const result = parseCourtPdf(text, { name: "Eksjö tingsrätt", formatFamily: "tabular" });
