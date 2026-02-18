@@ -95,9 +95,9 @@ describe("parseCourtPdf dispatcher", () => {
 
   it("resolves externalCourt from tabular format (Stockholm)", () => {
     const text = [
-      "ti2026-02-1709:00 - 17:00   Huvudförhandling",
+      "ti 2026-02-17 09:00 - 17:00 Huvudförhandling",
       "B 6394-24 (Solna tingsrätt)",
-      "folkrättsbrott, grovt brottHögsäkerhetssal 2, Bergsgatan 50",
+      "folkrättsbrott, grovt brott Högsäkerhetssal 2, Bergsgatan 50",
     ].join("\n");
     const result = parseCourtPdf(text, { name: "Stockholms tingsrätt", formatFamily: "tabular" });
     expect(result).toHaveLength(1);
@@ -107,9 +107,9 @@ describe("parseCourtPdf dispatcher", () => {
 
   it("resolves location from tabular format (Uppsala)", () => {
     const text = [
-      "on2026-02-18  09:30 - 16:30Huvudförhandling",
+      "on 2026-02-18 09:30 - 16:30 Huvudförhandling",
       "B 3858-25",
-      "mord m.m.Attunda tingsrätt",
+      "mord m.m. Attunda tingsrätt",
     ].join("\n");
     const result = parseCourtPdf(text, { name: "Uppsala tingsrätt", formatFamily: "tabular" });
     expect(result).toHaveLength(1);
@@ -119,9 +119,9 @@ describe("parseCourtPdf dispatcher", () => {
 
   it("keeps court unchanged when location matches court (Uppsala)", () => {
     const text = [
-      "må2026-02-16 09:00 - 12:00Huvudförhandling",
+      "må 2026-02-16 09:00 - 12:00 Huvudförhandling",
       "B 542-25",
-      "ringa narkotikabrottUppsala tingsrätt",
+      "ringa narkotikabrott Uppsala tingsrätt",
     ].join("\n");
     const result = parseCourtPdf(text, { name: "Uppsala tingsrätt", formatFamily: "tabular" });
     expect(result).toHaveLength(1);
