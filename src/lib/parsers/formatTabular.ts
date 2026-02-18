@@ -34,7 +34,7 @@ const DAG_REGEX = /^\(dag\s+\d+\/\d+\)/i;
 /**
  * Regex matching page headers to skip.
  */
-const HEADER_REGEX = /^(uppropslista|datum\s+tid|förhandlingar i|listan\s|dagdatum|dag\s+datum)/i;
+const HEADER_REGEX = /^(uppropslista|datum\s+tid|förhandlingar\b|listan\s|dagdatum|dag\s+datum)/i;
 
 /**
  * Day abbreviations (Swedish) — standalone lines to skip.
