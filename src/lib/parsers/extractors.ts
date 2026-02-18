@@ -101,8 +101,9 @@ export function extractSwedishDate(line: string): string | null {
 /**
  * Pre-process PDF text into clean, trimmed, non-empty lines.
  *
- * With unpdf coordinate-based extraction, text arrives as proper visual rows
- * with correct field spacing. Only minimal normalization is needed.
+ * With unpdf coordinate-based extraction, most courts get proper visual rows
+ * with correct field spacing. Some PDFs (e.g., Blekinge) store text without
+ * inter-field spaces, requiring targeted degluing patterns.
  */
 export function preprocessLines(text: string): string[] {
   return text
@@ -119,6 +120,15 @@ export function preprocessLines(text: string): string[] {
         .replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
         // Strip pagination footers: "1-81 visas av 81"
         .replace(/\s*\d+[-–—]\d+\s+visas\s+av\s+\d+\s*$/, "")
+        // --- Deglue patterns for PDFs with missing inter-field spaces ---
+        // Day abbreviation before date: "fr20-feb" → "fr 20-feb"
+        .replace(/^(m[åaö]|ma|ti|on|to|fr|lö|lo|sö|so)(\d)/i, "$1 $2")
+        // Time before uppercase: "12:00Huvudförhandling" → "12:00 Huvudförhandling"
+        .replace(/(\d{2}:\d{2})([A-ZÅÄÖ])/g, "$1 $2")
+        // Lowercase before Sal/Tingssal: "verksamhetSal 4" → "verksamhet Sal 4"
+        .replace(/([a-zåäö.])([ST](?:ingssal|al)\s*\d)/g, "$1 $2")
+        // Lowercase before case prefix: "HuvudförhandlingB 14" → "Huvudförhandling B 14"
+        .replace(/([a-zåäö.])(?=(?:PMT|FT|[TBKÄ])\s?\d)/g, "$1 ")
     );
 }
 
