@@ -13,6 +13,7 @@ const Index = () => {
 
   const handleFetchAll = useCallback(() => {
     setFetchAllTrigger((n) => n + 1);
+    setActiveTab("loading");
   }, []);
 
   return (
@@ -48,7 +49,7 @@ const Index = () => {
             <HearingsTab hearings={hearings} onFetchAll={handleFetchAll} isLoadingAll={isLoadingAll} />
           </TabsContent>
 
-          <TabsContent value="loading">
+          <TabsContent value="loading" forceMount className={activeTab !== "loading" ? "hidden" : undefined}>
             <DataLoadingTab onHearingsFetched={setHearings} fetchAllTrigger={fetchAllTrigger} onLoadingChange={setIsLoadingAll} />
           </TabsContent>
         </Tabs>
