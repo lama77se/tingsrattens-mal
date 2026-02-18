@@ -1,4 +1,5 @@
 import type { ParserStrategy, RawHearing, ParserContext } from "./types";
+import { preprocessLines } from "./extractors";
 
 /**
  * Parser for Gävle tingsrätt format.
@@ -50,18 +51,16 @@ function parse(ctx: ParserContext): RawHearing[] {
 
   console.log("PDF text first 500 chars:", text.substring(0, 500));
 
-  const lines = text.split(/\r?\n/);
+  const lines = preprocessLines(text);
   const hearings: RawHearing[] = [];
 
   for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
 
     // Try with day abbreviation prefix first, then without
-    let match = trimmed.match(HEARING_LINE_REGEX);
+    let match = line.match(HEARING_LINE_REGEX);
     const dateIdx = 1;
     if (!match) {
-      match = trimmed.match(HEARING_LINE_NO_DAY_REGEX);
+      match = line.match(HEARING_LINE_NO_DAY_REGEX);
     }
     if (!match) continue;
 
