@@ -238,4 +238,34 @@ describe("formatStandard", () => {
     expect(result[5].caseNumber).toBe("B 1407-24");
     expect(result[5].saken).toBe("narkotikabrott m m");
   });
+
+  it("ignores case numbers inside parentheses (Attunda-style cross-references)", () => {
+    const text = [
+      "10-feb",
+      "09:00 - 11:00 Tingssal 14",
+      "Muntlig förberedelse T 6933-25 kontraktsrätt (återvinning av tredskodom i T 14184-24)",
+      "Kalle Anka",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Attunda tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 6933-25");
+    expect(result[0].saken).toContain("kontraktsrätt");
+    expect(result[0].saken).toContain("T 14184-24");
+  });
+
+  it("ignores case number on continuation line starting with )", () => {
+    const text = [
+      "10-feb",
+      "09:00 - 11:00 Tingssal 14",
+      "Muntlig förberedelse T 6933-25",
+      "kontraktsrätt (återvinning av tredskodom i",
+      "T 14184-24) Tingssal 14",
+      "Kalle Anka",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Attunda tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 6933-25");
+  });
 });

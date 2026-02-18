@@ -16,6 +16,25 @@ import {
 } from "./extractors";
 
 /**
+ * Check if a line's first case number match is "real" — not inside parentheses.
+ * Parenthesized references like "(återvinning av tredskodom i T 14184-24)"
+ * should not be treated as new hearings.
+ */
+function hasRealCaseNumber(line: string): RegExpMatchArray | null {
+  const match = line.match(CASE_NUMBER_REGEX);
+  if (!match || match.index === undefined) return null;
+  const before = line.substring(0, match.index);
+  const after = line.substring(match.index + match[0].length).trim();
+  const openParens = (before.match(/\(/g) || []).length;
+  const closeParens = (before.match(/\)/g) || []).length;
+  // Case number is inside unclosed parentheses
+  if (openParens > closeParens) return null;
+  // Closing paren right after case number — continuation from previous line's parens
+  if (after.startsWith(")")) return null;
+  return match;
+}
+
+/**
  * Standard format parser — handles the current 4 courts (Alingsås, Attunda, Blekinge, Solna).
  * Exact same extraction logic as the original monolithic parseCourtPdf.
  */
@@ -52,7 +71,7 @@ export const formatStandard: ParserStrategy = {
       }
 
       // Look for case numbers — this signals a hearing entry
-      const caseMatch = line.match(CASE_NUMBER_REGEX);
+      const caseMatch = hasRealCaseNumber(line);
       if (!caseMatch) continue;
 
       const caseNumber = caseMatch[1];
@@ -88,7 +107,7 @@ export const formatStandard: ParserStrategy = {
         const nextLine = lines[i + 1].trim();
         if (
           nextLine.length > 1 &&
-          !nextLine.match(CASE_NUMBER_REGEX) &&
+          !hasRealCaseNumber(nextLine) &&
           !nextLine.match(SHORT_DATE_REGEX) &&
           !nextLine.match(ISO_DATE_REGEX)
         ) {
@@ -100,7 +119,7 @@ export const formatStandard: ParserStrategy = {
       // Extract parties from the line AFTER saken
       let parties = "";
       const partiesLineIndex = sakenFromNextLine ? i + 2 : i + 1;
-      if (partiesLineIndex < lines.length && !lines[partiesLineIndex].match(CASE_NUMBER_REGEX)) {
+      if (partiesLineIndex < lines.length && !hasRealCaseNumber(lines[partiesLineIndex])) {
         const pLine = lines[partiesLineIndex].trim();
         if (pLine.length > 2 && !pLine.match(SHORT_DATE_REGEX) && !pLine.match(ISO_DATE_REGEX)) {
           // Don't use as parties if it looks like a new hearing line (has time pattern)
