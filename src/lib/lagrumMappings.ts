@@ -727,6 +727,16 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Taxitrafiklagen (2012:211) 5 kap."],
     kommentar: "Exakt paragraf beror på överträdelsens art (tillstånd, legitimation m.m.).",
   },
+  "brott mot fiskelagen": {
+    sakomrade: "Fiske- och naturresursbrott",
+    primart_lagrum: ["Fiskelagen (1993:787) 40 §"],
+    kommentar: "Straffbestämmelser finns i fiskelagen; exakt överträdelse beror på art (t.ex. otillåtet fiske, redskap m.m.).",
+  },
+  "grovt omställningsstödsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2020:548) om omställningsstöd 30 §"],
+    kommentar: "Omställningsstödsbrott regleras i speciallag kopplad till pandemistöden. Grov grad anges särskilt i lag.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"

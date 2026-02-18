@@ -152,7 +152,7 @@ export function preprocessLines(text: string): string[] {
   const TIME_RANGE_RE = /^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const HAS_TIME_RE = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   // Page headers that appear at page boundaries — flush buffer and discard
-  const PAGE_HEADER_RE = /^(uppropslista|dag\s*datum|datum\s+tid|förhandlingar i|listan\s)/i;
+  const PAGE_HEADER_RE = /^(uppropslista|dag\s*datum|datum\s+tid|förhandlingar\b|listan\s)/i;
 
   // A line ending with a room (Sal/Tingssal + number) is truly complete.
   const ENDS_WITH_ROOM_RE = /(?:Tings)?[Ss]al\s+\S+\s*$/;
