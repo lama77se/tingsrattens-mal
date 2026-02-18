@@ -134,7 +134,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "halmstads_tingsratt",
     name: "Halmstads tingsrätt",
-    formatFamily: "standard",
+    formatFamily: "tabular",
     buildUrl: (week, year) =>
       `${BASE}/halmstads_tingsratt/veckans-forhandlingar/${year}/vecka-${week}.pdf`,
   },
