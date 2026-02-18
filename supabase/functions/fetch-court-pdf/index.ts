@@ -1,49 +1,13 @@
-import { getDocumentProxy } from "npm:unpdf";
+import pdf from "npm:pdf-parse@1.1.1/lib/pdf-parse.js";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface TextItem {
-  str: string;
-  transform: number[];
-}
-
-/**
- * Group text items by y-coordinate into visual rows, then sort properly.
- * Returns one string per visual row (top-to-bottom, left-to-right within each row).
- */
-function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
-  // Filter out empty/whitespace-only items
-  const filtered = items.filter((item) => item.str.trim().length > 0);
-  if (filtered.length === 0) return [];
-
-  // Sort by y descending (top of page = highest y value in PDF coords)
-  const sorted = [...filtered].sort((a, b) => b.transform[5] - a.transform[5]);
-
-  // Group items within yTolerance into same row
-  const rows: { y: number; items: TextItem[] }[] = [];
-  for (const item of sorted) {
-    const y = item.transform[5];
-    const existingRow = rows.find((r) => Math.abs(r.y - y) <= yTolerance);
-    if (existingRow) {
-      existingRow.items.push(item);
-    } else {
-      rows.push({ y, items: [item] });
-    }
-  }
-
-  // Sort rows top-to-bottom (highest y first), items left-to-right within each row
-  rows.sort((a, b) => b.y - a.y);
-  return rows.map((row) => {
-    row.items.sort((a, b) => a.transform[4] - b.transform[4]);
-    return row.items.map((item) => item.str).join(" ");
-  });
-}
-
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -54,27 +18,27 @@ Deno.serve(async (req) => {
     const year: number | undefined = body.year;
 
     if (!pdfUrl) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Saknar pdfUrl' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ success: false, error: "Saknar pdfUrl" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Validate URL is from domstol.se
-    if (!pdfUrl.startsWith('https://www.domstol.se/')) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Ogiltig URL – måste vara från domstol.se' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!pdfUrl.startsWith("https://www.domstol.se/")) {
+      return new Response(JSON.stringify({ success: false, error: "Ogiltig URL – måste vara från domstol.se" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log(`Fetching PDF from: ${pdfUrl}`);
 
-    // Use proxy to bypass TLS incompatibility between Deno and domstol.se
+    // Use proxys to bypass TLS incompatibility between Deno and domstol.se
     const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(pdfUrl)}`;
 
     let pdfResponse: Response | null = null;
-    let lastError = '';
+    let lastError = "";
 
     try {
       pdfResponse = await fetch(proxyUrl);
@@ -92,7 +56,10 @@ Deno.serve(async (req) => {
       try {
         const resp = await fetch(pdfUrl);
         if (resp.ok) pdfResponse = resp;
-        else { lastError = `Direct: HTTP ${resp.status}`; await resp.text(); }
+        else {
+          lastError = `Direct: HTTP ${resp.status}`;
+          await resp.text();
+        }
       } catch (e) {
         lastError = `Direct: ${e.message}`;
       }
@@ -101,7 +68,7 @@ Deno.serve(async (req) => {
     if (!pdfResponse) {
       return new Response(
         JSON.stringify({ success: false, error: `Kunde inte hämta PDF: ${lastError}`, url: pdfUrl }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -110,34 +77,25 @@ Deno.serve(async (req) => {
 
     // Check if we got HTML error page instead of PDF
     const firstBytes = new TextDecoder().decode(new Uint8Array(pdfBytes.slice(0, 10)));
-    if (!firstBytes.startsWith('%PDF')) {
+    if (!firstBytes.startsWith("%PDF")) {
       const snippet = new TextDecoder().decode(new Uint8Array(pdfBytes.slice(0, 500)));
-      const isNotFound = snippet.includes('404') || snippet.includes('Not Found') || snippet.includes('finns inte');
+      const isNotFound = snippet.includes("404") || snippet.includes("Not Found") || snippet.includes("finns inte");
       return new Response(
         JSON.stringify({
           success: false,
-          error: isNotFound ? 'PDF inte publicerad ännu' : 'Fick inte en PDF-fil tillbaka',
+          error: isNotFound ? "PDF inte publicerad ännu" : "Fick inte en PDF-fil tillbaka",
           notFound: isNotFound,
           url: pdfUrl,
         }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Parse PDF text using unpdf (coordinate-based extraction)
-    const doc = await getDocumentProxy(new Uint8Array(pdfBytes));
-    const numPages = doc.numPages;
-    const allLines: string[] = [];
-
-    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-      const page = await doc.getPage(pageNum);
-      const textContent = await page.getTextContent();
-      const items = textContent.items as TextItem[];
-      const pageLines = groupItemsIntoRows(items);
-      allLines.push(...pageLines);
-    }
-
-    const extractedText = allLines.join("\n");
+    // Parse PDF text using pdf-parse
+    const buffer = new Uint8Array(pdfBytes);
+    const parsed = await pdf(buffer);
+    const extractedText = parsed.text || "";
+    const numPages = parsed.numpages || 0;
 
     // Count hearings by looking for time patterns (e.g. 09:00, 13.30)
     const timePatterns = extractedText.match(/\d{2}[.:]\d{2}/g) || [];
@@ -145,7 +103,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        text: extractedText || '(Tom PDF)',
+        text: extractedText || "(Tom PDF)",
         url: pdfUrl,
         weekNumber,
         year,
@@ -153,13 +111,13 @@ Deno.serve(async (req) => {
         numPages,
         estimatedHearings: Math.max(1, Math.floor(timePatterns.length / 2)),
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.error("Error:", error);
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
