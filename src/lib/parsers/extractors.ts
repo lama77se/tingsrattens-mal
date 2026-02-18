@@ -203,6 +203,8 @@ export function cleanSaken(text: string): string {
   for (const ht of HEARING_TYPES) {
     saken = saken.replace(new RegExp(ht, "gi"), "").trim();
   }
+  // Strip trailing court name used as location (e.g., "... Attunda tingsrätt")
+  saken = saken.replace(/\s+\S+\s+tingsrätt\s*$/i, "").trim();
   return saken.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "").trim();
 }
 
