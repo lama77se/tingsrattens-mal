@@ -374,6 +374,22 @@ export const COURTS: CourtConfig[] = [
     buildUrl: () => "",
   },
   {
+    id: "varbergs_tingsratt",
+    name: "Varbergs tingsrätt",
+    formatFamily: "tabular",
+    singleUrl: true,
+    buildUrl: (week) => {
+      const base = `${BASE}/varbergs_tingsratt/scheman/webb-forhandlingar`;
+      return [
+        `${base}-v-${week}-${week + 2}.pdf`,
+        `${base}-v-${week - 1}-${week + 1}.pdf`,
+        `${base}-v-${week - 2}-${week}.pdf`,
+        `${base}-v-${week}-${week + 1}.pdf`,
+        `${base}-v-${week - 1}-${week}.pdf`,
+      ];
+    },
+  },
+  {
     id: "uppsala_tingsratt",
     name: "Uppsala tingsrätt",
     formatFamily: "tabular",
