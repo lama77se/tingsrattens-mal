@@ -366,6 +366,21 @@ export const COURTS: CourtConfig[] = [
     buildUrl: () => "",
   },
   {
+    id: "umea_tingsratt",
+    name: "Umeå tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
+    id: "uppsala_tingsratt",
+    name: "Uppsala tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v-${week}.pdf`,
+  },
+  {
     id: "norrtalje_tingsratt",
     name: "Norrtälje tingsrätt",
     formatFamily: "standard",
