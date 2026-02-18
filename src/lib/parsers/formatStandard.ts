@@ -76,7 +76,8 @@ export const formatStandard: ParserStrategy = {
 
       // Extract "saken" — text after case number on the same line
       let saken = "";
-      const afterCase = line.substring(line.indexOf(caseNumber) + caseNumber.length).trim();
+      const afterCase = line.substring(line.indexOf(caseNumber) + caseNumber.length).trim()
+        .replace(/^(?:m\.?\s*fl\.?|med\s+flera)\s*/i, "").trim();
       if (afterCase.length > 2) {
         saken = cleanSaken(afterCase);
       }
