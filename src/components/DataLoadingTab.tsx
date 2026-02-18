@@ -186,11 +186,8 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     for (let i = 0; i < weeks.length; i++) {
       const w = weeks[i];
       const result = await fetchWeek(court, i, w.week, w.year);
-      console.log(`[${court.id}] w${i}: success=${result?.success}, textLen=${result?.text?.length ?? 0}`);
       if (result?.success && result.text) {
-        console.log(`[${court.id}] w${i}: text first 200 chars:`, result.text.substring(0, 200));
         const parsed = parseCourtPdf(result.text, court);
-        console.log(`[${court.id}] w${i}: parsed ${parsed.length} hearings (format: ${court.formatFamily})`);
         for (const h of parsed) {
           const key = `${h.caseNumber}|${h.date}|${h.time}|${h.saken}`;
           if (seen.has(key)) continue;

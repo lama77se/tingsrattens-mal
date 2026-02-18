@@ -127,14 +127,16 @@ describe("preprocessLines", () => {
     expect(result).toHaveLength(2);
   });
 
-  it("splits de-accented day abbreviation from date digits", () => {
+  it("splits de-accented day abbreviation from date digits and converts short date", () => {
+    const year = new Date().getFullYear();
     expect(preprocessLines("ma16-feb09:00 - 09:15Edgangssmtr")).toEqual([
-      "ma 16-feb 09:00 - 09:15 Edgangssmtr",
+      `ma ${year}-02-16 09:00 - 09:15 Edgangssmtr`,
     ]);
   });
 
-  it("splits month abbreviation glued to time", () => {
-    expect(preprocessLines("16-feb09:00")).toEqual(["16-feb 09:00"]);
+  it("converts short date glued to time", () => {
+    const year = new Date().getFullYear();
+    expect(preprocessLines("16-feb09:00")).toEqual([`${year}-02-16 09:00`]);
   });
 
   it("normalizes en-dashes in ISO dates", () => {
