@@ -129,12 +129,18 @@ export function preprocessLines(text: string): string[] {
   // pdf-parse can join content across page breaks without newlines, producing lines like
   // "konkurs Sal 1ti 2026-02-10" or "narkotikabrott on 2026-02-11 09:00..."
   // Split before embedded day-abbreviation + date patterns (only when preceded by non-letter).
+  // Also split before day-abbreviation + time (for date-less multi-day entries at page boundaries).
   const pageSplit: string[] = [];
   for (const line of tokenJoined) {
-    const split = line.replace(
-      /([\d\s.,;:)])\s*((?:må|ma|ti|on|to|fr|lö|lo|sö|so))\s*(\d{4}[-–—]\d{2}[-–—]\d{2})/gi,
-      "$1\n$2 $3"
-    );
+    const split = line
+      .replace(
+        /([\d\s.,;:)])\s*((?:må|ma|ti|on|to|fr|lö|lo|sö|so))\s*(\d{4}[-–—]\d{2}[-–—]\d{2})/gi,
+        "$1\n$2 $3"
+      )
+      .replace(
+        /([\d\s.,;:)])((?:må|ma|mö|ti|on|to|fr|lö|lo|sö|so))(\d{1,2}:\d{2})/gi,
+        "$1\n$2 $3"
+      );
     for (const part of split.split("\n")) {
       const trimmed = part.trim();
       if (trimmed) pageSplit.push(trimmed);
@@ -149,6 +155,7 @@ export function preprocessLines(text: string): string[] {
   // Lines matching COMPLETE_HEARING_RE without a day abbreviation (e.g., from Phase 4
   // transforms) are still pushed directly since they lack subsequent field lines.
   const DAY_DATE_RE = /^(?:må|ma|ti|on|to|fr|lö|lo|sö|so)\s*\d{4}[-–—]\d{2}[-–—]\d{2}/i;
+  const DAY_TIME_RE = /^(?:må|ma|mö|ti|on|to|fr|lö|lo|sö|so)\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/i;
   const COMPLETE_HEARING_RE = /\d{4}[-–—]\d{2}[-–—]\d{2}\s*\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const TIME_RANGE_RE = /^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
   const HAS_TIME_RE = /\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}/;
@@ -181,6 +188,11 @@ export function preprocessLines(text: string): string[] {
         if (buffer) hearingJoined.push(buffer);
         buffer = line;
       }
+    } else if (DAY_TIME_RE.test(line)) {
+      // Day abbreviation + time range without date — date-less multi-day entries.
+      // Always buffer to accumulate case number, saken, room from subsequent lines.
+      if (buffer) hearingJoined.push(buffer);
+      buffer = line;
     } else if (COMPLETE_HEARING_RE.test(line)) {
       // Date + time without day abbreviation — self-contained, output directly
       if (buffer) { hearingJoined.push(buffer); buffer = ""; }

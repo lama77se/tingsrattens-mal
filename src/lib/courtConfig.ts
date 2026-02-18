@@ -397,6 +397,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v-${week}.pdf`,
   },
   {
+    id: "vanersborgs_tingsratt",
+    name: "Vänersborgs tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/vanersborgs_tingsratt/veckans_forhandlingar/v${week}.pdf`,
+  },
+  {
     id: "norrtalje_tingsratt",
     name: "Norrtälje tingsrätt",
     formatFamily: "standard",

@@ -22,6 +22,12 @@ const HEARING_LINE_REGEX = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*[-–—]\s*
 const TIME_ONLY_REGEX = /^(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
 
 /**
+ * Regex matching a day-abbreviation + time line (no date): "fr 09:00 - 16:00 <rest>"
+ * Used for multi-day hearings that lack an explicit date.
+ */
+const DAY_TIME_REGEX = /^(m[åaö]|ma|ti|on|to|fr|lö|lo|sö|so)\s*(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/i;
+
+/**
  * Regex matching a date-only line (possibly with day abbreviation): "må 2026-02-09"
  */
 const DATE_ONLY_REGEX = /(\d{4}-\d{2}-\d{2})\s*$/;
@@ -58,6 +64,7 @@ const TYPE_ALIASES: Record<string, string> = {
   "muntlig förberedelse och ev hf": "Muntlig förberedelse",
   "edgångssmtr": "Edgångssammanträde",
   "förlikningssmtr": "Förlikningssammanträde",
+  "sammantr.de": "Sammanträde",
 };
 
 // Pre-sorted aliases longest first for correct prefix matching
@@ -85,6 +92,28 @@ for (const { canonical, normalizedAlias } of SORTED_ALIASES) {
   }
 }
 ALIAS_SUFFIXES.sort((a, b) => b.normalizedSuffix.length - a.normalizedSuffix.length);
+
+/**
+ * Map day abbreviations to weekday offsets (0=Monday).
+ */
+const DAY_OFFSET: Record<string, number> = {
+  "må": 0, "ma": 0, "mö": 0,
+  "ti": 1, "on": 2, "to": 3, "fr": 4,
+  "lö": 5, "lo": 5, "sö": 6, "so": 6,
+};
+
+/**
+ * Compute an ISO date from a day abbreviation and the Monday of the week.
+ */
+function computeDateFromDay(dayAbbrev: string, weekMonday: Date): string {
+  const offset = DAY_OFFSET[dayAbbrev.toLowerCase()] ?? 0;
+  const d = new Date(weekMonday);
+  d.setDate(weekMonday.getDate() + offset);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 function extractTypeFromText(text: string): { type: string; remainder: string } {
   const normalized = normalize(text);
@@ -133,7 +162,8 @@ function isContinuationBreak(line: string): boolean {
     DATE_ONLY_REGEX.test(line) ||
     !!line.match(TIME_ONLY_REGEX) ||
     HEADER_REGEX.test(line) ||
-    BARE_DATE_TIME_REGEX.test(line)
+    BARE_DATE_TIME_REGEX.test(line) ||
+    !!line.match(DAY_TIME_REGEX)
   );
 }
 
@@ -156,6 +186,21 @@ export const formatTabular: ParserStrategy = {
     const lines = preprocessLines(text);
     const hearings: RawHearing[] = [];
     let currentDate = "";
+
+    // Determine week Monday from first ISO date found in document.
+    // Used to compute dates for day-only entries (multi-day hearings without dates).
+    let weekMonday: Date | null = null;
+    for (const line of lines) {
+      const dm = line.match(/(\d{4}-\d{2}-\d{2})/);
+      if (dm) {
+        const d = new Date(dm[1] + "T12:00:00");
+        const dow = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+        const mondayOffset = dow === 0 ? -6 : 1 - dow;
+        weekMonday = new Date(d);
+        weekMonday.setDate(d.getDate() + mondayOffset);
+        break;
+      }
+    }
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -189,7 +234,15 @@ export const formatTabular: ParserStrategy = {
           time = `${timeMatch[1]} - ${timeMatch[2]}`;
           rest = timeMatch[3].trim();
         } else {
-          continue;
+          // Check for day abbreviation + time (no date, e.g., multi-day hearings)
+          const dayTimeMatch = line.match(DAY_TIME_REGEX);
+          if (dayTimeMatch && weekMonday) {
+            date = computeDateFromDay(dayTimeMatch[1], weekMonday);
+            time = `${dayTimeMatch[2]} - ${dayTimeMatch[3]}`;
+            rest = dayTimeMatch[4].trim();
+          } else {
+            continue;
+          }
         }
       }
 
@@ -239,6 +292,9 @@ export const formatTabular: ParserStrategy = {
           }
         }
       }
+
+      // Strip location annotations like "(Extern lokal)" from saken
+      saken = saken.replace(/\s*\([Ee]xtern\s+lokal\)/g, "").trim();
 
       // Strip alias suffixes that span across lines
       // e.g., "Muntlig förberedelse och ev\nhf" → type "Muntlig förberedelse", saken "och ev hf ..."
