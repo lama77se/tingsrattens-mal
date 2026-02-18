@@ -1437,6 +1437,41 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("konkurs");
   });
 
+  it("does not absorb orphaned case number from next page into saken", () => {
+    // B 4561-24 bug: entry at bottom of page 1 has no saken/room.
+    // Page header flushes Phase 2 buffer. Orphaned (dag X/Y) markers and
+    // a bare case number from the next hearing appear after the break.
+    // The continuation loop must NOT absorb the orphaned case number.
+    const text = [
+      "må2026-02-1609:00 - 12:00Huvudförhandling",
+      "B 4561-24",
+      "Förhandlingar i Vänersborgs tingsrätt, listan skapades 2026-02-13",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
+      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
+      "(dag 1/2)",
+      "(dag 3/3)",
+      "(dag 2/2)",
+      "T 4695-25",
+      "(dag 2/2)",
+      "fordran (överlämnat från KFM, 01-811960-25)Sal 5",
+      "ti2026-02-1709:00 - 16:00Huvudförhandling",
+      "B 5601-23",
+      "ofredande m.m.Sal 8",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    // B 4561-24 has no saken (pdf-parse lost it at page boundary)
+    const b4561 = result.find(h => h.caseNumber === "B 4561-24");
+    expect(b4561).toBeDefined();
+    expect(b4561!.saken).toBe("");
+
+    // B 5601-23 should parse correctly
+    const b5601 = result.find(h => h.caseNumber === "B 5601-23");
+    expect(b5601).toBeDefined();
+    expect(b5601!.saken).toBe("ofredande m.m");
+    expect(b5601!.room).toBe("Sal 8");
+  });
+
   it("splits date-less entry from Sal at page boundary", () => {
     // Page boundary: "Sal 2on09:00 - 16:00Huvudförhandling" gets split by Phase 1.5
     const text = [
