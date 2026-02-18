@@ -1225,4 +1225,239 @@ describe("formatTabular", () => {
     expect(result[4].saken).toContain("överflyttning av vårdnaden");
     expect(result[4].room).toBe("Sal 7");
   });
+
+  it("parses Vänersborg 3-line format with dated and date-less entries", () => {
+    // Vänersborg uses tabular 3-line format:
+    //   Line 1: day+date+time+type
+    //   Line 2: case number
+    //   Line 3: saken + Sal
+    // Multi-day hearings (dag X/Y) lack the date — only day abbreviation.
+    const text = [
+      "Förhandlingar i Vänersborgs tingsrätt, listan skapades 2026-02-13",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
+      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
+      "må2026-02-1613:00 - 16:00Huvudförhandling",
+      "B 3985-24",
+      "misshandelSal 4",
+      "må2026-02-1609:00 - 16:00Huvudförhandling",
+      "T 740-25",
+      "vårdnad, boende, umgänge (INTERIMISTISK)Sal 3",
+      "ti2026-02-1709:00 - 16:00Huvudförhandling",
+      "B 5601-23",
+      "ofredande m.m.Sal 8 ",
+      "(Extern ",
+      "lokal)",
+      "ti2026-02-1709:00 - 12:00Huvudförhandling",
+      "B 5890-25",
+      "misshandelSal 4",
+      "ti2026-02-1709:00 - 11:00Muntlig förberedelse",
+      "T 4727-25",
+      "fordran (överlämnat från kfm 01-387691-25)Sal 5",
+      "on2026-02-1809:00 - 12:00Huvudförhandling",
+      "B 3778-24",
+      "misshandel m.m.Sal 4",
+      "to2026-02-1909:00 - 09:45Huvudförhandling",
+      "B 223-26",
+      "skadegörelseSal 4",
+      "fr2026-02-2009:30 - 10:00Huvudförhandling",
+      "B 115-26",
+      "hastighetsöverträdelseSal 4",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(8);
+
+    // Monday — dated entry
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].time).toBe("13:00 - 16:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 3985-24");
+    expect(result[0].saken).toBe("misshandel");
+    expect(result[0].room).toBe("Sal 4");
+
+    // Monday — parenthesized saken with INTERIMISTISK
+    expect(result[1].caseNumber).toBe("T 740-25");
+    expect(result[1].saken).toBe("vårdnad, boende, umgänge (INTERIMISTISK)");
+    expect(result[1].room).toBe("Sal 3");
+
+    // Tuesday — "(Extern lokal)" stripped from after Sal 8
+    expect(result[2].date).toBe("2026-02-17");
+    expect(result[2].caseNumber).toBe("B 5601-23");
+    expect(result[2].saken).toBe("ofredande m.m");
+    expect(result[2].room).toBe("Sal 8");
+
+    // Tuesday — regular entry
+    expect(result[3].caseNumber).toBe("B 5890-25");
+    expect(result[3].saken).toBe("misshandel");
+
+    // Tuesday — Muntlig förberedelse with KFM reference in saken
+    expect(result[4].type).toBe("Muntlig förberedelse");
+    expect(result[4].caseNumber).toBe("T 4727-25");
+    expect(result[4].saken).toBe("fordran (överlämnat från kfm 01-387691-25)");
+
+    // Wednesday
+    expect(result[5].date).toBe("2026-02-18");
+    expect(result[5].caseNumber).toBe("B 3778-24");
+    expect(result[5].saken).toBe("misshandel m.m");
+
+    // Thursday
+    expect(result[6].date).toBe("2026-02-19");
+    expect(result[6].caseNumber).toBe("B 223-26");
+    expect(result[6].saken).toBe("skadegörelse");
+
+    // Friday
+    expect(result[7].date).toBe("2026-02-20");
+    expect(result[7].caseNumber).toBe("B 115-26");
+    expect(result[7].saken).toBe("hastighetsöverträdelse");
+  });
+
+  it("computes dates for Vänersborg date-less multi-day entries", () => {
+    // Multi-day hearings lack ISO dates — only day abbreviation.
+    // Date is computed from the week determined by other dated entries in the document.
+    const text = [
+      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
+      "ti2026-02-1709:00 - 12:00Huvudförhandling",
+      "B 5890-25",
+      "misshandelSal 4",
+      "må09:00 - 16:00Huvudförhandling",
+      "B 4349-25",
+      "våldtäktSal 2",
+      "on09:00 - 16:00Huvudförhandling",
+      "B 5453-25",
+      "grov misshandel mmSal 1",
+      "to09:00 - 16:00Huvudförhandling",
+      "B 4085-25",
+      "våldtäkt mot barn m.m.Sal 2",
+      "fr09:00 - 16:00Huvudförhandling",
+      "B 5453-25",
+      "grov misshandel mmSal 5",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(5);
+
+    // Tuesday — dated entry, anchors the week
+    expect(result[0].date).toBe("2026-02-17");
+    expect(result[0].caseNumber).toBe("B 5890-25");
+
+    // Monday — date computed from day abbreviation + week
+    expect(result[1].date).toBe("2026-02-16");
+    expect(result[1].caseNumber).toBe("B 4349-25");
+    expect(result[1].saken).toBe("våldtäkt");
+    expect(result[1].room).toBe("Sal 2");
+
+    // Wednesday — computed
+    expect(result[2].date).toBe("2026-02-18");
+    expect(result[2].caseNumber).toBe("B 5453-25");
+    expect(result[2].saken).toBe("grov misshandel mm");
+
+    // Thursday — computed
+    expect(result[3].date).toBe("2026-02-19");
+    expect(result[3].caseNumber).toBe("B 4085-25");
+    expect(result[3].saken).toBe("våldtäkt mot barn m.m");
+
+    // Friday — computed
+    expect(result[4].date).toBe("2026-02-20");
+    expect(result[4].caseNumber).toBe("B 5453-25");
+    expect(result[4].saken).toBe("grov misshandel mm");
+  });
+
+  it("handles Vänersborg multi-line hearing type across lines", () => {
+    // "Muntlig förberedelse och\nev hf" spans two lines
+    const text = [
+      "fr2026-02-2009:30 - 12:00Muntlig förberedelse och ",
+      "ev hf",
+      "FT 5275-25",
+      "fordran. överlämnat från KFM, 01-952487-25Sal 6",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-20");
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].caseNumber).toBe("FT 5275-25");
+    expect(result[0].saken).toBe("fordran. överlämnat från KFM, 01-952487-25");
+    expect(result[0].room).toBe("Sal 6");
+  });
+
+  it("handles Vänersborg entry with missing saken", () => {
+    // Some entries have no saken text, just case number + room
+    const text = [
+      "to2026-02-1913:00 - 13:45Huvudförhandling",
+      "B 502-26",
+      "Sal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("B 502-26");
+    expect(result[0].room).toBe("Sal 2");
+    expect(result[0].saken).toBe("");
+  });
+
+  it("handles Vänersborg saken with no case number on hearing line", () => {
+    // Some entries have saken directly after hearing type (no case number)
+    const text = [
+      "to2026-02-1913:00 - 16:00Muntlig förberedelseöverflyttande av vårdnadSal 6",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].caseNumber).toBe("");
+    expect(result[0].saken).toBe("överflyttande av vårdnad");
+    expect(result[0].room).toBe("Sal 6");
+  });
+
+  it("handles Vänersborg page boundary with orphaned (dag X/Y)", () => {
+    // pdf-parse produces orphaned (dag X/Y) markers at page boundaries.
+    // These should be skipped without affecting subsequent hearings.
+    const text = [
+      "(dag 1/2)",
+      "(dag 3/3)",
+      "(dag 2/2)",
+      "on2026-02-1809:00 - 12:00Huvudförhandling",
+      "B 3778-24",
+      "misshandel m.m.Sal 4",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-18");
+    expect(result[0].caseNumber).toBe("B 3778-24");
+    expect(result[0].saken).toBe("misshandel m.m");
+  });
+
+  it("maps 'Sammantr.de' encoding artifact to Sammanträde", () => {
+    const text = "2026-02-16 13:00 - 15:00 Sammantr.de Ä 4210-24 konkurs Sal 1";
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Sammanträde");
+    expect(result[0].caseNumber).toBe("Ä 4210-24");
+    expect(result[0].saken).toBe("konkurs");
+  });
+
+  it("splits date-less entry from Sal at page boundary", () => {
+    // Page boundary: "Sal 2on09:00 - 16:00Huvudförhandling" gets split by Phase 1.5
+    const text = [
+      "on2026-02-1809:00 - 12:00Huvudförhandling",
+      "B 3778-24",
+      "misshandel m.m.Sal 4",
+      "Sal 2on09:00 - 16:00Huvudförhandling",
+      "B 5453-25",
+      "grov misshandel mmSal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].date).toBe("2026-02-18");
+    expect(result[0].caseNumber).toBe("B 3778-24");
+
+    // Date-less entry: "on" = Wednesday = 2026-02-18 (same week as the dated entry)
+    expect(result[1].date).toBe("2026-02-18");
+    expect(result[1].caseNumber).toBe("B 5453-25");
+    expect(result[1].saken).toBe("grov misshandel mm");
+    expect(result[1].room).toBe("Sal 1");
+  });
 });
