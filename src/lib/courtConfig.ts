@@ -343,6 +343,21 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/sundsvalls_tingsratt/block/v.-${week}.pdf`,
   },
   {
+    id: "uddevalla_tingsratt",
+    name: "Uddevalla tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/uddevalla_tingsratt/veckans-mal/veckans-mal-v.${week}.pdf`,
+  },
+  {
+    id: "sodertalje_tingsratt",
+    name: "Södertälje tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
+  {
     id: "skelleftea_tingsratt",
     name: "Skellefteå tingsrätt",
     formatFamily: "standard",
