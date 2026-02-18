@@ -1057,6 +1057,70 @@ describe("formatTabular", () => {
     expect(result[2].room).toBe("Sal 16");
   });
 
+  it("parses Uppsala format with court names as Lokal field", () => {
+    const text = [
+      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenLokal",
+      "må2026-02-16 09:00 - 09:15Edgångssmtr",
+      "K 9392-25",
+      "ansökan om konkursUppsala tingsrätt",
+      "må2026-02-16 09:00 - 12:00Huvudförhandling",
+      "B 542-25",
+      "ringa narkotikabrottUppsala tingsrätt",
+      "ti2026-02-17 09:00 - 16:00Muntlig förberedelse och ev hf",
+      "T 6817-25",
+      "kontraktsrättUppsala tingsrätt",
+      "on2026-02-18  09:30 - 16:30Huvudförhandling",
+      "B 3858-25",
+      "mord m.m.Attunda tingsrätt",
+      "to2026-02-19 09:00 - 10:00Plansammanträde",
+      "K 213-26",
+      "rekonstruktionUppsala tingsrätt",
+      "fr2026-02-20 09:00 - 11:00Muntlig förberedelse",
+      "FT 8123-25",
+      "fordranUppsala tingsrätt",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Uppsala tingsrätt", text });
+    expect(result).toHaveLength(6);
+
+    // Edgångssammanträde with location
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].type).toBe("Edgångssammanträde");
+    expect(result[0].caseNumber).toBe("K 9392-25");
+    expect(result[0].saken).toBe("ansökan om konkurs");
+    expect(result[0].location).toBe("Uppsala tingsrätt");
+
+    // Standard hearing at Uppsala
+    expect(result[1].type).toBe("Huvudförhandling");
+    expect(result[1].caseNumber).toBe("B 542-25");
+    expect(result[1].saken).toBe("ringa narkotikabrott");
+    expect(result[1].location).toBe("Uppsala tingsrätt");
+
+    // Alias type with location
+    expect(result[2].date).toBe("2026-02-17");
+    expect(result[2].type).toBe("Muntlig förberedelse");
+    expect(result[2].caseNumber).toBe("T 6817-25");
+    expect(result[2].saken).toBe("kontraktsrätt");
+
+    // Different court as Lokal — Attunda tingsrätt
+    expect(result[3].date).toBe("2026-02-18");
+    expect(result[3].caseNumber).toBe("B 3858-25");
+    expect(result[3].saken).toBe("mord m.m");
+    expect(result[3].location).toBe("Attunda tingsrätt");
+
+    // Plansammanträde (new hearing type)
+    expect(result[4].date).toBe("2026-02-19");
+    expect(result[4].type).toBe("Plansammanträde");
+    expect(result[4].caseNumber).toBe("K 213-26");
+    expect(result[4].saken).toBe("rekonstruktion");
+
+    // Standard Muntlig förberedelse
+    expect(result[5].date).toBe("2026-02-20");
+    expect(result[5].type).toBe("Muntlig förberedelse");
+    expect(result[5].caseNumber).toBe("FT 8123-25");
+    expect(result[5].saken).toBe("fordran");
+  });
+
   it("parses Uddevalla 3-line format with multi-day and multi-case", () => {
     const text = [
       "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",

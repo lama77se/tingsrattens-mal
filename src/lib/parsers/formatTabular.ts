@@ -250,6 +250,14 @@ export const formatTabular: ParserStrategy = {
         }
       }
 
+      // Extract trailing court name as location (Uppsala-style "Lokal" field)
+      let location: string | undefined;
+      const courtNameAtEnd = saken.match(/\s+(\S+\s+tingsrätt)\s*$/i);
+      if (courtNameAtEnd && courtNameAtEnd.index !== undefined) {
+        location = courtNameAtEnd[1];
+        saken = saken.substring(0, courtNameAtEnd.index).trim();
+      }
+
       // Clean trailing punctuation from saken
       saken = saken.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "").trim();
 
@@ -262,6 +270,7 @@ export const formatTabular: ParserStrategy = {
         saken: saken || "",
         parties: "",
         ...(externalCourt && { externalCourt }),
+        ...(location && { location }),
       });
     }
 
