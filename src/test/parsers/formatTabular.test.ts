@@ -1437,6 +1437,34 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("konkurs");
   });
 
+  it("recovers orphaned saken from page boundary", () => {
+    // B 3336-25 bug: entry at bottom of page 2 has no saken/room.
+    // pdf-parse puts the saken "olovlig körning m.m." at the top of page 3
+    // after the page header. Phase 2 should recover it by appending the
+    // orphaned text to the buffer before flushing.
+    const text = [
+      "on2026-02-1814:30 - 15:15Huvudförhandling",
+      "B 3336-25",
+      "Förhandlingar i Vänersborgs tingsrätt, listan skapades 2026-02-13",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
+      "DagDatumFörhandlingstidTyp av förhandlingMålnummerSakenSal",
+      "olovlig körning m.m.Sal 4",
+      "fr2026-02-2013:00 - 15:30Muntlig förberedelse",
+      "FT 4572-25",
+      "fordranSal 5",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    const b3336 = result.find(h => h.caseNumber === "B 3336-25");
+    expect(b3336).toBeDefined();
+    expect(b3336!.saken).toBe("olovlig körning m.m");
+    expect(b3336!.room).toBe("Sal 4");
+
+    const ft4572 = result.find(h => h.caseNumber === "FT 4572-25");
+    expect(ft4572).toBeDefined();
+    expect(ft4572!.saken).toBe("fordran");
+  });
+
   it("does not absorb orphaned case number from next page into saken", () => {
     // B 4561-24 bug: entry at bottom of page 1 has no saken/room.
     // Page header flushes Phase 2 buffer. Orphaned (dag X/Y) markers and
