@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
     const pdfUrl: string = body.pdfUrl;
     const weekNumber: number | undefined = body.weekNumber;
     const year: number | undefined = body.year;
+    const yTolerance: number = body.yTolerance ?? 3;
 
     if (!pdfUrl) {
       return new Response(JSON.stringify({ success: false, error: "Saknar pdfUrl" }), {
@@ -137,7 +138,7 @@ Deno.serve(async (req) => {
       const page = await pdf.getPage(p);
       const content = await page.getTextContent();
       const items = content.items as TextItem[];
-      const rows = groupItemsIntoRows(items);
+      const rows = groupItemsIntoRows(items, yTolerance);
       allLines.push(...rows);
     }
 
