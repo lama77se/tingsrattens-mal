@@ -467,4 +467,57 @@ describe("formatSchema", () => {
     expect(result[0].caseNumber).toBe("B 110-26");
     expect(result[0].saken).toBe("undanröjande av ungdomstjänst (B 512-25)");
   });
+
+  // pdfjs-serverless produces spaces around dashes in case numbers: "B 784 - 25"
+  it("normalizes pdfjs-serverless case number spacing (B 784 - 25)", () => {
+    const text = [
+      "Tisdag 17 februari 2026",
+      "kl. 09:00 - 10:15 B 784 - 25, Huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående brott mot knivlagen",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("B 784-25");
+    expect(result[0].time).toBe("09:00 - 10:15");
+    expect(result[0].saken).toBe("brott mot knivlagen");
+  });
+
+  it("normalizes pdfjs-serverless spacing for multi-case angående", () => {
+    const text = [
+      "Tisdag 24 februari 2026",
+      "kl. 09:30 - 15:00 B 811 - 24, Huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående häleriförseelse, B 443 - 25 ringa narkotikabrott,",
+      "brott mot lagen om förbud beträffande knivar och andra",
+      "farliga föremål",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("B 811-24");
+    expect(result[0].saken).toBe("häleriförseelse");
+    expect(result[1].caseNumber).toBe("B 443-25");
+    expect(result[1].saken).toBe("ringa narkotikabrott, brott mot lagen om förbud beträffande knivar och andra farliga föremål");
+  });
+
+  it("skips page headers and preserves correct location", () => {
+    const text = [
+      "Fredag 20 februari 2026",
+      "kl. 09:00 - 12:00 B 395 - 23, Huvudförhandling, Dag 2 av 2",
+      "Kalix tingshus, sal 1 angående medhjälp till grov smuggling",
+      "HAPARANDA TINGSRÄTT Sida 2 ( 2 )",
+      "Måndag 23 februari 2026",
+      "kl. 13:15 - 16:00 B 863 - 25, Fortsatt huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående Inbrottsstöld och hot mot tjänsteman",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].location).toBe("Kalix tingshus");
+    expect(result[0].caseNumber).toBe("B 395-23");
+    // Page header should not override location for next hearing
+    expect(result[1].location).toBe("Haparanda tingsrätt");
+    expect(result[1].caseNumber).toBe("B 863-25");
+    expect(result[1].type).toBe("Huvudförhandling");
+  });
 });
