@@ -254,6 +254,28 @@ describe("formatStandard", () => {
     expect(result[0].saken).toContain("T 14184-24");
   });
 
+  it("splits merged PDF rows into separate hearings (Halmstad row-merge)", () => {
+    // When pdfYTolerance is high, adjacent rows can merge into one line.
+    // Both B 297-26 and T 3736-25 should become separate hearings.
+    const text = [
+      "2026-02-26 13:00 - 15:00 Halmstads tingsrätt Muntlig förberedelse B 297-26 Brottmål T 3736-25 försträckning, fordran Sal 1",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Halmstads tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    // First hearing: B 297-26 — gets the time, saken stops before T 3736-25
+    expect(result[0].caseNumber).toBe("B 297-26");
+    expect(result[0].time).toBe("13:00 - 15:00");
+    expect(result[0].saken).not.toContain("T 3736-25");
+    expect(result[0].saken).not.toContain("försträckning");
+
+    // Second hearing: T 3736-25 — gets its own saken
+    expect(result[1].caseNumber).toBe("T 3736-25");
+    expect(result[1].saken).toContain("försträckning");
+    expect(result[1].date).toBe("2026-02-26");
+  });
+
   it("ignores case number on continuation line starting with )", () => {
     const text = [
       "10-feb",
