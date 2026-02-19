@@ -163,26 +163,36 @@ describe("formatStandard", () => {
     expect(result[1].date).toBe("2026-02-20");
   });
 
-  it("handles Helsingborg-style 3-line format with Sal room", () => {
+  it("handles Helsingborg-style single-line tabular format with Sal column header", () => {
+    // Helsingborg PDFs have a "Sal" column header with bare room numbers on data rows.
+    // The parser detects the header and inserts "Sal " before trailing bare numbers.
     const text = [
-      "ma 16-feb 09:00 - 09:15 Edgangssmtr",
-      "K 7484-25",
-      "Konkurs Sal 21",
-      "ti 17-feb 10:30 - 16:00 Huvudforhandling",
-      "B 9642-24",
-      "misshandel Sal 1",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "må 16-feb 09:00 - 09:15 Edgångssmtr K 7484-25 Konkurs 21",
+      "må 16-feb 09:00 - 10:30 Huvudförhandling B 9642-24 penningtvättsbrott 12",
+      "on 18-feb 09:00 - 09:10 Konkursförhandling K 9132-25 ansökan om konkurs 21",
+      "on 18-feb 09:00 - 16:00 Huvudförhandling B 4131-25 grovt narkotikabrott m.m 13",
     ].join("\n");
 
     const result = formatStandard.parse({ courtName: "Helsingborgs tingsrätt", text });
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(4);
 
     expect(result[0].caseNumber).toBe("K 7484-25");
     expect(result[0].saken).toBe("Konkurs");
     expect(result[0].room).toBe("Sal 21");
+    expect(result[0].date).toBe("2026-02-16");
 
     expect(result[1].caseNumber).toBe("B 9642-24");
-    expect(result[1].saken).toBe("misshandel");
-    expect(result[1].room).toBe("Sal 1");
+    expect(result[1].saken).toBe("penningtvättsbrott");
+    expect(result[1].room).toBe("Sal 12");
+
+    expect(result[2].caseNumber).toBe("K 9132-25");
+    expect(result[2].saken).toBe("ansökan om konkurs");
+    expect(result[2].room).toBe("Sal 21");
+
+    expect(result[3].caseNumber).toBe("B 4131-25");
+    expect(result[3].saken).toBe("grovt narkotikabrott m.m");
+    expect(result[3].room).toBe("Sal 13");
   });
 
   it("parses Sundsvall 3-line format with short dates and m.fl suffix", () => {
