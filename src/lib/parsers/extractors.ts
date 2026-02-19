@@ -116,8 +116,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/(\d{4})[-–—](\d{2})[-–—](\d{2})/g, "$1-$2-$3")
         // Strip (dag X/Y) annotations
         .replace(/\s*\(dag\s+\d+\/\d+\)/gi, "")
-        // Case number space before dash: B 784 -25 → B 784-25
-        .replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2")
+        // Case number spaces around dash: B 784 - 25 / B 784 -25 → B 784-25
+        .replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6})\s*([-–—])\s*(\d{2})/gi, "$1$2$3")
         // Strip pagination footers: "1-81 visas av 81"
         .replace(/\s*\d+[-–—]\d+\s+visas\s+av\s+\d+\s*$/, "")
         // --- Deglue patterns for PDFs with missing inter-field spaces ---

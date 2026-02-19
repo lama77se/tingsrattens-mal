@@ -28,14 +28,12 @@ export const formatSchema: ParserStrategy = {
     const { text } = ctx;
     if (!text || text.trim().length === 0) return [];
 
-    console.log("PDF text first 500 chars:", text.substring(0, 500));
-
     const lines = text
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean)
-      // Normalize case number spaces: "B 784 -25" → "B 784-25"
-      .map((l) => l.replace(/((?:FT|[TBK\u00c4])\s?\d{1,6})\s+([-–—]\d{2})/gi, "$1$2"));
+      // Normalize case number spaces: "B 784 - 25" / "B 784 -25" → "B 784-25"
+      .map((l) => l.replace(/((?:PMT|FT|[TBK\u00c4])\s?\d{1,6})\s*([-–—])\s*(\d{2})/gi, "$1$2$3"));
 
     const hearings: RawHearing[] = [];
     let currentDate = "";
@@ -106,6 +104,9 @@ export const formatSchema: ParserStrategy = {
     };
 
     for (const line of lines) {
+      // Skip page headers: "HAPARANDA TINGSRÄTT Sida 1(2)" / "LUNDS TINGSRÄTT  Sida 2(5)"
+      if (/Sida\s+\d/i.test(line) && /(?:tingsrätt|tingshus)/i.test(line)) continue;
+
       // Swedish long date heading: "Tisdag 17 februari 2026"
       if (WEEKDAY_PREFIX.test(line)) {
         const dateMatch = extractSwedishDate(line);
