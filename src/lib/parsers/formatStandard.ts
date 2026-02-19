@@ -75,7 +75,17 @@ export const formatStandard: ParserStrategy = {
 
     console.log("PDF text first 500 chars:", text.substring(0, 500));
 
-    const lines = preprocessLines(text);
+    let lines = preprocessLines(text);
+
+    // Detect tabular "Sal" column header (e.g., Helsingborg):
+    // header ends with "Sal", data rows have bare room numbers at end.
+    // Insert "Sal " prefix so extractRoom/cleanSaken work correctly.
+    if (lines.some((l) => /\bSal\s*$/i.test(l))) {
+      lines = lines.map((l) =>
+        /\bSal\s*$/i.test(l) ? l : l.replace(/\s(\d{1,3})\s*$/, " Sal $1"),
+      );
+    }
+
     const hearings: RawHearing[] = [];
     let currentDate = "";
 
