@@ -127,7 +127,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         status: "active",
         detail: urls.length > 1 ? `Testar ${triedUrls.length + 1}/${urls.length}...` : undefined,
       });
-      const attempt = await fetchCourtPdf(url, week, year);
+      const attempt = await fetchCourtPdf(url, week, year, court.pdfYTolerance);
       triedUrls.push({ url, ok: attempt.success });
       if (attempt.success) {
         result = attempt;

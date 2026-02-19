@@ -9,6 +9,8 @@ export interface CourtConfig {
   buildUrl: (week: number, year: number) => string | string[];
   /** If true, only fetch once (current week) — for courts that overwrite the same URL. */
   singleUrl?: boolean;
+  /** y-coordinate tolerance for PDF row grouping. Higher values for table-style PDFs (Excel). Default: 3. */
+  pdfYTolerance?: number;
   /** If true, court cannot be fetched — shown as info-only on the loading page. */
   disabled?: boolean;
   /** Note shown on the loading page (e.g., why a court is disabled). */
@@ -135,6 +137,7 @@ export const COURTS: CourtConfig[] = [
     id: "halmstads_tingsratt",
     name: "Halmstads tingsrätt",
     formatFamily: "tabular",
+    pdfYTolerance: 15,
     buildUrl: (week, year) =>
       `${BASE}/halmstads_tingsratt/veckans-forhandlingar/${year}/vecka-${week}.pdf`,
   },
