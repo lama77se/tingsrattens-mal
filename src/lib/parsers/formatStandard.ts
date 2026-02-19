@@ -35,6 +35,33 @@ function hasRealCaseNumber(line: string): RegExpMatchArray | null {
 }
 
 /**
+ * Find ALL real (non-parenthesized) case numbers on a line.
+ * Returns array with case number text and position info.
+ */
+function findAllRealCaseNumbers(
+  line: string
+): Array<{ caseNumber: string; index: number; endIndex: number }> {
+  const results: Array<{ caseNumber: string; index: number; endIndex: number }> = [];
+  const re = new RegExp(CASE_NUMBER_REGEX.source, "gi");
+  let m;
+  while ((m = re.exec(line)) !== null) {
+    if (m.index === undefined) continue;
+    const before = line.substring(0, m.index);
+    const after = line.substring(m.index + m[0].length).trim();
+    const openParens = (before.match(/\(/g) || []).length;
+    const closeParens = (before.match(/\)/g) || []).length;
+    if (openParens > closeParens) continue;
+    if (after.startsWith(")")) continue;
+    results.push({
+      caseNumber: m[1],
+      index: m.index,
+      endIndex: m.index + m[0].length,
+    });
+  }
+  return results;
+}
+
+/**
  * Standard format parser — handles the current 4 courts (Alingsås, Attunda, Blekinge, Solna).
  * Exact same extraction logic as the original monolithic parseCourtPdf.
  */
@@ -70,11 +97,9 @@ export const formatStandard: ParserStrategy = {
         }
       }
 
-      // Look for case numbers — this signals a hearing entry
-      const caseMatch = hasRealCaseNumber(line);
-      if (!caseMatch) continue;
-
-      const caseNumber = caseMatch[1];
+      // Find ALL real case numbers on this line (handles merged PDF rows)
+      const allCases = findAllRealCaseNumbers(line);
+      if (allCases.length === 0) continue;
 
       // If current line has no date but previous line does, grab it
       if (i > 0 && !line.match(SHORT_DATE_REGEX)) {
@@ -84,60 +109,67 @@ export const formatStandard: ParserStrategy = {
         }
       }
 
-      // Extract time
-      const time = extractTime(line, i > 0 ? lines[i - 1] : undefined);
+      // Shared extractions from the full line (time, room, type)
+      const lineTime = extractTime(line, i > 0 ? lines[i - 1] : undefined);
+      const lineRoom = extractRoom(lines, i);
+      const lineType = extractHearingType(lines, i);
 
-      // Extract room
-      const room = extractRoom(lines, i);
+      for (let c = 0; c < allCases.length; c++) {
+        const { caseNumber, endIndex } = allCases[c];
+        const isLast = c === allCases.length - 1;
 
-      // Detect hearing type
-      const type = extractHearingType(lines, i);
+        // First case on line gets the extracted time; spilled cases lose it
+        const time = c === 0 ? lineTime : "";
 
-      // Extract "saken" — text after case number on the same line
-      let saken = "";
-      const afterCase = line.substring(line.indexOf(caseNumber) + caseNumber.length).trim()
-        .replace(/^(?:m\.?\s*fl\.?|med\s+flera)\s*/i, "").trim();
-      if (afterCase.length > 2) {
-        saken = cleanSaken(afterCase);
-      }
+        // Extract "saken" — text after this case number up to the next one
+        let saken = "";
+        const segmentEnd = isLast ? line.length : allCases[c + 1].index;
+        const afterCase = line.substring(endIndex, segmentEnd).trim()
+          .replace(/^(?:m\.?\s*fl\.?|med\s+flera)\s*/i, "").trim();
 
-      // If no saken on case number line, next line is saken
-      let sakenFromNextLine = false;
-      if (!saken && i + 1 < lines.length) {
-        const nextLine = lines[i + 1].trim();
-        if (
-          nextLine.length > 1 &&
-          !hasRealCaseNumber(nextLine) &&
-          !nextLine.match(SHORT_DATE_REGEX) &&
-          !nextLine.match(ISO_DATE_REGEX)
-        ) {
-          saken = nextLine.replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
-          sakenFromNextLine = true;
+        if (afterCase.length > 2) {
+          saken = cleanSaken(afterCase);
         }
-      }
 
-      // Extract parties from the line AFTER saken
-      let parties = "";
-      const partiesLineIndex = sakenFromNextLine ? i + 2 : i + 1;
-      if (partiesLineIndex < lines.length && !hasRealCaseNumber(lines[partiesLineIndex])) {
-        const pLine = lines[partiesLineIndex].trim();
-        if (pLine.length > 2 && !pLine.match(SHORT_DATE_REGEX) && !pLine.match(ISO_DATE_REGEX)) {
-          // Don't use as parties if it looks like a new hearing line (has time pattern)
-          if (!pLine.match(TIME_RANGE_REGEX) || pLine.match(CASE_NUMBER_REGEX)) {
-            parties = cleanParties(pLine);
+        // If no saken and this is the last case on line, check next line
+        let sakenFromNextLine = false;
+        if (!saken && isLast && i + 1 < lines.length) {
+          const nextLine = lines[i + 1].trim();
+          if (
+            nextLine.length > 1 &&
+            !hasRealCaseNumber(nextLine) &&
+            !nextLine.match(SHORT_DATE_REGEX) &&
+            !nextLine.match(ISO_DATE_REGEX)
+          ) {
+            saken = nextLine.replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
+            sakenFromNextLine = true;
           }
         }
-      }
 
-      hearings.push({
-        date: currentDate,
-        time,
-        caseNumber,
-        type,
-        room,
-        saken,
-        parties,
-      });
+        // Extract parties only for the last case on the line
+        let parties = "";
+        if (isLast) {
+          const partiesLineIndex = sakenFromNextLine ? i + 2 : i + 1;
+          if (partiesLineIndex < lines.length && !hasRealCaseNumber(lines[partiesLineIndex])) {
+            const pLine = lines[partiesLineIndex].trim();
+            if (pLine.length > 2 && !pLine.match(SHORT_DATE_REGEX) && !pLine.match(ISO_DATE_REGEX)) {
+              if (!pLine.match(TIME_RANGE_REGEX) || pLine.match(CASE_NUMBER_REGEX)) {
+                parties = cleanParties(pLine);
+              }
+            }
+          }
+        }
+
+        hearings.push({
+          date: currentDate,
+          time,
+          caseNumber,
+          type: lineType,
+          room: lineRoom,
+          saken,
+          parties,
+        });
+      }
     }
 
     return hearings;
