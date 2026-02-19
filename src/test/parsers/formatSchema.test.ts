@@ -385,4 +385,86 @@ describe("formatSchema", () => {
     expect(result[0].type).toBe("Huvudförhandling");
     expect(result[0].saken).toBe("undanröjande av ungdomstjänst (B 512-25)");
   });
+
+  // Two-column merged line tests (coordinate-based PDF extraction merges
+  // left+right columns onto the same line for Haparanda's two-column layout)
+  it("handles merged time+case line from two-column PDF", () => {
+    const text = [
+      "Tisdag 17 februari 2026",
+      "kl. 09:00 - 10:15 B 784-25, Huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående brott mot knivlagen, grovt brott",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-17");
+    expect(result[0].time).toBe("09:00 - 10:15");
+    expect(result[0].caseNumber).toBe("B 784-25");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].room).toBe("Sal 1");
+    expect(result[0].saken).toBe("brott mot knivlagen, grovt brott");
+    expect(result[0].location).toBe("Haparanda tingsrätt");
+  });
+
+  it("handles multiple merged two-column hearings", () => {
+    const text = [
+      "Tisdag 17 februari 2026",
+      "kl. 09:00 - 10:15 B 784-25, Huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående brott mot knivlagen, grovt brott",
+      "kl. 11:15 - 12:00 B 1160-25, Huvudförhandling",
+      "Kalix tingshus, sal 1 angående stöld",
+      "Onsdag 18 februari 2026",
+      "kl. 09:00 - 16:00 B 863-25, Fortsatt huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående Inbrottsstöld, bedrägeri",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(3);
+
+    expect(result[0].date).toBe("2026-02-17");
+    expect(result[0].time).toBe("09:00 - 10:15");
+    expect(result[0].caseNumber).toBe("B 784-25");
+    expect(result[0].location).toBe("Haparanda tingsrätt");
+
+    expect(result[1].date).toBe("2026-02-17");
+    expect(result[1].caseNumber).toBe("B 1160-25");
+    expect(result[1].location).toBe("Kalix tingshus");
+    expect(result[1].room).toBe("Sal 1");
+
+    expect(result[2].date).toBe("2026-02-18");
+    expect(result[2].type).toBe("Huvudförhandling");
+    expect(result[2].saken).toBe("Inbrottsstöld, bedrägeri");
+  });
+
+  it("handles merged location+angående with multi-case split", () => {
+    const text = [
+      "Tisdag 24 februari 2026",
+      "kl. 09:30 - 15:00 B 811-24, Huvudförhandling",
+      "Haparanda tingsrätt, Sal 1 angående häleriförseelse, B 443-25 ringa narkotikabrott,",
+      "brott mot lagen om förbud beträffande knivar och andra",
+      "farliga föremål",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].caseNumber).toBe("B 811-24");
+    expect(result[0].saken).toBe("häleriförseelse");
+
+    expect(result[1].caseNumber).toBe("B 443-25");
+    expect(result[1].saken).toBe("ringa narkotikabrott, brott mot lagen om förbud beträffande knivar och andra farliga föremål");
+  });
+
+  it("handles merged location+angående with paren reference (no split)", () => {
+    const text = [
+      "Tisdag 24 februari 2026",
+      "kl. 15:15 - 16:00 B 110-26, Huvudförhandling",
+      "Kalix tingshus, sal 1 angående undanröjande av ungdomstjänst (B 512-25)",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("B 110-26");
+    expect(result[0].saken).toBe("undanröjande av ungdomstjänst (B 512-25)");
+  });
 });

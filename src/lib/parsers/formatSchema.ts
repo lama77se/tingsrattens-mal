@@ -64,6 +64,47 @@ export const formatSchema: ParserStrategy = {
       sakenParts = [];
     };
 
+    /** Parse a case number + hearing type fragment (e.g. "B 784-25, Huvudförhandling") */
+    const parseCaseFragment = (fragment: string) => {
+      const cm = fragment.match(CASE_NUMBER_REGEX);
+      if (!cm) return;
+      flush();
+      currentCaseNumber = cm[1];
+      const afterCase = fragment.substring(fragment.indexOf(cm[0]) + cm[0].length);
+      let typeStr = afterCase.replace(/^[\s,]+/, "").trim();
+      if (typeStr) {
+        typeStr = typeStr.replace(DAG_AV_REGEX, "").trim();
+        if (FORTSATT_REGEX.test(typeStr)) {
+          typeStr = typeStr.replace(FORTSATT_REGEX, "").trim();
+          if (typeStr.length > 0) {
+            typeStr = typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
+          }
+        }
+        currentType = typeStr;
+      }
+    };
+
+    /** Parse an angående fragment (may contain embedded case numbers for multi-case hearings) */
+    const parseAngaendeFragment = (angText: string) => {
+      const embeddedCase = angText.match(CASE_NUMBER_REGEX);
+      const isParenRef = embeddedCase &&
+        /\(\s*$/.test(angText.substring(0, angText.indexOf(embeddedCase[0])));
+      const isTrailingRef = embeddedCase &&
+        !angText.substring(angText.indexOf(embeddedCase[0]) + embeddedCase[0].length).replace(/^[\s,]+/, "").trim();
+      if (embeddedCase && !isParenRef && !isTrailingRef) {
+        const beforeCase = angText.substring(0, angText.indexOf(embeddedCase[0])).replace(/[,\s]+$/, "").trim();
+        if (beforeCase) sakenParts = [beforeCase];
+        const inheritedType = currentType;
+        flush();
+        currentCaseNumber = embeddedCase[1];
+        currentType = inheritedType;
+        const afterCase = angText.substring(angText.indexOf(embeddedCase[0]) + embeddedCase[0].length).replace(/^[\s,]+/, "").trim();
+        sakenParts = afterCase ? [afterCase] : [];
+      } else {
+        sakenParts = [angText];
+      }
+    };
+
     for (const line of lines) {
       // Swedish long date heading: "Tisdag 17 februari 2026"
       if (WEEKDAY_PREFIX.test(line)) {
@@ -75,21 +116,42 @@ export const formatSchema: ParserStrategy = {
         }
       }
 
-      // "kl." time line
+      // "kl." time line — may have case number merged on same line (two-column PDF)
+      // e.g. "kl. 09:00 - 10:15 B 784-25, Huvudförhandling"
       const klMatch = line.match(KL_TIME_REGEX);
       if (klMatch) {
         flush();
         currentTime = klMatch[2] ? `${klMatch[1]} - ${klMatch[2]}` : klMatch[1];
+        // Check for case number in remainder of line
+        const afterTime = line.substring(klMatch.index! + klMatch[0].length).trim();
+        if (afterTime) {
+          const caseInRemainder = afterTime.match(CASE_NUMBER_REGEX);
+          if (caseInRemainder) {
+            parseCaseFragment(afterTime);
+          }
+        }
         continue;
       }
 
-      // Location line (tingsrätt/tingshus) — but not if it also has a case number
-      if (/(?:tingsrätt|tingshus)/i.test(line) && !CASE_NUMBER_REGEX.test(line)) {
+      // Location line (tingsrätt/tingshus) — may have angående merged on same line
+      // e.g. "Haparanda tingsrätt, Sal 1 angående brott mot knivlagen"
+      // Guard: only skip if the location part itself contains a case number
+      if (/(?:tingsrätt|tingshus)/i.test(line)) {
         const locMatch = line.match(LOCATION_REGEX);
         if (locMatch) {
-          currentLocation = locMatch[1].trim();
-          if (locMatch[2]) currentRoom = `Sal ${locMatch[2]}`;
-          continue;
+          // Only treat as location if the matched portion has no case number
+          const locPortion = locMatch[0];
+          if (!CASE_NUMBER_REGEX.test(locPortion)) {
+            currentLocation = locMatch[1].trim();
+            if (locMatch[2]) currentRoom = `Sal ${locMatch[2]}`;
+            // Check for angående in remainder of line after location+room
+            const afterLoc = line.substring(locMatch[0].length).trim();
+            const angInRemainder = afterLoc.match(ANGAENDE_REGEX);
+            if (angInRemainder) {
+              parseAngaendeFragment(angInRemainder[1]);
+            }
+            continue;
+          }
         }
       }
 
@@ -106,30 +168,7 @@ export const formatSchema: ParserStrategy = {
       //   "angående häleriförseelse, B 443-25 ringa narkotikabrott, ..."
       const angMatch = line.match(ANGAENDE_REGEX);
       if (angMatch) {
-        const angText = angMatch[1];
-        const embeddedCase = angText.match(CASE_NUMBER_REGEX);
-        // Case numbers that are references (not separate cases):
-        // 1. Inside parentheses: "undanröjande av ungdomstjänst (B 512-25)"
-        // 2. At end with no description after: "återvinning av tredskodom FT 5619-25"
-        const isParenRef = embeddedCase &&
-          /\(\s*$/.test(angText.substring(0, angText.indexOf(embeddedCase[0])));
-        const isTrailingRef = embeddedCase &&
-          !angText.substring(angText.indexOf(embeddedCase[0]) + embeddedCase[0].length).replace(/^[\s,]+/, "").trim();
-        if (embeddedCase && !isParenRef && !isTrailingRef) {
-          // Text before the embedded case number is saken for the current hearing
-          const beforeCase = angText.substring(0, angText.indexOf(embeddedCase[0])).replace(/[,\s]+$/, "").trim();
-          if (beforeCase) sakenParts = [beforeCase];
-          const inheritedType = currentType;
-          flush();
-
-          // Start new hearing with embedded case number, inheriting type/time/location/room/date
-          currentCaseNumber = embeddedCase[1];
-          currentType = inheritedType;
-          const afterCase = angText.substring(angText.indexOf(embeddedCase[0]) + embeddedCase[0].length).replace(/^[\s,]+/, "").trim();
-          sakenParts = afterCase ? [afterCase] : [];
-        } else {
-          sakenParts = [angText];
-        }
+        parseAngaendeFragment(angMatch[1]);
         continue;
       }
 
@@ -138,22 +177,7 @@ export const formatSchema: ParserStrategy = {
       // (e.g. "återvinning av tredskodom i T 5137-25") are continuation text
       const caseMatch = line.match(CASE_NUMBER_REGEX);
       if (caseMatch && caseMatch.index === 0) {
-        flush();
-        currentCaseNumber = caseMatch[1];
-
-        // Extract hearing type from text after case number
-        const afterCase = line.substring(line.indexOf(caseMatch[0]) + caseMatch[0].length);
-        let typeStr = afterCase.replace(/^[\s,]+/, "").trim();
-        if (typeStr) {
-          typeStr = typeStr.replace(DAG_AV_REGEX, "").trim();
-          if (FORTSATT_REGEX.test(typeStr)) {
-            typeStr = typeStr.replace(FORTSATT_REGEX, "").trim();
-            if (typeStr.length > 0) {
-              typeStr = typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
-            }
-          }
-          currentType = typeStr;
-        }
+        parseCaseFragment(line);
         continue;
       }
 
