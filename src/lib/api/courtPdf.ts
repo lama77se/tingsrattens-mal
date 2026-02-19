@@ -15,10 +15,11 @@ export interface CourtPdfResult {
 export async function fetchCourtPdf(
   pdfUrl: string,
   weekNumber?: number,
-  year?: number
+  year?: number,
+  yTolerance?: number
 ): Promise<CourtPdfResult> {
   const { data, error } = await supabase.functions.invoke("fetch-court-pdf", {
-    body: { pdfUrl, weekNumber, year },
+    body: { pdfUrl, weekNumber, year, ...(yTolerance && { yTolerance }) },
   });
 
   if (error) {
