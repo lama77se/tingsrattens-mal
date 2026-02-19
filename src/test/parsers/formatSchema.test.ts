@@ -520,4 +520,45 @@ describe("formatSchema", () => {
     expect(result[1].caseNumber).toBe("B 863-25");
     expect(result[1].type).toBe("Huvudförhandling");
   });
+
+  // Three-row layout: "Sal" and room number on separate lines
+  // Row 1: kl. 10:00 - 12:00 B 1146-25, Huvudförhandling
+  // Row 2: Haparanda tingsrätt, Sal angående tillgrepp av fortskaffningsmedel...
+  // Row 3: 1
+  it("handles three-row layout where Sal and room number are split", () => {
+    const text = [
+      "Tisdag 3 februari 2026",
+      "kl. 13:15 - 16:15 B 256-25, Huvudförhandling",
+      "Kalix tingshus, sal 1 angående grovt bidragsbrott",
+      "Onsdag 4 februari 2026",
+      "kl. 10:00 - 12:00 B 1146-25, Huvudförhandling",
+      "Haparanda tingsrätt, Sal angående tillgrepp av fortskaffningsmedel och olovlig körning",
+      "1",
+      "Måndag 9 februari 2026",
+      "kl. 13:00 - 15:00 B 1213-25, Huvudförhandling",
+      "Haparanda tingsrätt, Sal angående grovt narkotikabrott",
+      "1",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Haparanda tingsrätt", text });
+    expect(result).toHaveLength(3);
+
+    // Normal two-column hearing
+    expect(result[0].caseNumber).toBe("B 256-25");
+    expect(result[0].room).toBe("Sal 1");
+    expect(result[0].location).toBe("Kalix tingshus");
+    expect(result[0].saken).toBe("grovt bidragsbrott");
+
+    // Three-row: room number on separate line
+    expect(result[1].caseNumber).toBe("B 1146-25");
+    expect(result[1].room).toBe("Sal 1");
+    expect(result[1].location).toBe("Haparanda tingsrätt");
+    expect(result[1].saken).toBe("tillgrepp av fortskaffningsmedel och olovlig körning");
+
+    // Another three-row
+    expect(result[2].caseNumber).toBe("B 1213-25");
+    expect(result[2].room).toBe("Sal 1");
+    expect(result[2].location).toBe("Haparanda tingsrätt");
+    expect(result[2].saken).toBe("grovt narkotikabrott");
+  });
 });
