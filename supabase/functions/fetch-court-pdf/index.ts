@@ -1,4 +1,4 @@
-import { getDocument } from "https://esm.sh/pdfjs-serverless@0.6.0";
+import { getDocument } from "https://esm.sh/pdfjs-serverless@1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
         pdfResponse = null;
       }
     } catch (e) {
-      lastError = e.message;
+      lastError = e instanceof Error ? e.message : String(e);
     }
 
     // Fallback: direct fetch
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
           await resp.text();
         }
       } catch (e) {
-        lastError = `Direct: ${e.message}`;
+        lastError = `Direct: ${e instanceof Error ? e.message : String(e)}`;
       }
     }
 
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
