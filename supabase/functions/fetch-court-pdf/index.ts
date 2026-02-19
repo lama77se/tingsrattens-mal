@@ -1,4 +1,4 @@
-import { getDocumentProxy } from "npm:unpdf";
+import { getDocument } from "https://esm.sh/pdfjs-serverless@0.6.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -129,13 +129,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract text using unpdf with coordinate-based row grouping
-    const pdf = await getDocumentProxy(new Uint8Array(pdfBytes));
-    const numPages = pdf.numPages;
+    // Extract text using pdfjs-serverless with coordinate-based row grouping
+    const doc = await getDocument(new Uint8Array(pdfBytes)).promise;
+    const numPages = doc.numPages;
     const allLines: string[] = [];
 
     for (let p = 1; p <= numPages; p++) {
-      const page = await pdf.getPage(p);
+      const page = await doc.getPage(p);
       const content = await page.getTextContent();
       const items = content.items as TextItem[];
       const rows = groupItemsIntoRows(items, yTolerance);
