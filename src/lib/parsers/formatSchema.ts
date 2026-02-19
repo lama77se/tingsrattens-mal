@@ -15,7 +15,7 @@ import { extractSwedishDate, CASE_NUMBER_REGEX } from "./extractors";
 
 const WEEKDAY_PREFIX = /^(måndag|tisdag|onsdag|torsdag|fredag|lördag|söndag)\s+/i;
 const KL_TIME_REGEX = /kl\.?\s*(\d{1,2}:\d{2})(?:\s*[-–—]\s*(\d{1,2}:\d{2}))?/i;
-const LOCATION_REGEX = /^(.+?(?:tingsrätt|tingshus))\s*[,.]?\s*(?:(?:[Tt]ings)?[Ss]al\s+(\S+))?/i;
+const LOCATION_REGEX = /^(.+?(?:tingsrätt|tingshus))\s*[,.]?\s*(?:(?:[Tt]ings)?[Ss]al\s+(\d\S*))?/i;
 const ANGAENDE_REGEX = /^a?ngående\s+(.+)/i;
 const FORTSATT_REGEX = /^Fortsatt\s+/i;
 const DAG_AV_REGEX = /,?\s*[Dd]ag\s+\d+\s+av\s+\d+/;
@@ -144,9 +144,19 @@ export const formatSchema: ParserStrategy = {
           const locPortion = locMatch[0];
           if (!CASE_NUMBER_REGEX.test(locPortion)) {
             currentLocation = locMatch[1].trim();
-            if (locMatch[2]) currentRoom = `Sal ${locMatch[2]}`;
+            if (locMatch[2]) {
+              currentRoom = `Sal ${locMatch[2]}`;
+            } else if (/(?:Tings)?[Ss]al\b/i.test(line)) {
+              // "Sal" present but room number didn't follow (wrapped to next line)
+              currentRoom = "";
+            }
             // Check for angående in remainder of line after location+room
-            const afterLoc = line.substring(locMatch[0].length).trim();
+            let afterLoc = line.substring(locMatch[0].length).trim();
+            // Handle orphaned "Sal" when room number wrapped to next line:
+            // "Haparanda tingsrätt, Sal angående ..." → strip "Sal" prefix
+            if (!locMatch[2] && /^(?:(?:Tings)?[Ss]al)\s+/i.test(afterLoc)) {
+              afterLoc = afterLoc.replace(/^(?:(?:Tings)?[Ss]al)\s+/i, "");
+            }
             const angInRemainder = afterLoc.match(ANGAENDE_REGEX);
             if (angInRemainder) {
               parseAngaendeFragment(angInRemainder[1]);
@@ -179,6 +189,12 @@ export const formatSchema: ParserStrategy = {
       const caseMatch = line.match(CASE_NUMBER_REGEX);
       if (caseMatch && caseMatch.index === 0) {
         parseCaseFragment(line);
+        continue;
+      }
+
+      // Standalone room number: "1" on its own line when "Sal" wrapped from previous row
+      if (/^\d{1,2}$/.test(line) && currentCaseNumber && !currentRoom) {
+        currentRoom = `Sal ${line}`;
         continue;
       }
 
