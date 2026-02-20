@@ -112,8 +112,9 @@ export function preprocessLines(text: string): string[] {
     .filter(Boolean)
     .map((line) =>
       line
-        // Normalize en-dashes/em-dashes to hyphens in ISO dates
-        .replace(/(\d{4})[-–—](\d{2})[-–—](\d{2})/g, "$1-$2-$3")
+        // Normalize ISO dates: collapse spaces around dashes and convert en/em-dashes
+        // Handles "2026 - 02 - 23" → "2026-02-23"
+        .replace(/(\d{4})\s*[-–—]\s*(\d{2})\s*[-–—]\s*(\d{2})/g, "$1-$2-$3")
         // Strip (dag X/Y) annotations
         .replace(/\s*\(dag\s+\d+\/\d+\)/gi, "")
         // Case number spaces around dash: B 784 - 25 / B 784 -25 → B 784-25
