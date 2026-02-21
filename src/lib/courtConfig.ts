@@ -233,8 +233,10 @@ export const COURTS: CourtConfig[] = [
     id: "jonkopings_tingsratt",
     name: "Jönköpings tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week, year) =>
+    buildUrl: (week, year) => [
+      `${BASE}/jonkopings_tingsratt/veckans-forhandlingar/vecka-${week}-${year}.pdf`,
       `${BASE}/jonkopings_tingsratt/vecka-${week}-${year}.pdf`,
+    ],
   },
   {
     id: "kristianstads_tingsratt",
