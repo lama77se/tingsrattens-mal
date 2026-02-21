@@ -382,6 +382,22 @@ export const formatTabular: ParserStrategy = {
       // Strip room qualifier annotations that leaked into saken (safety net)
       saken = saken.replace(/\s*\((?:säkerhets|video)?sal(?:en)?\)/gi, "").trim();
 
+      // Strip embedded court name fragments that leaked from the room/location column
+      // These appear mid-text when PDF columns are merged, e.g.:
+      // "förberedelse till Malmö mordbrand, anstiftan av förberedelse till tingsrätt mordbrand"
+      // We strip "CityName tingsrätt" as a pair, then standalone "tingsrätt" fragments
+      saken = saken.replace(/\b([A-ZÅÄÖ][a-zåäö]+)\s+tingsrätt\b/g, (match, city) => {
+        // Only strip if city looks like a location (not a legal term)
+        const legalTerms = ["Huvudförhandling", "Muntlig", "Offentlig", "Enskilt"];
+        if (legalTerms.includes(city)) return match;
+        if (!location) location = match.trim();
+        return " ";
+      }).trim();
+      // Standalone "tingsrätt" that leaked without its city name
+      saken = saken.replace(/\btingsrätt\b/gi, " ").trim();
+      // Collapse multiple spaces left after stripping
+      saken = saken.replace(/\s{2,}/g, " ").trim();
+
       // Strip alias suffixes that span across lines
       // e.g., "Muntlig förberedelse och ev\nhf" → type "Muntlig förberedelse", saken "och ev hf ..."
       const nSaken = normalize(saken);
