@@ -1361,4 +1361,113 @@ describe("formatTabular", () => {
     expect(b5601!.saken).toBe("ofredande m.m");
     expect(b5601!.room).toBe("Sal 8");
   });
+
+  it("handles column-separated output (bare time line)", () => {
+    // Column detection separates date, time, type, saken, sal into individual lines
+    const text = [
+      "ti",
+      "2026-02-10",
+      "09:00 - 16:00",
+      "Huvudförhandling",
+      "mordbrand, försök till mordbrand",
+      "Sal 14",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-10");
+    expect(result[0].time).toBe("09:00 - 16:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("mordbrand, försök till mordbrand");
+    expect(result[0].room).toBe("Sal 14");
+  });
+
+  it("handles column-separated output with multiple hearings", () => {
+    const text = [
+      "må",
+      "2026-02-09",
+      "09:00 - 12:00",
+      "Huvudförhandling",
+      "stöld",
+      "Tingssal 1",
+      "må",
+      "2026-02-09",
+      "13:00 - 15:00",
+      "Muntlig förberedelse",
+      "fordran",
+      "Tingssal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("stöld");
+    expect(result[0].room).toBe("Tingssal 1");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].saken).toBe("fordran");
+    expect(result[1].room).toBe("Tingssal 2");
+  });
+
+  it("handles Hässleholm security room at external court with long saken", () => {
+    // Simulates PDF text where the Sal column wraps across multiple rows
+    // ("Sal 14 (säkerhetssal) Malmö tingsrätt") interleaved with a long saken.
+    const text = [
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling mordbrand, försök till mordbrand, Sal 14",
+      "anstiftan av mordbrand, involverande av",
+      "(säkerhetssal)",
+      "underårig i brottslighet, förberedelse till",
+      "Malmö",
+      "mordbrand, anstiftan av förberedelse till",
+      "tingsrätt",
+      "mordbrand, grov skadegörelse, medhjälp till",
+      "grov skadegörelse, anstiftan av grov",
+      "skadegörelse, medhjälp till försök till",
+      "mordbrand, anstiftan av försök till",
+      "mordbrand, narkotikabrott,",
+      "barnpornografibrott",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 14 (säkerhetssal)");
+    expect(result[0].location).toBe("Malmö tingsrätt");
+    expect(result[0].saken).toBe(
+      "mordbrand, försök till mordbrand, " +
+      "anstiftan av mordbrand, involverande av " +
+      "underårig i brottslighet, förberedelse till " +
+      "mordbrand, anstiftan av förberedelse till " +
+      "mordbrand, grov skadegörelse, medhjälp till " +
+      "grov skadegörelse, anstiftan av grov " +
+      "skadegörelse, medhjälp till försök till " +
+      "mordbrand, anstiftan av försök till " +
+      "mordbrand, narkotikabrott, " +
+      "barnpornografibrott"
+    );
+  });
+
+  it("handles sal-column overflow with court name on single line", () => {
+    const text = [
+      "on 2026-02-11 09:00 - 16:00 Huvudförhandling grovt narkotikabrott Sal 3",
+      "(säkerhetssal)",
+      "Kristianstads tingsrätt",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 3 (säkerhetssal)");
+    expect(result[0].location).toBe("Kristianstads tingsrätt");
+    expect(result[0].saken).toBe("grovt narkotikabrott");
+  });
+
+  it("does not skip legitimate saken words that look like city names", () => {
+    // A capitalized word NOT followed by "tingsrätt" should remain in saken
+    const text = [
+      "ti 2026-02-10 09:00 - 12:00 Huvudförhandling stöld Sal 1",
+      "Karlskrona",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].saken).toBe("stöld Karlskrona");
+  });
 });

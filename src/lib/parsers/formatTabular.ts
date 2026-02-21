@@ -18,9 +18,11 @@ const CASE_AT_START_REGEX = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
 const HEARING_LINE_REGEX = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
 
 /**
- * Regex matching a time-only line (no date): HH:MM - HH:MM <rest>
+ * Regex matching a time-only line (no date): HH:MM - HH:MM [<rest>]
+ * Trailing text is optional to support column-separated PDF output where
+ * the time range may be on its own line.
  */
-const TIME_ONLY_REGEX = /^(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
+const TIME_ONLY_REGEX = /^(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})(?:\s+(.*))?/;
 
 /**
  * Regex matching a day-abbreviation + time line (no date): "fr 09:00 - 16:00 <rest>"
@@ -238,7 +240,19 @@ export const formatTabular: ParserStrategy = {
         if (timeMatch && currentDate) {
           date = currentDate;
           time = `${timeMatch[1]} - ${timeMatch[2]}`;
-          rest = timeMatch[3].trim();
+          rest = (timeMatch[3] || "").trim();
+          // Column-separated output: type may be on the next non-empty line
+          if (!rest) {
+            for (let k = i + 1; k < lines.length; k++) {
+              const peek = lines[k].trim();
+              if (!peek || peek.length <= 1) continue;
+              if (isContinuationBreak(peek)) break;
+              if (DAG_REGEX.test(peek) || HEADER_REGEX.test(peek)) continue;
+              rest = peek;
+              i = k;
+              break;
+            }
+          }
         } else {
           // Check for day abbreviation + time (no date, e.g., multi-day hearings)
           const dayTimeMatch = line.match(DAY_TIME_REGEX);
@@ -283,6 +297,7 @@ export const formatTabular: ParserStrategy = {
       // Extract room and saken from the text after type (and case number)
       let room = extractRoomFromText(afterCase);
       let saken = stripRoom(afterCase);
+      let location: string | undefined;
 
       // Always check subsequent lines for continuation text
       for (let j = i + 1; j < lines.length; j++) {
@@ -319,6 +334,42 @@ export const formatTabular: ParserStrategy = {
           }
 
           if (!room) room = extractRoomFromText(lineText);
+
+          // Detect sal-column overflow fragments when room is already found.
+          // In tabular PDFs, the Sal column can wrap across multiple rows:
+          // e.g., "Sal 14", "(säkerhetssal)", "Malmö", "tingsrätt"
+          // These fragments get interleaved with saken continuation lines.
+          if (room) {
+            const trimmed = lineText.trim();
+            // Parenthesized room qualifier: (säkerhetssal), (videosal), etc.
+            if (/^\([^)]*(?:sal|lokal|säkerhet)[^)]*\)$/i.test(trimmed)) {
+              room = `${room} ${trimmed}`;
+              continue;
+            }
+            // "CityName tingsrätt" on a single line → location
+            if (/^\S+\s+tingsrätt$/i.test(trimmed)) {
+              if (!location) location = trimmed;
+              continue;
+            }
+            // Standalone "tingsrätt" → sal-column overflow
+            if (/^tingsrätt$/i.test(trimmed)) continue;
+            // Standalone capitalized word with "tingsrätt" somewhere in remaining
+            // continuation lines — the sal column fragments are interleaved with
+            // saken text, so "Malmö" and "tingsrätt" may not be adjacent.
+            if (/^[A-ZÅÄÖ][a-zåäö]+$/.test(trimmed)) {
+              let hasTingsratt = false;
+              for (let k = j + 1; k < lines.length; k++) {
+                const peek = lines[k].trim();
+                if (isContinuationBreak(peek)) break;
+                if (/^tingsrätt$/i.test(peek)) { hasTingsratt = true; break; }
+              }
+              if (hasTingsratt) {
+                if (!location) location = `${trimmed} tingsrätt`;
+                continue;
+              }
+            }
+          }
+
           const cleaned = stripRoom(lineText);
           if (cleaned && !DAY_ABBREV_REGEX.test(cleaned)) {
             saken = saken ? `${saken} ${cleaned}` : cleaned;
@@ -328,6 +379,8 @@ export const formatTabular: ParserStrategy = {
 
       // Strip location annotations like "(Extern lokal)" from saken
       saken = saken.replace(/\s*\([Ee]xtern\s+lokal\)/g, "").trim();
+      // Strip room qualifier annotations that leaked into saken (safety net)
+      saken = saken.replace(/\s*\((?:säkerhets|video)?sal(?:en)?\)/gi, "").trim();
 
       // Strip alias suffixes that span across lines
       // e.g., "Muntlig förberedelse och ev\nhf" → type "Muntlig förberedelse", saken "och ev hf ..."
@@ -340,11 +393,12 @@ export const formatTabular: ParserStrategy = {
       }
 
       // Extract trailing court name as location (Uppsala-style "Lokal" field)
-      let location: string | undefined;
-      const courtNameAtEnd = saken.match(/\s+(\S+\s+tingsrätt)\s*$/i);
-      if (courtNameAtEnd && courtNameAtEnd.index !== undefined) {
-        location = courtNameAtEnd[1];
-        saken = saken.substring(0, courtNameAtEnd.index).trim();
+      if (!location) {
+        const courtNameAtEnd = saken.match(/\s+(\S+\s+tingsrätt)\s*$/i);
+        if (courtNameAtEnd && courtNameAtEnd.index !== undefined) {
+          location = courtNameAtEnd[1];
+          saken = saken.substring(0, courtNameAtEnd.index).trim();
+        }
       }
 
       // Clean trailing punctuation from saken
