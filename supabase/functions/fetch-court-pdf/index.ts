@@ -37,71 +37,10 @@ function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
   // Sort rows top-to-bottom (highest y first)
   rows.sort((a, b) => b.y - a.y);
 
-  // Detect major column boundaries by clustering x-start positions.
-  // 1. Collect unique x-starts (within tolerance of 5)
-  const xStarts: number[] = [];
-  for (const item of filtered) {
-    const x = item.transform[4];
-    if (!xStarts.some((xs) => Math.abs(xs - x) <= 5)) {
-      xStarts.push(x);
-    }
-  }
-  xStarts.sort((a, b) => a - b);
-
-  // 2. Find gaps between consecutive unique x-starts.
-  //    Large gaps indicate column boundaries.
-  const columnGroups: number[][] = [[xStarts[0]]];
-  for (let i = 1; i < xStarts.length; i++) {
-    const gap = xStarts[i] - xStarts[i - 1];
-    if (gap > 50) {
-      // Large gap = new column group
-      columnGroups.push([xStarts[i]]);
-    } else {
-      columnGroups[columnGroups.length - 1].push(xStarts[i]);
-    }
-  }
-
-  // 3. Each column group gets a range [min, max] of x-starts
-  const columns = columnGroups.map((group) => ({
-    min: Math.min(...group),
-    max: Math.max(...group),
-  }));
-
-  function getColumnIndex(x: number): number {
-    // Find column whose range is closest to this x
-    let bestIdx = 0;
-    let bestDist = Infinity;
-    for (let i = 0; i < columns.length; i++) {
-      const col = columns[i];
-      const dist = x < col.min ? col.min - x : x > col.max ? x - col.max : 0;
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = i;
-      }
-    }
-    return bestIdx;
-  }
-
-  const result: string[] = [];
-  for (const row of rows) {
+  return rows.map((row) => {
     row.items.sort((a, b) => a.transform[4] - b.transform[4]);
-
-    // Group items by their detected column
-    const colMap: Map<number, TextItem[]> = new Map();
-    for (const item of row.items) {
-      const colIdx = getColumnIndex(item.transform[4]);
-      if (!colMap.has(colIdx)) colMap.set(colIdx, []);
-      colMap.get(colIdx)!.push(item);
-    }
-
-    // Output each column group as a separate line, left-to-right
-    const sortedCols = [...colMap.entries()].sort((a, b) => a[0] - b[0]);
-    for (const [, colItems] of sortedCols) {
-      const text = colItems.map((item) => item.str).join(" ").trim();
-      if (text) result.push(text);
-    }
-  }
-  return result;
+    return row.items.map((item) => item.str).join(" ").trim();
+  }).filter(Boolean);
 }
 
 Deno.serve(async (req) => {
