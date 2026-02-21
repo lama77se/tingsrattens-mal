@@ -1,85 +1,65 @@
 
-## What Went Wrong
 
-I gave contradictory advice — apologies for that. The real situation:
+## Problem
 
-- `npm:unpdf` **was working** in production (the logs showed successful PDF fetches)
-- You replaced it with `pdfjs-serverless@0.6.0` based on my advice
-- Version `0.6.0` is too old — it does not export `getDocument` at the top level
-- The current code has 4 build errors that need fixing
+The PDF has a tabular layout where "Saken" text wraps across multiple lines in a left column, and room/location info ("Sal 14 (säkerhetssal) Malmö tingsrätt") sits in a right column at the same vertical positions. The `groupItemsIntoRows` function in the edge function merges all items at the same y-coordinate into one line, causing "(säkerhetssal)", "Malmö", and "tingsrätt" to be injected into the middle of the saken text.
 
-## The 4 Build Errors
+## Solution
 
-1. **`getDocument` not found in version 0.6.0** — need to upgrade to the latest version (1.x)
-2. **`e` is of type `unknown`** (line 89) — catch blocks in TypeScript treat errors as `unknown`
-3. **`e` is of type `unknown`** (line 102) — same issue in the fallback fetch block
-4. **`error` is of type `unknown`** (line 165) — same issue in the outer catch block
+Add column-gap detection to `groupItemsIntoRows`. After sorting items left-to-right within a row, if there is a large horizontal gap between consecutive items (indicating a column boundary), split the row into separate output lines. This keeps the saken column and the room/location column as distinct lines.
 
-## Files to Change
+## File to Change
 
-### `supabase/functions/fetch-court-pdf/index.ts`
+### `supabase/functions/fetch-court-pdf/index.ts` -- `groupItemsIntoRows` function (lines 18-44)
 
-**Fix 1 — Line 1: Upgrade pdfjs-serverless to latest (no version pin, or pin to 1.x)**
+Replace the final mapping step (lines 40-43) that joins all items into one string. Instead, detect x-gaps and split:
 
-Old:
-```
-import { getDocument } from "https://esm.sh/pdfjs-serverless@0.6.0";
-```
-
-New:
-```
-import { getDocument } from "https://esm.sh/pdfjs-serverless@1";
-```
-
-The official Deno example in the pdfjs-serverless README uses exactly this import pattern without `@0.6.0`.
-
-**Fix 2 — Line 89: Type-safe error handling in proxy catch block**
-
-Old:
 ```typescript
-} catch (e) {
-  lastError = e.message;
+function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
+  // ... existing filtering, sorting, and row grouping logic stays the same ...
+
+  const result: string[] = [];
+  for (const row of rows) {
+    row.items.sort((a, b) => a.transform[4] - b.transform[4]);
+
+    // Detect large horizontal gaps to split columns
+    const segments: TextItem[][] = [[]];
+    for (let i = 0; i < row.items.length; i++) {
+      if (i > 0) {
+        const prevItem = row.items[i - 1];
+        const prevEnd = prevItem.transform[4] + (prevItem.str.length * 5); // approximate end x
+        const currentX = row.items[i].transform[4];
+        const gap = currentX - prevEnd;
+        if (gap > 40) {
+          // Large gap = new column segment
+          segments.push([]);
+        }
+      }
+      segments[segments.length - 1].push(row.items[i]);
+    }
+
+    // Each segment becomes its own line
+    for (const segment of segments) {
+      const text = segment.map((item) => item.str).join(" ").trim();
+      if (text) result.push(text);
+    }
+  }
+  return result;
 }
 ```
 
-New:
-```typescript
-} catch (e) {
-  lastError = e instanceof Error ? e.message : String(e);
-}
-```
+The gap threshold of 40 units is conservative -- typical character width in PDFs is about 5-7 units, so 40 units represents roughly 6-8 character widths of empty space, which reliably indicates a column boundary rather than a normal word space.
 
-**Fix 3 — Line 102: Type-safe error handling in direct fetch catch block**
+### Why This Works
 
-Old:
-```typescript
-} catch (e) {
-  lastError = `Direct: ${e.message}`;
-}
-```
+- Normal word spacing within the saken column has small x-gaps (under 10 units)
+- The gap between the saken column and the room/location column is much larger (50+ units)
+- By splitting at large gaps, "Sal 14 (säkerhetssal) Malmö tingsrätt" becomes its own line(s), separate from the saken text
+- The existing parser logic in `cleanSaken` already knows how to strip room info and court names when they appear on their own lines
+- This fix benefits all courts, not just Hassleholm -- any PDF with column layouts will be handled correctly
 
-New:
-```typescript
-} catch (e) {
-  lastError = `Direct: ${e instanceof Error ? e.message : String(e)}`;
-}
-```
+### Technical Details
 
-**Fix 4 — Line 165: Type-safe error handling in outer catch block**
-
-Old:
-```typescript
-return new Response(JSON.stringify({ success: false, error: error.message }), {
-```
-
-New:
-```typescript
-return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : String(error) }), {
-```
-
-## Technical Note
-
-- `pdfjs-serverless@1` is the current major version and correctly exports `getDocument` as confirmed by both the official README and the npm registry
-- The `@1` pin ensures we stay on the stable 1.x line without accidentally pulling in a future breaking 2.x release
-- The error type fixes are standard TypeScript strict-mode practice — `catch` variables are `unknown` by default in modern TypeScript
-- No other logic changes — the coordinate-based `groupItemsIntoRows` function, `yTolerance`, proxy fallback, and response shape all stay exactly as-is
+- The `prevEnd` approximation uses `str.length * 5` as a rough character width. This does not need to be exact -- we only need to distinguish between normal word gaps (~5-15 units) and column gaps (~50+ units)
+- The threshold of 40 is chosen to avoid false positives (splitting normal text) while catching real column boundaries
+- Edge function will auto-redeploy after the change
