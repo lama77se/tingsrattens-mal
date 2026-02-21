@@ -336,36 +336,64 @@ export const formatTabular: ParserStrategy = {
           if (!room) room = extractRoomFromText(lineText);
 
           // Detect sal-column overflow fragments when room is already found.
-          // In tabular PDFs, the Sal column can wrap across multiple rows:
-          // e.g., "Sal 14", "(säkerhetssal)", "Malmö", "tingsrätt"
-          // These fragments get interleaved with saken continuation lines.
+          // With simplified row extraction (no column splitting), room/location
+          // fragments appear at the END of merged lines since the room column
+          // is rightmost. We check for both standalone and trailing patterns.
           if (room) {
             const trimmed = lineText.trim();
-            // Parenthesized room qualifier: (säkerhetssal), (videosal), etc.
+
+            // --- Standalone line patterns (column-separated output) ---
+            // Parenthesized room qualifier as entire line
             if (/^\([^)]*(?:sal|lokal|säkerhet)[^)]*\)$/i.test(trimmed)) {
               room = `${room} ${trimmed}`;
               continue;
             }
-            // "CityName tingsrätt" on a single line → location
+            // "CityName tingsrätt" as entire line → location
             if (/^\S+\s+tingsrätt$/i.test(trimmed)) {
               if (!location) location = trimmed;
               continue;
             }
             // Standalone "tingsrätt" → sal-column overflow
             if (/^tingsrätt$/i.test(trimmed)) continue;
-            // Standalone capitalized word with "tingsrätt" somewhere in remaining
-            // continuation lines — the sal column fragments are interleaved with
-            // saken text, so "Malmö" and "tingsrätt" may not be adjacent.
+            // Standalone capitalized word with "tingsrätt" on a later line
             if (/^[A-ZÅÄÖ][a-zåäö]+$/.test(trimmed)) {
               let hasTingsratt = false;
               for (let k = j + 1; k < lines.length; k++) {
                 const peek = lines[k].trim();
                 if (isContinuationBreak(peek)) break;
-                if (/^tingsrätt$/i.test(peek)) { hasTingsratt = true; break; }
+                if (/^tingsrätt$/i.test(peek) || /\btingsrätt\s*$/i.test(peek)) { hasTingsratt = true; break; }
               }
               if (hasTingsratt) {
                 if (!location) location = `${trimmed} tingsrätt`;
                 continue;
+              }
+            }
+
+            // --- Trailing patterns (merged row output) ---
+            // Room qualifier at end of line: "...involverande av (säkerhetssal)"
+            const trailingQualifier = trimmed.match(/\s+(\([^)]*(?:sal|lokal|säkerhet)[^)]*\))\s*$/i);
+            if (trailingQualifier) {
+              room = `${room} ${trailingQualifier[1]}`;
+              lineText = trimmed.substring(0, trailingQualifier.index!).trim();
+            }
+            // Line ends with "tingsrätt": "...förberedelse till tingsrätt"
+            const trailingTR = lineText.match(/\s+tingsrätt\s*$/i);
+            if (trailingTR) {
+              lineText = lineText.substring(0, trailingTR.index!).trim();
+            }
+            // Line ends with capitalized word that forms "City tingsrätt" with
+            // a later line ending in "tingsrätt": "...förberedelse till Malmö"
+            const trailingCity = lineText.match(/\s+([A-ZÅÄÖ][a-zåäö]+)\s*$/);
+            if (trailingCity) {
+              let hasTingsratt = false;
+              for (let k = j + 1; k < lines.length; k++) {
+                const peek = lines[k].trim();
+                if (isContinuationBreak(peek)) break;
+                if (/^tingsrätt$/i.test(peek) || /\btingsrätt\s*$/i.test(peek)) { hasTingsratt = true; break; }
+              }
+              if (hasTingsratt) {
+                if (!location) location = `${trailingCity[1]} tingsrätt`;
+                lineText = lineText.substring(0, trailingCity.index!).trim();
               }
             }
           }
