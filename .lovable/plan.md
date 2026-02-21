@@ -1,65 +1,79 @@
 
 
-## Problem
+## Root Cause
 
-The PDF has a tabular layout where "Saken" text wraps across multiple lines in a left column, and room/location info ("Sal 14 (säkerhetssal) Malmö tingsrätt") sits in a right column at the same vertical positions. The `groupItemsIntoRows` function in the edge function merges all items at the same y-coordinate into one line, causing "(säkerhetssal)", "Malmö", and "tingsrätt" to be injected into the middle of the saken text.
+The column-gap detection logic I added to `groupItemsIntoRows` in the edge function is the cause. It splits PDF rows into multiple output lines based on x-position gaps, but different PDFs from the same court (different weeks) have slightly different layouts. This causes:
+
+- **Week 7**: Date, time, and hearing type end up on **three separate lines** instead of one. The tabular parser's `HEARING_LINE_REGEX` requires date+time on the same line, so nothing matches and zero hearings are parsed.
+- **Week 9**: Date+time end up on one line but with nothing after the end time. The regex requires text after the time range (`\s+(.*)`) so it also fails to match.
+- **Week 8**: Everything happens to land on the same line, so parsing works fine.
 
 ## Solution
 
-Add column-gap detection to `groupItemsIntoRows`. After sorting items left-to-right within a row, if there is a large horizontal gap between consecutive items (indicating a column boundary), split the row into separate output lines. This keeps the saken column and the room/location column as distinct lines.
+Revert the `groupItemsIntoRows` function to the simpler approach: join all items in a row into a single line (left-to-right by x-coordinate). This restores the previous behavior where date, time, type, saken, and room are on one line for tabular PDFs.
 
-## File to Change
+The "Saken" contamination problem (Malmö tingsrätt words mixed into saken) should instead be handled **in the client-side parser** where we have more context about what each field means, rather than in the raw text extraction step.
 
-### `supabase/functions/fetch-court-pdf/index.ts` -- `groupItemsIntoRows` function (lines 18-44)
+## Changes
 
-Replace the final mapping step (lines 40-43) that joins all items into one string. Instead, detect x-gaps and split:
+### 1. `supabase/functions/fetch-court-pdf/index.ts` -- Simplify `groupItemsIntoRows`
+
+Remove the column-detection logic (lines 40-103) and replace with simple left-to-right joining:
 
 ```typescript
 function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
-  // ... existing filtering, sorting, and row grouping logic stays the same ...
+  const filtered = items.filter((item) => item.str.trim().length > 0);
+  if (filtered.length === 0) return [];
 
-  const result: string[] = [];
-  for (const row of rows) {
-    row.items.sort((a, b) => a.transform[4] - b.transform[4]);
+  const sorted = [...filtered].sort((a, b) => b.transform[5] - a.transform[5]);
 
-    // Detect large horizontal gaps to split columns
-    const segments: TextItem[][] = [[]];
-    for (let i = 0; i < row.items.length; i++) {
-      if (i > 0) {
-        const prevItem = row.items[i - 1];
-        const prevEnd = prevItem.transform[4] + (prevItem.str.length * 5); // approximate end x
-        const currentX = row.items[i].transform[4];
-        const gap = currentX - prevEnd;
-        if (gap > 40) {
-          // Large gap = new column segment
-          segments.push([]);
-        }
-      }
-      segments[segments.length - 1].push(row.items[i]);
-    }
-
-    // Each segment becomes its own line
-    for (const segment of segments) {
-      const text = segment.map((item) => item.str).join(" ").trim();
-      if (text) result.push(text);
+  const rows: { y: number; items: TextItem[] }[] = [];
+  for (const item of sorted) {
+    const y = item.transform[5];
+    const existingRow = rows.find((r) => Math.abs(r.y - y) <= yTolerance);
+    if (existingRow) {
+      existingRow.items.push(item);
+    } else {
+      rows.push({ y, items: [item] });
     }
   }
-  return result;
+
+  rows.sort((a, b) => b.y - a.y);
+
+  return rows.map((row) => {
+    row.items.sort((a, b) => a.transform[4] - b.transform[4]);
+    return row.items.map((item) => item.str).join(" ").trim();
+  }).filter(Boolean);
 }
 ```
 
-The gap threshold of 40 units is conservative -- typical character width in PDFs is about 5-7 units, so 40 units represents roughly 6-8 character widths of empty space, which reliably indicates a column boundary rather than a normal word space.
+### 2. Handle Saken/Location contamination in the client-side parser instead
 
-### Why This Works
+The original problem (Malmö tingsrätt words in saken) will return. To fix it properly, add a cleanup step in `formatTabular.ts` that strips known location patterns from the saken text after extraction:
 
-- Normal word spacing within the saken column has small x-gaps (under 10 units)
-- The gap between the saken column and the room/location column is much larger (50+ units)
-- By splitting at large gaps, "Sal 14 (säkerhetssal) Malmö tingsrätt" becomes its own line(s), separate from the saken text
-- The existing parser logic in `cleanSaken` already knows how to strip room info and court names when they appear on their own lines
-- This fix benefits all courts, not just Hassleholm -- any PDF with column layouts will be handled correctly
+- Strip patterns like "(säkerhetssal)" from saken
+- Strip standalone court names ("Malmö tingsrätt") that appear embedded in saken text
+- These patterns are already partially handled by existing `stripRoom` and `courtNameAtEnd` logic but need strengthening
 
-### Technical Details
+Specifically, add a post-extraction cleanup in `formatTabular.ts` around line 330 that removes location-related fragments from saken:
 
-- The `prevEnd` approximation uses `str.length * 5` as a rough character width. This does not need to be exact -- we only need to distinguish between normal word gaps (~5-15 units) and column gaps (~50+ units)
-- The threshold of 40 is chosen to avoid false positives (splitting normal text) while catching real column boundaries
-- Edge function will auto-redeploy after the change
+```typescript
+// Strip embedded location fragments that leaked from the room/location column
+saken = saken
+  .replace(/\s*\(säkerhetssal\)\s*/g, " ")
+  .replace(/\s*\(extern\s+lokal\)/gi, " ")
+  .trim();
+```
+
+And improve the existing trailing court name extraction (line 344) to also catch mid-text court names.
+
+### Why This Approach Is Better
+
+- The edge function should produce **faithful text extraction** -- one line per visual row, preserving the original PDF layout
+- Column separation is a **parsing concern**, not an extraction concern -- the parser knows what fields to expect and can split them correctly
+- Different PDFs from the same court can have different column gaps, making gap-based splitting unreliable at the extraction level
+- The parser already has logic for room extraction, court name detection, etc. -- it just needs minor improvements to handle edge cases
+
+### Deploy
+
+The edge function will auto-redeploy after saving.
