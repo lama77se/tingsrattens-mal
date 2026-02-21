@@ -1459,6 +1459,36 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("grovt narkotikabrott");
   });
 
+  it("handles merged-row security room at external court (reverted edge function)", () => {
+    // With simplified row extraction, room/location fragments are merged at the
+    // END of continuation lines (room column is rightmost):
+    // "...involverande av (säkerhetssal)"
+    // "...förberedelse till Malmö"
+    // "...förberedelse till tingsrätt"
+    const text = [
+      "ti 2026-02-10 09:00 - 16:00 Huvudförhandling mordbrand, försök till mordbrand, Sal 14",
+      "anstiftan av mordbrand, involverande av (säkerhetssal)",
+      "underårig i brottslighet, förberedelse till Malmö",
+      "mordbrand, anstiftan av förberedelse till tingsrätt",
+      "mordbrand, grov skadegörelse",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Hässleholms tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 14 (säkerhetssal)");
+    expect(result[0].location).toBe("Malmö tingsrätt");
+    // Saken should NOT contain "Malmö" or "tingsrätt"
+    expect(result[0].saken).not.toContain("Malmö");
+    expect(result[0].saken).not.toContain("tingsrätt");
+    expect(result[0].saken).toBe(
+      "mordbrand, försök till mordbrand, " +
+      "anstiftan av mordbrand, involverande av " +
+      "underårig i brottslighet, förberedelse till " +
+      "mordbrand, anstiftan av förberedelse till " +
+      "mordbrand, grov skadegörelse"
+    );
+  });
+
   it("does not skip legitimate saken words that look like city names", () => {
     // A capitalized word NOT followed by "tingsrätt" should remain in saken
     const text = [
