@@ -255,6 +255,13 @@ export const formatTabular: ParserStrategy = {
         time = `${fullMatch[2]} - ${fullMatch[3]}`;
         rest = fullMatch[4].trim();
         currentDate = date;
+
+        // Detect phantom merged lines from multi-page PDFs where two rows at
+        // nearly the same Y coordinate get merged (e.g., Uddevalla "frozen first
+        // row"). The rest will start with another time range from the second entry.
+        if (/^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}\s/.test(rest)) {
+          continue;
+        }
       } else {
         // Check for time-only line (needs tracked date)
         const timeMatch = line.match(TIME_ONLY_REGEX);
