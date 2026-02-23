@@ -1489,6 +1489,111 @@ describe("formatTabular", () => {
     );
   });
 
+  // --- Norrköping split-date tests (day on next line) ---
+
+  it("handles Norrköping split-date where day is on the next line", () => {
+    // Raw PDF text: date "2026-02-16" split as "2026 - 02 -" on line 1 and "16" on line 2
+    const text = [
+      "må 2026 - 02 - 09:00 - Huvudförhandling B 1795 - 25 misshandel m m Sal 3",
+      "16 16:00",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].time).toBe("09:00 - 16:00");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 1795-25");
+    expect(result[0].saken).toBe("misshandel m m");
+    expect(result[0].room).toBe("Sal 3");
+  });
+
+  it("handles Norrköping split-date with time range already on first line", () => {
+    // When the end time fits on the first line, the next line is just the day number
+    const text = [
+      "on 2026 - 02 - 11:00 - 12:00 Huvudförhandling B 4178 - 25 brott mot lagen om förbud beträffande knivar och andra farliga föremål Sal 7",
+      "18",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-18");
+    expect(result[0].time).toBe("11:00 - 12:00");
+    expect(result[0].caseNumber).toBe("B 4178-25");
+    expect(result[0].saken).toBe("brott mot lagen om förbud beträffande knivar och andra farliga föremål");
+    expect(result[0].room).toBe("Sal 7");
+  });
+
+  it("handles Norrköping split-date with Sal number on second line", () => {
+    // "Sal\n10" split where Sal number is on the day line
+    const text = [
+      "ti 2026 - 02 - 09:00 - Muntlig förberedelse T 3297 - 25 fordran Sal",
+      "24 11:00 10",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-24");
+    expect(result[0].time).toBe("09:00 - 11:00");
+    expect(result[0].caseNumber).toBe("T 3297-25");
+    expect(result[0].saken).toBe("fordran");
+    expect(result[0].room).toBe("Sal 10");
+  });
+
+  it("handles Norrköping split-date with continuation text on second line", () => {
+    // "och/umgänge" continues saken from the first line
+    const text = [
+      "må 2026 - 02 - 09:00 - Huvudförhandling T 1309 - 25 ansökan om äktenskapsskillnad med frågor om vårdnad, boende Sal 6",
+      "23 12:00 och/umgänge",
+      "(dag 1/2)",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-23");
+    expect(result[0].time).toBe("09:00 - 12:00");
+    expect(result[0].caseNumber).toBe("T 1309-25");
+    expect(result[0].saken).toContain("ansökan om äktenskapsskillnad");
+    expect(result[0].saken).toContain("och/umgänge");
+    expect(result[0].room).toBe("Sal 6");
+  });
+
+  it("parses multiple Norrköping split-date hearings", () => {
+    const text = [
+      "må 2026 - 02 - 09:00 - Huvudförhandling B 1795 - 25 misshandel m m Sal 3",
+      "16 16:00",
+      "må 2026 - 02 - 09:00 - Huvudförhandling B 3905 - 25 misshandel m.m. Sal 4",
+      "16 16:00",
+      "ti 2026 - 02 - 09:00 - Huvudförhandling B 4350 - 25 grovt djurplågeri Sal 7",
+      "17 11:30",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(3);
+    expect(result[0].date).toBe("2026-02-16");
+    expect(result[0].caseNumber).toBe("B 1795-25");
+    expect(result[0].time).toBe("09:00 - 16:00");
+    expect(result[1].date).toBe("2026-02-16");
+    expect(result[1].caseNumber).toBe("B 3905-25");
+    expect(result[2].date).toBe("2026-02-17");
+    expect(result[2].caseNumber).toBe("B 4350-25");
+    expect(result[2].time).toBe("09:00 - 11:30");
+  });
+
+  it("handles Norrköping split-date with FT case number split across lines", () => {
+    // FT case number gets split: "FT 4434 -" on line 1, "25" on the day line
+    const text = [
+      "ti 2026 - 02 - 10:00 - Muntlig förberedelse FT 4434 - fordran Sal 1",
+      "24 12:00 25",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-24");
+    expect(result[0].time).toBe("10:00 - 12:00");
+    expect(result[0].type).toBe("Muntlig förberedelse");
+  });
+
   it("does not skip legitimate saken words that look like city names", () => {
     // A capitalized word NOT followed by "tingsrätt" should remain in saken
     const text = [
