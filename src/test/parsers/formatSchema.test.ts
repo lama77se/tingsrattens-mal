@@ -386,6 +386,85 @@ describe("formatSchema", () => {
     expect(result[0].saken).toBe("undanröjande av ungdomstjänst (B 512-25)");
   });
 
+  // Malmö two-column layout: Sal and angående merged on same line
+  it("handles Malmö merged Sal + angående on same line", () => {
+    const text = [
+      "Fredag 20 februari 2026",
+      "kl. 09:00 - 10:00 B 1547-26, Huvudförhandling",
+      "Sal 22 angående penningtvättsbrott",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 22");
+    expect(result[0].caseNumber).toBe("B 1547-26");
+    expect(result[0].saken).toBe("penningtvättsbrott");
+  });
+
+  it("handles Malmö merged Sal (säkerhetssal) + angående", () => {
+    const text = [
+      "Fredag 20 februari 2026",
+      "kl. 09:00 - 16:30 B 9174-25, Huvudförhandling, Dag 5 av 7",
+      "Sal 11 (säkerhetssal) angående grov kvinnofridskränkning och grov misshandel",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 11");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].saken).toBe("grov kvinnofridskränkning och grov misshandel");
+  });
+
+  it("handles Malmö Sal + Säkerhetssal qualifier + angående", () => {
+    const text = [
+      "Fredag 20 februari 2026",
+      "kl. 09:00 - 16:30 B 10398-25, Huvudförhandling, Dag 1 av 3",
+      "Sal 52, Säkerhetssal angående grovt vapenbrott, anstiftan av grovt vapenbrott och grovt",
+      "skyddande av brottsling",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 52");
+    expect(result[0].saken).toBe(
+      "grovt vapenbrott, anstiftan av grovt vapenbrott och grovt skyddande av brottsling"
+    );
+  });
+
+  it("handles Malmö merged Sal + ngående typo (missing 'a')", () => {
+    const text = [
+      "Torsdag 26 februari 2026",
+      "kl. 09:00 - 11:00 B 13877-25, Huvudförhandling",
+      "Sal 10 (säkerhetssal) ngående misshandel",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].room).toBe("Sal 10");
+    expect(result[0].saken).toBe("misshandel");
+  });
+
+  it("parses full Malmö page with multiple merged entries", () => {
+    const text = [
+      "MALMÖ TINGSRÄTT Sida 1(9)",
+      "Malmö tingsrätt",
+      "20-27 februari 2026",
+      "Fredag 20 februari 2026",
+      "kl. 09:00 - 10:00 B 1547-26, Huvudförhandling",
+      "Sal 22 angående penningtvättsbrott",
+      "kl. 09:00 - 12:00 B 4399-25, Huvudförhandling",
+      "Sal 15 angående bidragsbrott",
+      "kl. 09:00 - 16:30 B 3227-25, Huvudförhandling",
+      "Sal 17 angående misshandel",
+    ].join("\n");
+
+    const result = formatSchema.parse({ courtName: "Malmö tingsrätt", text });
+    expect(result).toHaveLength(3);
+    expect(result[0].saken).toBe("penningtvättsbrott");
+    expect(result[1].saken).toBe("bidragsbrott");
+    expect(result[2].saken).toBe("misshandel");
+  });
+
   // Two-column merged line tests (coordinate-based PDF extraction merges
   // left+right columns onto the same line for Haparanda's two-column layout)
   it("handles merged time+case line from two-column PDF", () => {
