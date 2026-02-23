@@ -303,8 +303,6 @@ export const formatTabular: ParserStrategy = {
         afterCase = afterCase.replace(/^[/,]\s*/, "");
         caseMatch = afterCase.match(CASE_AT_START_REGEX);
       }
-      let caseNumber = caseNumbers.join(", ");
-
       // Extract external court reference "(X tingsrätt)" after case numbers
       let externalCourt: string | undefined;
       const courtRef = afterCase.match(/^\(([^)]*(?:tingsrätt|tingsratt))\)\s*/i);
@@ -322,7 +320,6 @@ export const formatTabular: ParserStrategy = {
       // Extract trailing case numbers from saken (same-line overflow from
       // the PDF case column, e.g., "misshandel B 2327-24" after room stripping)
       saken = extractTrailingCases(saken, caseNumbers);
-      caseNumber = caseNumbers.join(", ");
 
       // Always check subsequent lines for continuation text
       for (let j = i + 1; j < lines.length; j++) {
@@ -472,22 +469,29 @@ export const formatTabular: ParserStrategy = {
 
       // Extract trailing case numbers again (may have been added by continuation text)
       saken = extractTrailingCases(saken, caseNumbers);
-      caseNumber = caseNumbers.join(", ");
 
       // Clean trailing punctuation from saken
       saken = saken.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "").trim();
 
-      hearings.push({
+      const baseHearing = {
         date,
         time,
-        caseNumber,
         type,
         room: room || "",
         saken: saken || "",
         parties: "",
         ...(externalCourt && { externalCourt }),
         ...(location && { location }),
-      });
+      };
+
+      // Split multi-case hearings into separate rows (one per case number)
+      if (caseNumbers.length > 1) {
+        for (const cn of caseNumbers) {
+          hearings.push({ ...baseHearing, caseNumber: cn });
+        }
+      } else {
+        hearings.push({ ...baseHearing, caseNumber: caseNumbers[0] || "" });
+      }
     }
 
     return hearings;
