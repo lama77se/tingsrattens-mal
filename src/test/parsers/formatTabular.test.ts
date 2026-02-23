@@ -1795,4 +1795,55 @@ describe("formatTabular", () => {
     expect(result[5].caseNumber).toBe("B 2324-24");
     expect(result[5].saken).toBe("stöld m m");
   });
+
+  it("parses M and F case number prefixes (miljömål, fastighetsmål)", () => {
+    const text = [
+      "ti 2026-02-24 09:00 - 16:00 Huvudförhandling M 1339-24 Skadestånd enligt 32 kap. miljöbalken Sal 8",
+      "on 2026-02-25 10:00 - 16:00 Huvudförhandling F 4281-22 tomträttsavgäld Sal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].caseNumber).toBe("M 1339-24");
+    expect(result[0].saken).toBe("Skadestånd enligt 32 kap. miljöbalken");
+    expect(result[0].room).toBe("Sal 8");
+
+    expect(result[1].caseNumber).toBe("F 4281-22");
+    expect(result[1].saken).toBe("tomträttsavgäld");
+    expect(result[1].room).toBe("Sal 2");
+  });
+
+  it("parses 'Huvudförhandling, forts.' type alias", () => {
+    const text = [
+      "to 2026-02-26 09:00 - 16:00 Huvudförhandling, forts. T 4499-24 fastställelsetalan Sal 3",
+      "to 2026-02-26 09:00 - 16:00 Huvudförhandling, forts. B 122-26 stöld m.m Sal 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("T 4499-24");
+    expect(result[0].saken).toBe("fastställelsetalan");
+    expect(result[0].room).toBe("Sal 3");
+
+    expect(result[1].type).toBe("Huvudförhandling");
+    expect(result[1].caseNumber).toBe("B 122-26");
+    expect(result[1].saken).toBe("stöld m.m");
+  });
+
+  it("strips 'och' before case number in type overflow (Muntlig förberedelse och FT ...)", () => {
+    const text = [
+      "fr 2026-02-20 09:30 - 12:00 Muntlig förberedelse och FT 5275-25 fordran Sal 6",
+      "ev hf",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Vänersborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].caseNumber).toBe("FT 5275-25");
+    expect(result[0].saken).toBe("fordran ev hf");
+    expect(result[0].room).toBe("Sal 6");
+  });
 });

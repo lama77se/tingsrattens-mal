@@ -8,9 +8,9 @@ import {
 } from "./extractors";
 
 /**
- * Regex matching a case number at the start of text (B, T, FT, K, Ä prefixes).
+ * Regex matching a case number at the start of text (B, T, FT, K, M, F, Ä prefixes).
  */
-const CASE_AT_START_REGEX = /^((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
+const CASE_AT_START_REGEX = /^((?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
 
 /**
  * Regex matching a hearing line: YYYY-MM-DD HH:MM - HH:MM <rest>
@@ -57,6 +57,7 @@ const DAY_ABBREV_REGEX = /^(m[åaö]|ti|on|to|fr|lö|sö)$/i;
 const TYPE_ALIASES: Record<string, string> = {
   "muntlig förberedelse, eventuell huvudförhandling": "Muntlig förberedelse",
   "muntlig förberedelse, eventuell huvuförhandling": "Muntlig förberedelse",
+  "huvudförhandling, forts.": "Huvudförhandling",
   "huvudförhandling i förenklad form": "Huvudförhandling",
   "fortsatt muntlig förberedelse": "Muntlig förberedelse",
   "förberedande förhandling": "Förhandling",
@@ -160,7 +161,7 @@ function extractTrailingCases(saken: string, cases: string[]): string {
   // Iteratively strip case numbers from the end of the text
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const m = s.match(/\s+((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i);
+    const m = s.match(/\s+((?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i);
     if (!m) break;
     trailingFound.unshift(m[1]); // prepend to maintain left-to-right order
     s = s.substring(0, m.index!).trim();
@@ -295,6 +296,13 @@ export const formatTabular: ParserStrategy = {
       // Extract case number(s) if present at start of remainder
       const caseNumbers: string[] = [];
       let afterCase = remainder;
+      // Strip "och" prefix only when immediately followed by a case number
+      // (PDF column overflow: "Muntlig förberedelse och FT 5275-25" where
+      // "och ev hf" was the full type but the case number column interrupted it)
+      const ochStripped = afterCase.replace(/^och\s+/i, "");
+      if (CASE_AT_START_REGEX.test(ochStripped)) {
+        afterCase = ochStripped;
+      }
       let caseMatch = afterCase.match(CASE_AT_START_REGEX);
       while (caseMatch) {
         caseNumbers.push(caseMatch[1]);
