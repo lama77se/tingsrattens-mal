@@ -502,6 +502,14 @@ export const formatTabular: ParserStrategy = {
       }
     }
 
-    return hearings;
+    // Deduplicate hearings that appear multiple times (e.g., "frozen first row"
+    // repeated on every page of multi-page PDFs like Uddevalla).
+    const seen = new Set<string>();
+    return hearings.filter((h) => {
+      const key = `${h.date}|${h.time}|${h.caseNumber}|${h.type}|${h.saken}|${h.room}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   },
 };
