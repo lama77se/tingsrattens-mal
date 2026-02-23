@@ -1750,4 +1750,49 @@ describe("formatTabular", () => {
     expect(result[6].caseNumber).toBe("B 807-26");
     expect(result[6].saken).toBe("Undanröjande av skyddstillsyn");
   });
+
+  it("parses Sundsvall single-line format with Ä case numbers, Bevisupptagning, and Fortsatt hf", () => {
+    const currentYear = new Date().getFullYear();
+    const text = [
+      "Dag Datum Förhandlingstid Typ av förhandling Målnr Saken",
+      "må 23-feb 09:00 - 11:00 Bevisupptagning T 326-25 fordran",
+      "må 23-feb 09:00 - 14:00 Huvudförhandling B 1775-22 misshandel",
+      "ti 24-feb 09:00 - 09:30 Konkursförhandling K 87-26 konkurs",
+      "ti 24-feb 09:00 - 16:00 Huvudförhandling B 32-26 m.fl grov stöld",
+      "fr 27-feb 09:00 - 10:00 Sammanträde Ä 1839-25 anordnande av godmanskap",
+      "fr 27-feb 10:00 - 11:00 Fortsatt hf B 2324-24 stöld m m",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Sundsvalls tingsrätt", text });
+    expect(result).toHaveLength(6);
+
+    // Bevisupptagning hearing type
+    expect(result[0].date).toBe(`${currentYear}-02-23`);
+    expect(result[0].type).toBe("Bevisupptagning");
+    expect(result[0].caseNumber).toBe("T 326-25");
+    expect(result[0].saken).toBe("fordran");
+
+    expect(result[1].type).toBe("Huvudförhandling");
+    expect(result[1].caseNumber).toBe("B 1775-22");
+
+    // Konkursförhandling
+    expect(result[2].date).toBe(`${currentYear}-02-24`);
+    expect(result[2].type).toBe("Konkursförhandling");
+    expect(result[2].caseNumber).toBe("K 87-26");
+
+    // "m.fl" in saken (med flera — multiple defendants)
+    expect(result[3].caseNumber).toBe("B 32-26");
+    expect(result[3].saken).toBe("m.fl grov stöld");
+
+    // Ä case number — requires non-ASCII word boundary fix
+    expect(result[4].date).toBe(`${currentYear}-02-27`);
+    expect(result[4].type).toBe("Sammanträde");
+    expect(result[4].caseNumber).toBe("Ä 1839-25");
+    expect(result[4].saken).toBe("anordnande av godmanskap");
+
+    // Fortsatt hf → Huvudförhandling
+    expect(result[5].type).toBe("Huvudförhandling");
+    expect(result[5].caseNumber).toBe("B 2324-24");
+    expect(result[5].saken).toBe("stöld m m");
+  });
 });

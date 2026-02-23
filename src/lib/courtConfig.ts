@@ -343,7 +343,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "sundsvalls_tingsratt",
     name: "Sundsvalls tingsrätt",
-    formatFamily: "standard",
+    formatFamily: "tabular",
     buildUrl: (week) =>
       `${BASE}/sundsvalls_tingsratt/block/v.-${week}.pdf`,
   },
