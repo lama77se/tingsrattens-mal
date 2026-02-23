@@ -150,6 +150,26 @@ function stripRoom(text: string): string {
 }
 
 /**
+ * Extract case numbers from the end of saken text (PDF column overflow).
+ * Mutates the cases array by pushing found case numbers.
+ * Returns the cleaned saken text.
+ */
+function extractTrailingCases(saken: string, cases: string[]): string {
+  let s = saken;
+  const trailingFound: string[] = [];
+  // Iteratively strip case numbers from the end of the text
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const m = s.match(/\s+((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i);
+    if (!m) break;
+    trailingFound.unshift(m[1]); // prepend to maintain left-to-right order
+    s = s.substring(0, m.index!).trim();
+  }
+  cases.push(...trailingFound);
+  return s;
+}
+
+/**
  * Check if a line should stop the continuation loop.
  */
 function isContinuationBreak(line: string): boolean {
@@ -299,6 +319,11 @@ export const formatTabular: ParserStrategy = {
       let saken = stripRoom(afterCase);
       let location: string | undefined;
 
+      // Extract trailing case numbers from saken (same-line overflow from
+      // the PDF case column, e.g., "misshandel B 2327-24" after room stripping)
+      saken = extractTrailingCases(saken, caseNumbers);
+      caseNumber = caseNumbers.join(", ");
+
       // Always check subsequent lines for continuation text
       for (let j = i + 1; j < lines.length; j++) {
         const nextLine = lines[j];
@@ -308,25 +333,25 @@ export const formatTabular: ParserStrategy = {
         if (nextLine.length > 1) {
           let lineText = nextLine;
 
-          // Extract case number(s) from continuation line if not yet found
-          if (!caseNumber) {
+          // Extract case number(s) from continuation line (append to existing)
+          {
             const caseCont = lineText.match(CASE_AT_START_REGEX);
             if (caseCont) {
-              const cases: string[] = [];
               let after = lineText;
               let cm = after.match(CASE_AT_START_REGEX);
               while (cm) {
-                cases.push(cm[1]);
+                caseNumbers.push(cm[1]);
                 after = after.substring(cm[0].length).trim();
                 after = after.replace(/^[/,]\s*/, "");
                 cm = after.match(CASE_AT_START_REGEX);
               }
-              caseNumber = cases.join(", ");
               // Extract external court reference from continuation
-              const courtRef2 = after.match(/^\(([^)]*(?:tingsrätt|tingsratt))\)\s*/i);
-              if (courtRef2) {
-                externalCourt = courtRef2[1].trim();
-                after = after.substring(courtRef2[0].length);
+              if (!externalCourt) {
+                const courtRef2 = after.match(/^\(([^)]*(?:tingsrätt|tingsratt))\)\s*/i);
+                if (courtRef2) {
+                  externalCourt = courtRef2[1].trim();
+                  after = after.substring(courtRef2[0].length);
+                }
               }
               after = after.replace(/^med\s+flera\s*/i, "").replace(/^m\.?fl\.?\s*/i, "");
               lineText = after;
@@ -444,6 +469,10 @@ export const formatTabular: ParserStrategy = {
           saken = saken.substring(0, courtNameAtEnd.index).trim();
         }
       }
+
+      // Extract trailing case numbers again (may have been added by continuation text)
+      saken = extractTrailingCases(saken, caseNumbers);
+      caseNumber = caseNumbers.join(", ");
 
       // Clean trailing punctuation from saken
       saken = saken.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "").trim();

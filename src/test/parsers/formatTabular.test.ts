@@ -1611,6 +1611,39 @@ describe("formatTabular", () => {
     expect(result[0].room).toBe("Sal 5");
   });
 
+  it("extracts secondary case number from split-date merge overflow (B 678-25 / B 2327-24)", () => {
+    // B 2327-24 overflows from the case column onto the day line
+    const text = [
+      "on 2026 - 02 - 13:00 - Huvudförhandling B 678 - 25 misshandel, olaga hot, barnfridsbrott Sal 3",
+      "18 16:00 B 2327 - 24",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-18");
+    expect(result[0].time).toBe("13:00 - 16:00");
+    expect(result[0].caseNumber).toBe("B 678-25, B 2327-24");
+    expect(result[0].saken).toBe("misshandel, olaga hot, barnfridsbrott");
+    expect(result[0].room).toBe("Sal 3");
+  });
+
+  it("extracts secondary case numbers from continuation lines (T 2784-25 + T 1811-25 + T 452-26)", () => {
+    // Two additional case numbers: T 1811-25 overflows onto day line, T 452-26 on own line
+    const text = [
+      "ti 2026 - 02 - 09:00 - Huvudförhandling T 2784 - 25 överflyttande av vårdnad Sal 6",
+      "17 12:00 T 1811 - 25",
+      "T 452 - 26",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].date).toBe("2026-02-17");
+    expect(result[0].time).toBe("09:00 - 12:00");
+    expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result[0].saken).toBe("överflyttande av vårdnad");
+    expect(result[0].room).toBe("Sal 6");
+  });
+
   it("does not skip legitimate saken words that look like city names", () => {
     // A capitalized word NOT followed by "tingsrätt" should remain in saken
     const text = [
