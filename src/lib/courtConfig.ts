@@ -55,7 +55,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "solna_tingsratt",
     name: "Solna tingsrätt",
-    formatFamily: "standard",
+    formatFamily: "tabular",
     buildUrl: (week, year) =>
       `${BASE}/solna_tingsratt/veckans-forhandlingar/v${week}.${year}.pdf`,
   },

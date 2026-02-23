@@ -62,7 +62,7 @@ function findAllRealCaseNumbers(
 }
 
 /**
- * Standard format parser — handles the current 4 courts (Alingsås, Attunda, Blekinge, Solna).
+ * Standard format parser — handles courts with multi-line date/case/parties layout (Alingsås, Attunda, Blekinge).
  * Exact same extraction logic as the original monolithic parseCourtPdf.
  */
 export const formatStandard: ParserStrategy = {

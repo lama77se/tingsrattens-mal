@@ -1696,4 +1696,58 @@ describe("formatTabular", () => {
     expect(result).toHaveLength(1);
     expect(result[0].saken).toBe("stöld Karlskrona");
   });
+
+  it("parses Solna single-line format with short dates and no room", () => {
+    const currentYear = new Date().getFullYear();
+    const text = [
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken",
+      `må 23-feb 09:00 - 09:45 Huvudförhandling B 6901-25 Skadegörelse`,
+      `må 23-feb 09:00 - 12:00 Muntlig förberedelse T 7487-25 Fordran (överlämnat från KFM); återvinning i mål 01-649381-24`,
+      `må 23-feb 13:00 - 13:20 Edgångssmtr K 12456-25 Konkurs`,
+      `må 23-feb 13:20 - 13:40 Edgångssmtr K 10465-25 Konkurs`,
+      `ti 24-feb 09:00 - 09:20 Konkursförhandling K 12299-25 Ansökan om konkurs`,
+      `ti 24-feb 09:00 - 16:30 Huvudförhandling B 453-25 Misshandel m m`,
+      `ti 24-feb 15:00 - 16:00 Sammanträde B 807-26 Undanröjande av skyddstillsyn`,
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Solna tingsrätt", text });
+    expect(result).toHaveLength(7);
+
+    // Standard hearing
+    expect(result[0].date).toBe(`${currentYear}-02-23`);
+    expect(result[0].time).toBe("09:00 - 09:45");
+    expect(result[0].type).toBe("Huvudförhandling");
+    expect(result[0].caseNumber).toBe("B 6901-25");
+    expect(result[0].saken).toBe("Skadegörelse");
+    expect(result[0].room).toBe("");
+
+    // Muntlig förberedelse with KFM reference in saken
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].caseNumber).toBe("T 7487-25");
+    expect(result[1].saken).toBe("Fordran (överlämnat från KFM); återvinning i mål 01-649381-24");
+
+    // Edgångssmtr alias → Edgångssammanträde
+    expect(result[2].type).toBe("Edgångssammanträde");
+    expect(result[2].caseNumber).toBe("K 12456-25");
+    expect(result[2].saken).toBe("Konkurs");
+
+    expect(result[3].type).toBe("Edgångssammanträde");
+    expect(result[3].caseNumber).toBe("K 10465-25");
+
+    // Konkursförhandling (full type name)
+    expect(result[4].date).toBe(`${currentYear}-02-24`);
+    expect(result[4].type).toBe("Konkursförhandling");
+    expect(result[4].caseNumber).toBe("K 12299-25");
+    expect(result[4].saken).toBe("Ansökan om konkurs");
+
+    // Huvudförhandling with m m
+    expect(result[5].type).toBe("Huvudförhandling");
+    expect(result[5].caseNumber).toBe("B 453-25");
+    expect(result[5].saken).toBe("Misshandel m m");
+
+    // Sammanträde
+    expect(result[6].type).toBe("Sammanträde");
+    expect(result[6].caseNumber).toBe("B 807-26");
+    expect(result[6].saken).toBe("Undanröjande av skyddstillsyn");
+  });
 });
