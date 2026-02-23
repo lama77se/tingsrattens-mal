@@ -55,7 +55,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "solna_tingsratt",
     name: "Solna tingsrätt",
-    formatFamily: "standard",
+    formatFamily: "tabular",
     buildUrl: (week, year) =>
       `${BASE}/solna_tingsratt/veckans-forhandlingar/v${week}.${year}.pdf`,
   },
@@ -343,7 +343,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "sundsvalls_tingsratt",
     name: "Sundsvalls tingsrätt",
-    formatFamily: "standard",
+    formatFamily: "tabular",
     buildUrl: (week) =>
       `${BASE}/sundsvalls_tingsratt/block/v.-${week}.pdf`,
   },

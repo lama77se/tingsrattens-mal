@@ -34,7 +34,7 @@ export const MONTH_MAP: Record<string, string> = {
   september: "09", oktober: "10", november: "11", december: "12",
 };
 
-export const CASE_NUMBER_REGEX = /\b((?:PMT|FT|[TBK\u00c4])\s?\d{1,6}[-\u2013\u2014]\d{2})\b/i;
+export const CASE_NUMBER_REGEX = /(?<![A-Za-z\u00c4\u00e4])((?:PMT|FT|[TBK\u00c4])\s?\d{1,6}[-\u2013\u2014]\d{2})\b/i;
 
 export const TIME_RANGE_REGEX = /(\d{1,2}:\d{2})\s*[-\u2013\u2014]\s*(\d{1,2}:\d{2})/;
 
