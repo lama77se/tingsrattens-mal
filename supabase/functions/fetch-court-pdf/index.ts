@@ -23,10 +23,22 @@ function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
   // Sort by y descending (top of page = highest y value in PDF coordinates)
   const sorted = [...filtered].sort((a, b) => b.transform[5] - a.transform[5]);
 
+  // X-tolerance for detecting column collisions (two items at similar x = separate rows)
+  const xCollisionTolerance = 10;
+
   const rows: { y: number; items: TextItem[] }[] = [];
   for (const item of sorted) {
     const y = item.transform[5];
-    const existingRow = rows.find((r) => Math.abs(r.y - y) <= yTolerance);
+    const x = item.transform[4];
+    const existingRow = rows.find((r) => {
+      if (Math.abs(r.y - y) > yTolerance) return false;
+      // Reject merge if row already has an item at a similar x position
+      // (indicates two distinct visual rows at nearly the same y)
+      const hasXCollision = r.items.some(
+        (ri) => Math.abs(ri.transform[4] - x) < xCollisionTolerance
+      );
+      return !hasXCollision;
+    });
     if (existingRow) {
       existingRow.items.push(item);
     } else {
