@@ -1868,4 +1868,35 @@ describe("formatTabular", () => {
       expect(h.saken).not.toMatch(/\d{2}:\d{2}/);
     }
   });
+
+  it("handles case numbers wrapping across lines (B 1852-25, B + 3694-24)", () => {
+    const text = [
+      "on 2026-02-18 (dag 4/4) 09:00 - 16:00 Huvudförhandling B 1852-25, B grovt narkotikabrott m m Sal 1",
+      "3694-24",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Uddevalla tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("B 1852-25");
+    expect(result[0].saken).toBe("grovt narkotikabrott m m");
+    expect(result[0].room).toBe("Sal 1");
+    expect(result[1].caseNumber).toBe("B 3694-24");
+    expect(result[1].saken).toBe("grovt narkotikabrott m m");
+    expect(result[1].room).toBe("Sal 1");
+  });
+
+  it("handles case numbers wrapping across lines with saken continuation (T 1887-25, Ä + 1005-25)", () => {
+    const text = [
+      "on 2026-02-18 09:00 - 16:00 Huvudförhandling T 1887-25, Ä överflyttning av vårdnaden enligt 6 kap Sal 5",
+      "8 § föräldrabalken",
+      "1005-25",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Uddevalla tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("T 1887-25");
+    expect(result[0].saken).toBe("överflyttning av vårdnaden enligt 6 kap 8 § föräldrabalken");
+    expect(result[1].caseNumber).toBe("Ä 1005-25");
+    expect(result[1].saken).toBe("överflyttning av vårdnaden enligt 6 kap 8 § föräldrabalken");
+  });
 });
