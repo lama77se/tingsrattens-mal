@@ -106,10 +106,55 @@ export function extractSwedishDate(line: string): string | null {
  * inter-field spaces, requiring targeted degluing patterns.
  */
 export function preprocessLines(text: string): string[] {
-  return text
+  let trimmed = text
     .split("\n")
     .map((l) => l.trim())
-    .filter(Boolean)
+    .filter(Boolean);
+
+  // Merge split-date lines (Norrköping-style PDFs).
+  // Some PDFs render dates across two rows:
+  //   Line N:   "må 2026 - 02 - 09:00 - Huvudförhandling ..."
+  //   Line N+1: "16 16:00"
+  // The day number (16) belongs to the date (2026-02-16) but ended up on the
+  // next line due to table column layout. We detect partial dates (YYYY-MM-
+  // followed by a time instead of a day) and merge the day from the next line.
+  const SPLIT_DATE_LINE = /^(.*\b\d{4}\s*[-–—]\s*\d{2}\s*[-–—]\s*)(\d{1,2}:\d{2}\b.*)$/;
+  const NEXT_LINE_DAY = /^(\d{1,2})\b(.*)/;
+  const merged: string[] = [];
+  for (let i = 0; i < trimmed.length; i++) {
+    const splitMatch = trimmed[i].match(SPLIT_DATE_LINE);
+    if (splitMatch && i + 1 < trimmed.length) {
+      const nextDayMatch = trimmed[i + 1].match(NEXT_LINE_DAY);
+      if (nextDayMatch) {
+        // Reconstruct: "må 2026 - 02 - 16 09:00 - 16:00 Huvudförhandling ..."
+        const datePart = splitMatch[1]; // "må 2026 - 02 - "
+        const day = nextDayMatch[1];     // "16"
+        const timeAndRest = splitMatch[2]; // "09:00 - Huvudförhandling ..."
+        const nextRemainder = nextDayMatch[2].trim(); // "16:00" or "16:00 (extra text)"
+        // Insert end time into the time range if present
+        let reconstructed = `${datePart}${day} ${timeAndRest}`;
+        // If the next line had an end time (e.g., "16 16:00"), inject it after the start time
+        if (nextRemainder) {
+          const startTimeMatch = timeAndRest.match(/^(\d{1,2}:\d{2})\s*[-–—]\s*/);
+          const endTimeMatch = nextRemainder.match(/^(\d{1,2}:\d{2})\b\s*(.*)/);
+          if (startTimeMatch && endTimeMatch) {
+            const afterStartTime = timeAndRest.substring(startTimeMatch[0].length);
+            reconstructed = `${datePart}${day} ${startTimeMatch[1]} - ${endTimeMatch[1]} ${afterStartTime}`;
+            // Append any leftover text from the next line (rare)
+            if (endTimeMatch[2]) {
+              reconstructed += ` ${endTimeMatch[2]}`;
+            }
+          }
+        }
+        merged.push(reconstructed);
+        i++; // skip the next line since we merged it
+        continue;
+      }
+    }
+    merged.push(trimmed[i]);
+  }
+
+  return merged
     .map((line) =>
       line
         // Normalize ISO dates: collapse spaces around dashes and convert en/em-dashes
