@@ -467,10 +467,16 @@ describe("formatTabular", () => {
   it("handles multiple case numbers on one line (Norrköping)", () => {
     const text = "ti 2026-02-17 09:00 - 12:00 Huvudförhandling T 2784-25 T 1811-25 T 452-26 överflyttande av vårdnad Sal 6";
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    expect(result).toHaveLength(1);
-    expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result).toHaveLength(3);
+    expect(result[0].caseNumber).toBe("T 2784-25");
     expect(result[0].saken).toBe("överflyttande av vårdnad");
     expect(result[0].room).toBe("Sal 6");
+    expect(result[1].caseNumber).toBe("T 1811-25");
+    expect(result[1].saken).toBe("överflyttande av vårdnad");
+    expect(result[1].room).toBe("Sal 6");
+    expect(result[2].caseNumber).toBe("T 452-26");
+    expect(result[2].saken).toBe("överflyttande av vårdnad");
+    expect(result[2].room).toBe("Sal 6");
   });
 
   it("parses Bevisupptagning hearing type", () => {
@@ -533,10 +539,14 @@ describe("formatTabular", () => {
   it("handles slash-separated case numbers", () => {
     const text = "ti 2026-02-17 09:00 - 12:00 Huvudförhandling T 2784-25 / T 1811-25 / T 452-26 överflyttande av vårdnad Sal 6";
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    expect(result).toHaveLength(1);
-    expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result).toHaveLength(3);
+    expect(result[0].caseNumber).toBe("T 2784-25");
     expect(result[0].saken).toBe("överflyttande av vårdnad");
     expect(result[0].room).toBe("Sal 6");
+    expect(result[1].caseNumber).toBe("T 1811-25");
+    expect(result[1].saken).toBe("överflyttande av vårdnad");
+    expect(result[2].caseNumber).toBe("T 452-26");
+    expect(result[2].saken).toBe("överflyttande av vårdnad");
   });
 
   it("handles multi-hearing with continuation saken", () => {
@@ -570,7 +580,7 @@ describe("formatTabular", () => {
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(5);
     expect(result[0].date).toBe("2026-02-16");
     expect(result[0].time).toBe("09:00 - 16:00");
     expect(result[0].type).toBe("Huvudförhandling");
@@ -581,9 +591,13 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("misshandel m.m");
     expect(result[1].room).toBe("Sal 4");
     expect(result[2].date).toBe("2026-02-17");
-    expect(result[2].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result[2].caseNumber).toBe("T 2784-25");
     expect(result[2].saken).toBe("överflyttande av vårdnad");
     expect(result[2].room).toBe("Sal 6");
+    expect(result[3].caseNumber).toBe("T 1811-25");
+    expect(result[3].saken).toBe("överflyttande av vårdnad");
+    expect(result[4].caseNumber).toBe("T 452-26");
+    expect(result[4].saken).toBe("överflyttande av vårdnad");
   });
 
   it("skips Kristianstad-style headers in continuation", () => {
@@ -701,7 +715,7 @@ describe("formatTabular", () => {
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Nyköpings tingsrätt", text });
-    expect(result).toHaveLength(4);
+    expect(result).toHaveLength(5);
 
     expect(result[0].caseNumber).toBe("B 4819-25");
     expect(result[0].type).toBe("Huvudförhandling");
@@ -713,15 +727,20 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("ansökan om konkurs");
     expect(result[1].room).toBe("Tingssal 6");
 
-    expect(result[2].caseNumber).toBe("B 4165-25, B 4675-25");
+    expect(result[2].caseNumber).toBe("B 4165-25");
     expect(result[2].type).toBe("Huvudförhandling");
     expect(result[2].saken).toBe("misshandel");
     expect(result[2].room).toBe("Tingssal 1");
 
-    expect(result[3].caseNumber).toBe("FT 4566-25");
-    expect(result[3].type).toBe("Muntlig förberedelse");
-    expect(result[3].saken).toBe("fordran");
-    expect(result[3].room).toBe("Tingssal 6");
+    expect(result[3].caseNumber).toBe("B 4675-25");
+    expect(result[3].type).toBe("Huvudförhandling");
+    expect(result[3].saken).toBe("misshandel");
+    expect(result[3].room).toBe("Tingssal 1");
+
+    expect(result[4].caseNumber).toBe("FT 4566-25");
+    expect(result[4].type).toBe("Muntlig förberedelse");
+    expect(result[4].saken).toBe("fordran");
+    expect(result[4].room).toBe("Tingssal 6");
   });
 
   it("parses Skaraborgs single-line format with all hearing types", () => {
@@ -854,7 +873,7 @@ describe("formatTabular", () => {
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Stockholms tingsrätt", text });
-    expect(result).toHaveLength(10);
+    expect(result).toHaveLength(11);
 
     // Konkursförhandling
     expect(result[0].date).toBe("2026-02-16");
@@ -869,55 +888,60 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("fordran");
     expect(result[1].room).toBe("Sal 25");
 
-    // Multi-case
+    // Multi-case → split into separate rows
     expect(result[2].type).toBe("Huvudförhandling");
-    expect(result[2].caseNumber).toBe("T 11073-22, T 8203-24");
+    expect(result[2].caseNumber).toBe("T 11073-22");
     expect(result[2].saken).toBe("fastställelsetalan");
     expect(result[2].room).toBe("Sal 27");
 
-    // "Huvudförhandling i förenklad form" → Huvudförhandling
-    expect(result[3].date).toBe("2026-02-17");
     expect(result[3].type).toBe("Huvudförhandling");
-    expect(result[3].caseNumber).toBe("FT 21289-25");
-    expect(result[3].saken).toBe("fordran");
-    expect(result[3].room).toBe("Sal 30");
+    expect(result[3].caseNumber).toBe("T 8203-24");
+    expect(result[3].saken).toBe("fastställelsetalan");
+    expect(result[3].room).toBe("Sal 27");
+
+    // "Huvudförhandling i förenklad form" → Huvudförhandling
+    expect(result[4].date).toBe("2026-02-17");
+    expect(result[4].type).toBe("Huvudförhandling");
+    expect(result[4].caseNumber).toBe("FT 21289-25");
+    expect(result[4].saken).toBe("fordran");
+    expect(result[4].room).toBe("Sal 30");
 
     // PMT prefix + "med flera" stripped
-    expect(result[4].type).toBe("Huvudförhandling");
-    expect(result[4].caseNumber).toBe("PMT 12670-24");
-    expect(result[4].saken).toBe("varumärkesintrång m.m");
-    expect(result[4].room).toBe("Sal 26");
+    expect(result[5].type).toBe("Huvudförhandling");
+    expect(result[5].caseNumber).toBe("PMT 12670-24");
+    expect(result[5].saken).toBe("varumärkesintrång m.m");
+    expect(result[5].room).toBe("Sal 26");
 
     // External court reference "(Solna tingsrätt)" extracted
-    expect(result[5].type).toBe("Huvudförhandling");
-    expect(result[5].caseNumber).toBe("B 6394-24");
-    expect(result[5].externalCourt).toBe("Solna tingsrätt");
-    expect(result[5].saken).toContain("folkrättsbrott");
+    expect(result[6].type).toBe("Huvudförhandling");
+    expect(result[6].caseNumber).toBe("B 6394-24");
+    expect(result[6].externalCourt).toBe("Solna tingsrätt");
+    expect(result[6].saken).toContain("folkrättsbrott");
 
     // Edgångssammanträde
-    expect(result[6].date).toBe("2026-02-18");
-    expect(result[6].type).toBe("Edgångssammanträde");
-    expect(result[6].caseNumber).toBe("K 5348-25");
-    expect(result[6].saken).toBe("konkurs");
-    expect(result[6].room).toBe("Sal 9");
+    expect(result[7].date).toBe("2026-02-18");
+    expect(result[7].type).toBe("Edgångssammanträde");
+    expect(result[7].caseNumber).toBe("K 5348-25");
+    expect(result[7].saken).toBe("konkurs");
+    expect(result[7].room).toBe("Sal 9");
 
     // Standard Muntlig förberedelse
-    expect(result[7].type).toBe("Muntlig förberedelse");
-    expect(result[7].caseNumber).toBe("T 16169-25");
-    expect(result[7].saken).toBe("kontraktsrätt");
-    expect(result[7].room).toBe("Sal 25");
+    expect(result[8].type).toBe("Muntlig förberedelse");
+    expect(result[8].caseNumber).toBe("T 16169-25");
+    expect(result[8].saken).toBe("kontraktsrätt");
+    expect(result[8].room).toBe("Sal 25");
 
     // Föredragning — new type, no room
-    expect(result[8].type).toBe("Föredragning");
-    expect(result[8].caseNumber).toBe("Ä 25040-25");
-    expect(result[8].saken).toBe("prövning av tillträdesförbud");
-    expect(result[8].room).toBe("");
+    expect(result[9].type).toBe("Föredragning");
+    expect(result[9].caseNumber).toBe("Ä 25040-25");
+    expect(result[9].saken).toBe("prövning av tillträdesförbud");
+    expect(result[9].room).toBe("");
 
     // Thursday standard hearing
-    expect(result[9].date).toBe("2026-02-19");
-    expect(result[9].caseNumber).toBe("T 19657-25");
-    expect(result[9].saken).toBe("fordran");
-    expect(result[9].room).toBe("Sal 29");
+    expect(result[10].date).toBe("2026-02-19");
+    expect(result[10].caseNumber).toBe("T 19657-25");
+    expect(result[10].saken).toBe("fordran");
+    expect(result[10].room).toBe("Sal 29");
   });
 
   it("handles Stockholm typo 'huvuförhandling' and Fortsatt muntlig förberedelse", () => {
@@ -1097,7 +1121,7 @@ describe("formatTabular", () => {
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Uddevalla tingsrätt", text });
-    expect(result).toHaveLength(5);
+    expect(result).toHaveLength(7);
 
     expect(result[0].date).toBe("2026-02-17");
     expect(result[0].type).toBe("Huvudförhandling");
@@ -1105,24 +1129,33 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("grov fridskränkning");
     expect(result[0].room).toBe("Sal 1");
 
-    expect(result[1].caseNumber).toBe("B 1852-25, B 3694-24");
+    // Split multi-case into separate rows
+    expect(result[1].caseNumber).toBe("B 1852-25");
     expect(result[1].saken).toBe("misshandel m m");
     expect(result[1].room).toBe("Sal 2");
 
-    expect(result[2].date).toBe("2026-02-18");
-    expect(result[2].type).toBe("Konkursförhandling");
-    expect(result[2].caseNumber).toBe("K 104-26");
-    expect(result[2].saken).toBe("ansökan om konkurs");
+    expect(result[2].caseNumber).toBe("B 3694-24");
+    expect(result[2].saken).toBe("misshandel m m");
+    expect(result[2].room).toBe("Sal 2");
 
-    expect(result[3].type).toBe("Muntlig förberedelse");
-    expect(result[3].caseNumber).toBe("FT 5432-25");
-    expect(result[3].saken).toBe("fordran");
+    expect(result[3].date).toBe("2026-02-18");
+    expect(result[3].type).toBe("Konkursförhandling");
+    expect(result[3].caseNumber).toBe("K 104-26");
+    expect(result[3].saken).toBe("ansökan om konkurs");
 
-    // Multi-line saken with mixed case numbers
-    expect(result[4].date).toBe("2026-02-19");
-    expect(result[4].caseNumber).toBe("T 1887-25, Ä 1005-25");
-    expect(result[4].saken).toContain("överflyttning av vårdnaden");
-    expect(result[4].room).toBe("Sal 7");
+    expect(result[4].type).toBe("Muntlig förberedelse");
+    expect(result[4].caseNumber).toBe("FT 5432-25");
+    expect(result[4].saken).toBe("fordran");
+
+    // Multi-line saken with mixed case numbers — split into separate rows
+    expect(result[5].date).toBe("2026-02-19");
+    expect(result[5].caseNumber).toBe("T 1887-25");
+    expect(result[5].saken).toContain("överflyttning av vårdnaden");
+    expect(result[5].room).toBe("Sal 7");
+
+    expect(result[6].caseNumber).toBe("Ä 1005-25");
+    expect(result[6].saken).toContain("överflyttning av vårdnaden");
+    expect(result[6].room).toBe("Sal 7");
   });
 
   it("parses Vänersborg 3-line format with dated entries", () => {
@@ -1619,12 +1652,16 @@ describe("formatTabular", () => {
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    expect(result).toHaveLength(1);
+    expect(result).toHaveLength(2);
     expect(result[0].date).toBe("2026-02-18");
     expect(result[0].time).toBe("13:00 - 16:00");
-    expect(result[0].caseNumber).toBe("B 678-25, B 2327-24");
+    expect(result[0].caseNumber).toBe("B 678-25");
     expect(result[0].saken).toBe("misshandel, olaga hot, barnfridsbrott");
     expect(result[0].room).toBe("Sal 3");
+    expect(result[1].date).toBe("2026-02-18");
+    expect(result[1].caseNumber).toBe("B 2327-24");
+    expect(result[1].saken).toBe("misshandel, olaga hot, barnfridsbrott");
+    expect(result[1].room).toBe("Sal 3");
   });
 
   it("extracts secondary case numbers from continuation lines (T 2784-25 + T 1811-25 + T 452-26)", () => {
@@ -1636,12 +1673,16 @@ describe("formatTabular", () => {
     ].join("\n");
 
     const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
-    expect(result).toHaveLength(1);
+    expect(result).toHaveLength(3);
     expect(result[0].date).toBe("2026-02-17");
     expect(result[0].time).toBe("09:00 - 12:00");
-    expect(result[0].caseNumber).toBe("T 2784-25, T 1811-25, T 452-26");
+    expect(result[0].caseNumber).toBe("T 2784-25");
     expect(result[0].saken).toBe("överflyttande av vårdnad");
     expect(result[0].room).toBe("Sal 6");
+    expect(result[1].caseNumber).toBe("T 1811-25");
+    expect(result[1].saken).toBe("överflyttande av vårdnad");
+    expect(result[2].caseNumber).toBe("T 452-26");
+    expect(result[2].saken).toBe("överflyttande av vårdnad");
   });
 
   it("does not skip legitimate saken words that look like city names", () => {
