@@ -167,10 +167,20 @@ export const formatSchema: ParserStrategy = {
       }
 
       // Bare room line (no court name): "Sal 09", "Sal 10 (säkerhetssal)"
+      // Malmö PDFs merge Sal and angående on same line due to column layout:
+      //   "Sal 22 angående penningtvättsbrott"
+      //   "Sal 52, Säkerhetssal angående grovt vapenbrott..."
+      //   "Sal 10 (säkerhetssal) angående våldtäkt m.m."
       const bareRoomMatch = line.match(/^((?:Tings)?[Ss]al)\s+(\d+)/);
       if (bareRoomMatch) {
         const prefix = bareRoomMatch[1].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
         currentRoom = `${prefix} ${bareRoomMatch[2]}`;
+        // Check for angående merged on same line
+        const afterRoom = line.substring(bareRoomMatch[0].length);
+        const angInRemainder = afterRoom.match(/a?ngående\s+(.+)/i);
+        if (angInRemainder) {
+          parseAngaendeFragment(angInRemainder[1]);
+        }
         continue;
       }
 
