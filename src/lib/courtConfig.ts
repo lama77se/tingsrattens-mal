@@ -398,8 +398,10 @@ export const COURTS: CourtConfig[] = [
     id: "uppsala_tingsratt",
     name: "Uppsala tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week) =>
+    buildUrl: (week) => [
+      `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v.-${week}.pdf`,
       `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v-${week}.pdf`,
+    ],
   },
   {
     id: "vanersborgs_tingsratt",
