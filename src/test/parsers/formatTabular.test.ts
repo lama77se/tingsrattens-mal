@@ -1592,6 +1592,23 @@ describe("formatTabular", () => {
     expect(result[0].date).toBe("2026-02-24");
     expect(result[0].time).toBe("10:00 - 12:00");
     expect(result[0].type).toBe("Muntlig förberedelse");
+    expect(result[0].caseNumber).toBe("FT 4434-25");
+    expect(result[0].saken).toBe("fordran");
+    expect(result[0].room).toBe("Sal 1");
+  });
+
+  it("handles Norrköping split-date with FT case number and KFM text", () => {
+    // Another FT case with additional text: "FT 4901 -" on line 1, "25" on day line
+    const text = [
+      "ti 2026 - 02 - 10:00 - Muntlig förberedelse FT 4901 - fordran (överlämnat från KFM) Sal 5",
+      "24 12:00 25",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Norrköpings tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("FT 4901-25");
+    expect(result[0].saken).toBe("fordran (överlämnat från KFM)");
+    expect(result[0].room).toBe("Sal 5");
   });
 
   it("does not skip legitimate saken words that look like city names", () => {

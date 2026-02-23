@@ -115,6 +115,28 @@ describe("preprocessLines", () => {
     expect(result[0]).toBe("upphörande av godmanskap (återförvisat mål)");
   });
 
+  it("strips pagination footer with spaces around dash", () => {
+    const input = "upphörande av godmanskap (återförvisat mål)\n1 - 81 visas av 81";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe("upphörande av godmanskap (återförvisat mål)");
+  });
+
+  it("strips standalone pagination footer line", () => {
+    const result = preprocessLines("1 - 81 visas av 81");
+    // Should result in empty array (line becomes empty and gets filtered or is <= 1 char)
+    expect(result.every(l => !l.includes("visas av"))).toBe(true);
+  });
+
+  it("fixes split case number where year overflows to next line", () => {
+    // After split-date merge, "FT 4434 - fordran Sal 1 25" should become "FT 4434-25 fordran Sal 1"
+    const input = "ti 2026 - 02 - 10:00 - Muntlig förberedelse FT 4434 - fordran Sal 1\n24 12:00 25";
+    const result = preprocessLines(input);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain("FT 4434-25");
+    expect(result[0]).not.toMatch(/fordran.*25/); // 25 should not be after fordran
+  });
+
   it("passes through clean hearing lines unchanged", () => {
     const input = "to 2026-02-19 09:00 - 09:45 Huvudförhandling B 199-26 ringa stöld Sal 6";
     const result = preprocessLines(input);
