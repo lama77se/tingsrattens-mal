@@ -351,10 +351,15 @@ export const formatTabular: ParserStrategy = {
 
       // Always check subsequent lines for continuation text
       for (let j = i + 1; j < lines.length; j++) {
-        const nextLine = lines[j];
+        let nextLine = lines[j];
         if (isContinuationBreak(nextLine)) break;
-        // Skip (dag X/Y) annotations in continuation
-        if (DAG_REGEX.test(nextLine)) continue;
+        // Strip (dag X/Y) annotations in continuation — but keep processing
+        // the rest of the line (it may contain case numbers, e.g., Värmland:
+        // "(dag 8/28) B 1053-23 narkotikabrott m.m")
+        if (DAG_REGEX.test(nextLine)) {
+          nextLine = nextLine.replace(DAG_REGEX, "").trim();
+          if (!nextLine) continue;
+        }
         if (nextLine.length > 1) {
           let lineText = nextLine;
 
@@ -508,6 +513,38 @@ export const formatTabular: ParserStrategy = {
 
       // Extract trailing case numbers again (may have been added by continuation text)
       saken = extractTrailingCases(saken, caseNumbers);
+
+      // Extract case numbers embedded in the middle of saken (column overflow
+      // where a continuation case number has descriptive text after it, e.g.,
+      // "synnerligen grovt B 1053-23 narkotikabrott m.m" from Värmland PDFs).
+      // The lookbehind prevents matching letters inside words (e.g., "kfm" → "m"
+      // would falsely match [TBKMFÄ]). The lookahead prevents matching partial
+      // numbers (e.g., "01-387691-25" → "01-38" matching \d{1,6}-\d{2}).
+      // Case numbers inside parentheses are kept (case references like
+      // "återvinning av mål FT 1065-25").
+      {
+        const embeddedCaseRegex = /(?<!\w)(?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2}(?!\d)/gi;
+        const toStrip: { start: number; end: number }[] = [];
+        let ecMatch;
+        while ((ecMatch = embeddedCaseRegex.exec(saken)) !== null) {
+          // Skip case numbers inside parentheses (case references)
+          const before = saken.substring(0, ecMatch.index);
+          const opens = (before.match(/\(/g) || []).length;
+          const closes = (before.match(/\)/g) || []).length;
+          if (opens > closes) continue;
+
+          const cn = ecMatch[0];
+          if (!caseNumbers.some(c => c.replace(/\s/g, "") === cn.replace(/\s/g, ""))) {
+            caseNumbers.push(cn);
+          }
+          toStrip.push({ start: ecMatch.index, end: ecMatch.index + cn.length });
+        }
+        // Strip from right to left to preserve indices
+        for (const s of toStrip.reverse()) {
+          saken = saken.substring(0, s.start) + saken.substring(s.end);
+        }
+        saken = saken.replace(/\s{2,}/g, " ").trim();
+      }
 
       // Clean trailing punctuation from saken
       saken = saken.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "").trim();

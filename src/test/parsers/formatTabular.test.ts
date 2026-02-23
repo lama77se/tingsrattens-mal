@@ -1899,4 +1899,103 @@ describe("formatTabular", () => {
     expect(result[1].caseNumber).toBe("Ä 1005-25");
     expect(result[1].saken).toBe("överflyttning av vårdnaden enligt 6 kap 8 § föräldrabalken");
   });
+
+  // --- Värmland multi-case tests ---
+
+  it("handles Värmland multi-case with (dag X/Y) on same line as case number", () => {
+    const text = [
+      "må 2026-02-23 09:30 - 16:30 Huvudförhandling B 1861-25 synnerligen grovt",
+      "(dag 8/28) B 1053-23 narkotikabrott m.m",
+      "B 2367-25",
+      "B 4936-25",
+      "må 2026-02-23 10:30 - 11:30 Huvudförhandling B 80-26 skadegörelse",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Värmlands tingsrätt", text });
+
+    // First hearing should produce 4 case numbers
+    const first = result.filter(h => h.time === "09:30 - 16:30");
+    expect(first).toHaveLength(4);
+    expect(first.map(h => h.caseNumber)).toContain("B 1861-25");
+    expect(first.map(h => h.caseNumber)).toContain("B 1053-23");
+    expect(first.map(h => h.caseNumber)).toContain("B 2367-25");
+    expect(first.map(h => h.caseNumber)).toContain("B 4936-25");
+
+    // Saken should NOT contain case numbers
+    for (const h of first) {
+      expect(h.saken).not.toMatch(/[BTKMFÄ]\s?\d{1,6}[-–]\d{2}/);
+    }
+
+    // Second hearing
+    const second = result.find(h => h.caseNumber === "B 80-26");
+    expect(second).toBeDefined();
+    expect(second!.saken).toBe("skadegörelse");
+  });
+
+  it("strips embedded case numbers from saken when all on one line", () => {
+    // Simulates unpdf merging all columns into a single line
+    const text = [
+      "må 2026-02-23 09:30 - 16:30 Huvudförhandling B 1861-25 synnerligen grovt B 1053-23 narkotikabrott m.m B 2367-25",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Värmlands tingsrätt", text });
+
+    expect(result.length).toBeGreaterThanOrEqual(1);
+
+    // All case numbers should be extracted
+    const caseNums = result.map(h => h.caseNumber);
+    expect(caseNums).toContain("B 1861-25");
+    expect(caseNums).toContain("B 1053-23");
+    expect(caseNums).toContain("B 2367-25");
+
+    // Saken should not contain any case numbers
+    for (const h of result) {
+      expect(h.saken).not.toMatch(/[BTKMFÄ]\s?\d{1,6}[-–]\d{2}/);
+    }
+    // Saken should contain the description text
+    expect(result[0].saken).toContain("synnerligen grovt");
+    expect(result[0].saken).toContain("narkotikabrott");
+  });
+
+  it("handles Värmland continuation case numbers without (dag) annotation", () => {
+    const text = [
+      "to 2026-02-26 09:30 - 10:00 Huvudförhandling B 457-26 ringa narkotikabrott",
+      "B 5577-25",
+      "B 5688-25",
+      "to 2026-02-26 09:45 - 10:30 Huvudförhandling B 326-26 våldsamt motstånd",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Värmlands tingsrätt", text });
+
+    const first = result.filter(h => h.time === "09:30 - 10:00");
+    expect(first).toHaveLength(3);
+    expect(first.map(h => h.caseNumber)).toEqual(["B 457-26", "B 5577-25", "B 5688-25"]);
+    expect(first[0].saken).toBe("ringa narkotikabrott");
+
+    const second = result.find(h => h.caseNumber === "B 326-26");
+    expect(second).toBeDefined();
+    expect(second!.saken).toBe("våldsamt motstånd");
+  });
+
+  it("handles Värmland hearing type wrapping across lines (Konkursförhandling)", () => {
+    // When "Konkursförhandling" wraps mid-word (Konkursförhandlin + g), the
+    // truncated type won't be recognized. This test verifies the parser doesn't
+    // crash and still extracts the case number and saken.
+    const text = [
+      "ti 2026-02-24 09:00 - 09:15 Konkursförhandlin K 6180-25 ansökan om konkurs",
+      "g",
+      "ti 2026-02-24 09:00 - 09:45 Huvudförhandling B 3577-25 hot mot tjänsteman",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Värmlands tingsrätt", text });
+    expect(result.length).toBeGreaterThanOrEqual(2);
+
+    const konkurs = result.find(h => h.caseNumber === "K 6180-25");
+    expect(konkurs).toBeDefined();
+    expect(konkurs!.saken).toContain("ansökan om konkurs");
+
+    const hot = result.find(h => h.caseNumber === "B 3577-25");
+    expect(hot).toBeDefined();
+    expect(hot!.saken).toBe("hot mot tjänsteman");
+  });
 });
