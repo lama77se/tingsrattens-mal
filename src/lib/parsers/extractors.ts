@@ -162,10 +162,16 @@ export function preprocessLines(text: string): string[] {
         .replace(/(\d{4})\s*[-–—]\s*(\d{2})\s*[-–—]\s*(\d{2})/g, "$1-$2-$3")
         // Strip (dag X/Y) annotations
         .replace(/\s*\(dag\s+\d+\/\d+\)/gi, "")
+        // Fix split case numbers: when a case number's year part overflowed to
+        // the next PDF row and got appended at the line's end after split-date merge.
+        // "FT 4434 - fordran Sal 1 25" → "FT 4434 - 25 fordran Sal 1"
+        // [^\d\s] ensures the text after the dash starts with a letter (not a digit
+        // or space), preventing false matches on complete case numbers like "T 3297 - 25".
+        .replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6}\s*[-–—]\s*)([^\d\s].*?)\s+(\d{2})\s*$/i, "$1$3 $2")
         // Case number spaces around dash: B 784 - 25 / B 784 -25 → B 784-25
         .replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6})\s*([-–—])\s*(\d{2})/gi, "$1$2$3")
-        // Strip pagination footers: "1-81 visas av 81"
-        .replace(/\s*\d+[-–—]\d+\s+visas\s+av\s+\d+\s*$/, "")
+        // Strip pagination footers: "1-81 visas av 81" or "1 - 81 visas av 81"
+        .replace(/\s*\d+\s*[-–—]\s*\d+\s+visas\s+av\s+\d+\s*$/, "")
         // --- Deglue patterns for PDFs with missing inter-field spaces ---
         // Day abbreviation before date: "fr20-feb" → "fr 20-feb"
         .replace(/^(m[åaö]|ma|ti|on|to|fr|lö|lo|sö|so)(\d)/i, "$1 $2")
@@ -181,7 +187,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/([a-zåäö.])([ST](?:ingssal|al)\s*\d)/g, "$1 $2")
         // Lowercase before case prefix: "HuvudförhandlingB 14" → "Huvudförhandling B 14"
         .replace(/([a-zåäö.])(?=(?:PMT|FT|[TBKÄ])\s?\d)/g, "$1 ")
-    );
+    )
+    .filter(Boolean);
 }
 
 export function extractTime(line: string, prevLine?: string): string {
