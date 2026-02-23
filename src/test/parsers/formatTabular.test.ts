@@ -1846,4 +1846,26 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("fordran ev hf");
     expect(result[0].room).toBe("Sal 6");
   });
+
+  it("skips phantom merged lines from multi-page PDF frozen rows (Uddevalla)", () => {
+    const text = [
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "må 2026-02-16 09:00 - 09:30 Konkursförhandling K 3847-25 ansökan om konkurs Sal 8",
+      // Phantom merged line: frozen row from page 1 + first row of page 2
+      "må on 2026-02-16 2026-02-18 09:00 - 09:30 09:00 - 14:00 Konkursförhandling Huvudförhandling K 3847-25 B 1631-25 ansökan om konkurs grovt bokföringsbrott m m Sal 8 Sal 3",
+      "on 2026-02-18 10:30 - 11:15 Huvudförhandling B 3404-25 försök till sabotage Sal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Uddevalla tingsrätt", text });
+    // Phantom line should be skipped; only real hearings remain
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("K 3847-25");
+    expect(result[0].saken).toBe("ansökan om konkurs");
+    expect(result[1].caseNumber).toBe("B 3404-25");
+    expect(result[1].saken).toBe("försök till sabotage");
+    // No hearing should have time ranges in saken
+    for (const h of result) {
+      expect(h.saken).not.toMatch(/\d{2}:\d{2}/);
+    }
+  });
 });
