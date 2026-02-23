@@ -318,6 +318,19 @@ export const formatTabular: ParserStrategy = {
         afterCase = afterCase.replace(/^[/,]\s*/, "");
         caseMatch = afterCase.match(CASE_AT_START_REGEX);
       }
+
+      // Detect trailing case prefix without number (wrapped to next line).
+      // E.g., "B 1852-25, B grovt narkotikabrott" where "B" is the start of
+      // the second case number "B 3694-24" but the number wrapped to a new line.
+      let pendingCasePrefix = "";
+      if (caseNumbers.length > 0) {
+        const lonePrefixMatch = afterCase.match(/^((?:PMT|FT|[TBKMFÄ]))\s+(?!\d)/i);
+        if (lonePrefixMatch) {
+          pendingCasePrefix = lonePrefixMatch[1].toUpperCase();
+          afterCase = afterCase.substring(lonePrefixMatch[0].length).trim();
+        }
+      }
+
       // Extract external court reference "(X tingsrätt)" after case numbers
       let externalCourt: string | undefined;
       const courtRef = afterCase.match(/^\(([^)]*(?:tingsrätt|tingsratt))\)\s*/i);
@@ -344,6 +357,17 @@ export const formatTabular: ParserStrategy = {
         if (DAG_REGEX.test(nextLine)) continue;
         if (nextLine.length > 1) {
           let lineText = nextLine;
+
+          // Complete a wrapped case number (bare number matching pending prefix)
+          if (pendingCasePrefix) {
+            const bareMatch = lineText.match(/^(\d{1,6}[-–—]\d{2})\b/);
+            if (bareMatch) {
+              caseNumbers.push(`${pendingCasePrefix} ${bareMatch[1]}`);
+              lineText = lineText.substring(bareMatch[0].length).trim();
+              lineText = lineText.replace(/^[/,]\s*/, "");
+              pendingCasePrefix = "";
+            }
+          }
 
           // Extract case number(s) from continuation line (append to existing)
           {
