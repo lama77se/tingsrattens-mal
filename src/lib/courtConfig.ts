@@ -461,4 +461,12 @@ export const COURTS: CourtConfig[] = [
     note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
     buildUrl: () => "",
   },
+  {
+    id: "ostersunds_tingsratt",
+    name: "Östersunds tingsrätt",
+    formatFamily: "standard",
+    disabled: true,
+    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
+    buildUrl: () => "",
+  },
 ];
