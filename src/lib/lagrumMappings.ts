@@ -363,6 +363,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Vapen- och ordningsbrott",
     primart_lagrum: ["Lag (1988:254) 1 § (grovt brott)"],
   },
+  "brott mot lagen om förbud beträffande knivar etc; grovt brott": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) om förbud beträffande knivar och andra farliga föremål 1 § (grovt brott)"],
+    kommentar: "Avser grov överträdelse av knivlagen. Textvariant ('etc;') bör normaliseras.",
+  },
   "brott mot lagen om förbud beträffande knivar och andra farliga föremål": {
     sakomrade: "Vapen- och ordningsbrott",
     primart_lagrum: ["Lag (1988:254) 1 §"],
@@ -472,6 +477,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 6 kap. 4 §"],
     alternativa_lagrum: ["BrB 6 kap. 4 § (grovt brott)"],
   },
+  "brott mot lagen om totalförsvarsplikt": {
+    sakomrade: "Totalförsvars- och tjänstepliktsbrott",
+    primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
+    kommentar: "Straffbestämmelser finns i 10 kap. lagen om totalförsvarsplikt; exakt paragraf beror på gärningens art.",
+  },
   "brott mot totalförsvarsplikten": {
     sakomrade: "Totalförsvars- och tjänstepliktsbrott",
     primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
@@ -549,6 +559,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Lag (2024:79) om vistelseförbud 23 §"],
     kommentar: "Straffbestämmelsen finns i lagen om vistelseförbud.",
+  },
+  "förverkande": {
+    sakomrade: "Särskild rättsverkan av brott",
+    primart_lagrum: ["BrB 36 kap."],
+    kommentar: "Förverkande är inte ett brott utan en särskild rättsverkan. Regleras huvudsakligen i 36 kap. BrB men kan även förekomma i speciallagstiftning.",
   },
   "talan om självständigt förverkande": {
     sakomrade: "Särskild rättsverkan av brott",
