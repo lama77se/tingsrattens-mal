@@ -191,6 +191,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Penning- och urkundsbrott",
     primart_lagrum: ["BrB 14 kap. 10 § (ringa brott)"],
   },
+  "olovligt innehav av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
+    kommentar: "Straffbestämmelser finns i 11 kap. alkohollagen. Exakt paragraf beror på omständigheterna (t.ex. innehav i försäljningssyfte).",
+  },
   "olovlig hantering av alkohol": {
     sakomrade: "Alkohol- och punktskattebrott",
     primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
@@ -741,6 +746,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Järnvägs- och transportreglering",
     primart_lagrum: ["Järnvägssäkerhetslagen (1990:1157) 10 kap."],
     kommentar: "Straffbestämmelser finns i järnvägssäkerhetslagen; exakt paragraf beror på överträdelsens art.",
+  },
+  "brott mot lagen om tobaksfria nikotinprodukter": {
+    sakomrade: "Tobaks- och nikotinreglering",
+    primart_lagrum: ["Lag (2022:1257) om tobaksfria nikotinprodukter 32 §"],
+    kommentar: "Straffbestämmelser finns i lagen om tobaksfria nikotinprodukter; exakt paragraf kan variera beroende på överträdelsens art.",
   },
   "undanröjande av ungdomsvård": {
     sakomrade: "Straffverkställighet",
