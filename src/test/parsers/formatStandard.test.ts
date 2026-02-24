@@ -195,6 +195,27 @@ describe("formatStandard", () => {
     expect(result[3].room).toBe("Sal 13");
   });
 
+  it("does not double Sal prefix when data rows already contain 'Sal X' (Alingsås/Blekinge)", () => {
+    // When the header ends with "Sal" but data rows already have "Sal X",
+    // the Sal column rewrite must be skipped to avoid "Sal Sal X" contamination.
+    const text = [
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "må 16-feb 13:30 - 16:00 Muntlig förberedelse T 732-25 ogiltlighet och fastställelse av testamente Sal 2",
+      "ti 17-feb 09:00 - 12:00 Huvudförhandling B 1234-25 misshandel Sal 1",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Alingsås tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].caseNumber).toBe("T 732-25");
+    expect(result[0].saken).toBe("ogiltlighet och fastställelse av testamente");
+    expect(result[0].room).toBe("Sal 2");
+
+    expect(result[1].caseNumber).toBe("B 1234-25");
+    expect(result[1].saken).toBe("misshandel");
+    expect(result[1].room).toBe("Sal 1");
+  });
+
   it("parses Sundsvall 3-line format with short dates and m.fl suffix", () => {
     const text = [
       "Dag Datum Förhandlingstid Typ av förhandling Målnr Saken",
