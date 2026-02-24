@@ -450,6 +450,7 @@ export const COURTS: CourtConfig[] = [
     id: "orebro_tingsratt",
     name: "Örebro tingsrätt",
     formatFamily: "tabular",
+    singleUrl: true,
     buildUrl: () =>
       `${BASE}/orebro_tingsratt/schema/schema39.pdf`,
   },
