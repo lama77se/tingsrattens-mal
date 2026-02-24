@@ -307,6 +307,48 @@ describe("formatStandard", () => {
     expect(result[1].date).toBe("2026-02-26");
   });
 
+  it("inherits saken from previous hearing for bare case number on separate row (Hälsinglands)", () => {
+    // Some tabular PDFs put secondary case numbers on their own row with no saken.
+    // B 390-26 is a companion case for the hearing above (B 3539-25).
+    const text = [
+      "må 16-feb 09:30 - 10:00 Huvudförhandling B 3354-25 ringa narkotikabrott",
+      "må 16-feb 10:00 - 11:00 Huvudförhandling B 3539-25 ringa narkotikabrott",
+      "B 390-26",
+      "må 16-feb 10:30 - 11:00 Konkursförhandling K 295-26 konkurs",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Hälsinglands tingsrätt", text });
+    expect(result).toHaveLength(4);
+
+    expect(result[0].caseNumber).toBe("B 3354-25");
+    expect(result[0].saken).toBe("ringa narkotikabrott");
+
+    expect(result[1].caseNumber).toBe("B 3539-25");
+    expect(result[1].saken).toBe("ringa narkotikabrott");
+
+    // B 390-26 on separate row should inherit saken from previous hearing
+    expect(result[2].caseNumber).toBe("B 390-26");
+    expect(result[2].saken).toBe("ringa narkotikabrott");
+
+    expect(result[3].caseNumber).toBe("K 295-26");
+    expect(result[3].saken).toBe("konkurs");
+  });
+
+  it("does not inherit saken when the case line has its own time (normal hearing)", () => {
+    // A normal hearing with time but no saken should NOT inherit from previous
+    const text = [
+      "16-feb",
+      "09:00 - 10:00 Huvudförhandling B 1234-25 stöld",
+      "10:30 - 11:00 Huvudförhandling B 5678-25",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Test", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("stöld");
+    // Second hearing has its own time slot — it's a separate hearing, not a companion
+    expect(result[1].saken).toBe("");
+  });
+
   it("ignores case number on continuation line starting with )", () => {
     const text = [
       "10-feb",
