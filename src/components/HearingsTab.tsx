@@ -10,11 +10,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, Clock, MapPin, ExternalLink } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
+import { FetchAllProgress } from "@/components/DataLoadingTab";
 
 interface HearingsTabProps {
   hearings: Hearing[];
   onFetchAll?: () => void;
   isLoadingAll?: boolean;
+  fetchAllProgress?: FetchAllProgress | null;
 }
 
 type SortKey = "datetime" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
@@ -42,7 +44,7 @@ const sortKeyLabels: Record<SortKey, string> = {
   flera: "Flera sakfrågor",
 };
 
-export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false }: HearingsTabProps) {
+export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false, fetchAllProgress }: HearingsTabProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState("Alla");
   const [typeFilter, setTypeFilter] = useState("Alla");
@@ -162,6 +164,31 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAll ? "animate-spin" : ""}`} />
             {isLoadingAll ? "Hämtar..." : "Hämta alla"}
           </Button>
+        )}
+        {fetchAllProgress && fetchAllProgress.total > 0 && (
+          <div className="mt-4 w-full max-w-md space-y-1.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {fetchAllProgress.success + fetchAllProgress.failed} av {fetchAllProgress.total} tingsrätter klara
+                {fetchAllProgress.failed > 0 && <span className="text-destructive ml-1">({fetchAllProgress.failed} misslyckade)</span>}
+              </span>
+              <span className="font-medium">{Math.round(((fetchAllProgress.success + fetchAllProgress.failed) / fetchAllProgress.total) * 100)}%</span>
+            </div>
+            <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden flex">
+              {fetchAllProgress.success > 0 && (
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-300"
+                  style={{ width: `${(fetchAllProgress.success / fetchAllProgress.total) * 100}%` }}
+                />
+              )}
+              {fetchAllProgress.failed > 0 && (
+                <div
+                  className="h-full bg-destructive transition-all duration-300"
+                  style={{ width: `${(fetchAllProgress.failed / fetchAllProgress.total) * 100}%` }}
+                />
+              )}
+            </div>
+          </div>
         )}
       </div>
     );

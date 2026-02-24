@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scale, Database } from "lucide-react";
 import HearingsTab from "@/components/HearingsTab";
-import DataLoadingTab from "@/components/DataLoadingTab";
+import DataLoadingTab, { FetchAllProgress } from "@/components/DataLoadingTab";
 import { Hearing } from "@/lib/parseCourtPdf";
 
 const Index = () => {
@@ -10,6 +10,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("hearings");
   const [fetchAllTrigger, setFetchAllTrigger] = useState(0);
   const [isLoadingAll, setIsLoadingAll] = useState(false);
+  const [fetchAllProgress, setFetchAllProgress] = useState<FetchAllProgress | null>(null);
 
   const handleFetchAll = useCallback(() => {
     setFetchAllTrigger((n) => n + 1);
@@ -46,11 +47,11 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="hearings">
-            <HearingsTab hearings={hearings} onFetchAll={handleFetchAll} isLoadingAll={isLoadingAll} />
+            <HearingsTab hearings={hearings} onFetchAll={handleFetchAll} isLoadingAll={isLoadingAll} fetchAllProgress={fetchAllProgress} />
           </TabsContent>
 
           <TabsContent value="loading" forceMount className={activeTab !== "loading" ? "hidden" : undefined}>
-            <DataLoadingTab onHearingsFetched={setHearings} fetchAllTrigger={fetchAllTrigger} onLoadingChange={setIsLoadingAll} />
+            <DataLoadingTab onHearingsFetched={setHearings} fetchAllTrigger={fetchAllTrigger} onLoadingChange={setIsLoadingAll} onProgressChange={setFetchAllProgress} fetchAllProgress={fetchAllProgress} />
           </TabsContent>
         </Tabs>
       </main>
