@@ -228,7 +228,6 @@ export const formatTabular: ParserStrategy = {
     const { text } = ctx;
     if (!text || text.trim().length === 0) return [];
 
-    console.log("PDF text first 500 chars:", text.substring(0, 500));
 
     const rawLines = preprocessLines(text);
     // Convert short dates (e.g., "10-feb") to ISO dates for regex matching

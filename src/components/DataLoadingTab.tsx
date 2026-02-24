@@ -349,17 +349,6 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
                       </div>
                     ))}
 
-                    {w.result?.success && w.result.text && (
-                      <details className="mt-3 pt-3 border-t">
-                        <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                          Visa rådata ({w.result.text.length} tecken)
-                        </summary>
-                        <pre className="mt-2 text-xs bg-muted p-3 rounded-md overflow-auto max-h-48 whitespace-pre-wrap">
-                          {w.result.text.substring(0, 2000)}
-                          {(w.result.text.length || 0) > 2000 && "\n\n... (trunkerad)"}
-                        </pre>
-                      </details>
-                    )}
                   </CardContent>
                 </Card>
               ))}

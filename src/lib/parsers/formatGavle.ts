@@ -49,7 +49,6 @@ function parse(ctx: ParserContext): RawHearing[] {
   const { text } = ctx;
   if (!text.trim()) return [];
 
-  console.log("PDF text first 500 chars:", text.substring(0, 500));
 
   const lines = preprocessLines(text);
   const hearings: RawHearing[] = [];
