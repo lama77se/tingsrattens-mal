@@ -278,10 +278,20 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot internationell rätt (folkrätt)",
     primart_lagrum: ["BrB 22 kap. 6 § (grovt brott)"],
   },
+  "brott mot aktiebolagslagen": {
+    sakomrade: "Bolagsrättslig ekonomisk brottslighet",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 30 kap."],
+    kommentar: "Straffbestämmelser finns i 30 kap. aktiebolagslagen; exakt paragraf beror på överträdelsens art (t.ex. otillåten värdeöverföring, bokföringsskyldighet m.m.).",
+  },
   "grovt bokföringsbrott": {
     sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
     primart_lagrum: ["BrB 11 kap. 5 § (grovt bokföringsbrott)"],
     alternativa_lagrum: ["BrB 11 kap. 5 § (bokföringsbrott)"],
+  },
+  "grov oredlighet mot borgenärer": {
+    sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
+    primart_lagrum: ["BrB 11 kap. 1 § (grov)"],
+    alternativa_lagrum: ["BrB 11 kap. 1 § (oredlighet mot borgenärer)"],
   },
   "bokföringsbrott": {
     sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
@@ -521,6 +531,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
     alternativa_lagrum: ["Lag (2000:1225) 6 § (grovt smugglingsbrott)"],
   },
+  "grov olovlig befattning med smuggelgods": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 6 §"],
+    kommentar: "Avser grov form av olovlig befattning med smuggelgods enligt smugglingslagen.",
+  },
   "ringa tullbrott": {
     sakomrade: "Tull- och smugglingsbrott",
     primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
@@ -669,10 +684,20 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (1951:649) om straff för vissa trafikbrott 4 a §"],
     kommentar: "Sjöfylleri regleras i samma lag som rattfylleri.",
   },
+  "obehörigt tillträde till skyddsobjekt": {
+    sakomrade: "Säkerhets- och skyddsbrott",
+    primart_lagrum: ["Skyddslagen (2010:305) 7 §"],
+    kommentar: "Avser överträdelse av tillträdesförbud till skyddsobjekt enligt skyddslagen.",
+  },
   "olovlig avbildning av skyddsobjekt": {
     sakomrade: "Säkerhets- och skyddsbrott",
     primart_lagrum: ["Skyddslagen (2010:305) 7 §"],
     kommentar: "Straffbestämmelser finns i skyddslagen.",
+  },
+  "fornminnesbrott": {
+    sakomrade: "Kulturmiljöbrott",
+    primart_lagrum: ["Kulturmiljölagen (1988:950) 2 kap. 21 §"],
+    kommentar: "Straffbestämmelser avseende fornminnen finns i kulturmiljölagen; exakt paragraf beror på gärningens art.",
   },
   "brott mot djurskyddslagen": {
     sakomrade: "Djurskyddsbrott",
@@ -682,6 +707,10 @@ const mappings: Record<string, LagrumEntry> = {
   "våldsamt motstånd": {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 4 §"],
+  },
+  "kränkande fotografering": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 a §"],
   },
   "olovlig identitetsanvändning": {
     sakomrade: "Bedrägerirelaterade brott",
@@ -781,6 +810,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Järnvägs- och transportreglering",
     primart_lagrum: ["Järnvägssäkerhetslagen (1990:1157) 10 kap."],
     kommentar: "Straffbestämmelser finns i järnvägssäkerhetslagen; exakt paragraf beror på överträdelsens art.",
+  },
+  "olovlig tobaksförsäljning, grovt brott": {
+    sakomrade: "Tobaks- och nikotinreglering",
+    primart_lagrum: ["Lag (2018:2088) om tobak och liknande produkter 10 kap."],
+    kommentar: "Straffbestämmelser finns i lagen om tobak och liknande produkter; exakt paragraf och grad beror på överträdelsens art.",
   },
   "brott mot lagen om tobaksfria nikotinprodukter": {
     sakomrade: "Tobaks- och nikotinreglering",
