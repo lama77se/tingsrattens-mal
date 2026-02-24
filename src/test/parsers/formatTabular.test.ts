@@ -2094,4 +2094,97 @@ describe("formatTabular", () => {
     expect(konkurs!.room).toBe("Sal 4");
     expect(konkurs!.location).toBe("Härnösand");
   });
+
+  it("parses Örebro tingsrätt format with header, (dag X/Y), multi-case, and all hearing types", () => {
+    const text = [
+      "Datum             Tid             Mötestyp                   Målnummer       Saken                                                Lokal",
+      "",
+      "må 2026-02-23     09:00 - 09:30   Konkursförhandling            K 8331-25     ansökan om konkurs                                    Sal 7",
+      "må 2026-02-23     09:00 - 16:00   Huvudförhandling              B 6055-24     allmänfarlig ödeläggelse m.m.                         Sal 2",
+      "   (dag 6/7)",
+      "må 2026-02-23     10:00 - 10:30   Edgångssmtr                   K 6172-25     konkurs                                               Sal 7",
+      "må 2026-02-23     15:00 - 15:30   Häktningsförhandling          B 422-26      narkotika m.m.                                        Sal 10",
+      "ti   2026-02-24   09:00 - 10:00   Muntlig förberedelse och ev hf T 8089-25    fastställande av faderskap                            Sal 12",
+      "ti   2026-02-24   09:00 - 11:00   Muntlig förberedelse    T 8932-25     vårdnad, boende och/eller umgänge                                                  Sal 16",
+      "ti   2026-02-24   13:00 - 14:00   Fortsatt hf             B 7971-25    misshandel m m                                                                  Sal 9",
+      "to   2026-02-26   09:30 - 10:30   Borgenärssammanträde    Ä 991-26     företagsrekonstruktion        Sal 7",
+      "to   2026-02-26   14:30 - 15:00   Huvudförhandling        B 872-26      ringa stöld                                                                      Sal 15",
+      "                                                          B 1697-22",
+      "                                                          B 6537-24",
+      "to   2026-02-26   15:00 - 16:00   Huvudförhandling        B 8742-25     grovt brott mot lagen om förbud beträffande knivar och andra farliga föremål     Sal 1",
+      "                                                          B 7687-25",
+      "fr   2026-02-27   09:00 - 12:00   Huvudförhandling        B 998-25      misshandel                         Sal 16",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Örebro tingsrätt", text });
+
+    // Konkursförhandling
+    const konkurs = result.find(h => h.caseNumber === "K 8331-25");
+    expect(konkurs).toBeDefined();
+    expect(konkurs!.date).toBe("2026-02-23");
+    expect(konkurs!.type).toBe("Konkursförhandling");
+    expect(konkurs!.saken).toBe("ansökan om konkurs");
+    expect(konkurs!.room).toBe("Sal 7");
+
+    // Huvudförhandling with (dag X/Y)
+    const allmanfarlig = result.find(h => h.caseNumber === "B 6055-24");
+    expect(allmanfarlig).toBeDefined();
+    expect(allmanfarlig!.type).toBe("Huvudförhandling");
+    expect(allmanfarlig!.saken).toBe("allmänfarlig ödeläggelse m.m");
+    expect(allmanfarlig!.room).toBe("Sal 2");
+
+    // Edgångssmtr → Edgångssammanträde
+    const edgang = result.find(h => h.caseNumber === "K 6172-25");
+    expect(edgang).toBeDefined();
+    expect(edgang!.type).toBe("Edgångssammanträde");
+
+    // Häktningsförhandling
+    const haktning = result.find(h => h.caseNumber === "B 422-26");
+    expect(haktning).toBeDefined();
+    expect(haktning!.type).toBe("Häktningsförhandling");
+    expect(haktning!.saken).toBe("narkotika m.m");
+
+    // Muntlig förberedelse och ev hf → Muntlig förberedelse
+    const faderskap = result.find(h => h.caseNumber === "T 8089-25");
+    expect(faderskap).toBeDefined();
+    expect(faderskap!.type).toBe("Muntlig förberedelse");
+    expect(faderskap!.saken).toBe("fastställande av faderskap");
+    expect(faderskap!.room).toBe("Sal 12");
+
+    // Continued saken with "och/eller"
+    const vardnad = result.find(h => h.caseNumber === "T 8932-25");
+    expect(vardnad).toBeDefined();
+    expect(vardnad!.saken).toBe("vårdnad, boende och/eller umgänge");
+
+    // Fortsatt hf → Huvudförhandling
+    const fortsatt = result.find(h => h.caseNumber === "B 7971-25");
+    expect(fortsatt).toBeDefined();
+    expect(fortsatt!.type).toBe("Huvudförhandling");
+    expect(fortsatt!.saken).toBe("misshandel m m");
+
+    // Borgenärssammanträde with Ä case number
+    const borgenar = result.find(h => h.caseNumber === "Ä 991-26");
+    expect(borgenar).toBeDefined();
+    expect(borgenar!.type).toBe("Borgenärssammanträde");
+    expect(borgenar!.saken).toBe("företagsrekonstruktion");
+
+    // Multi-case: B 872-26 + B 1697-22 + B 6537-24
+    const stold = result.filter(h => h.saken === "ringa stöld" && h.date === "2026-02-26" && h.time === "14:30 - 15:00");
+    expect(stold).toHaveLength(3);
+    const stoldCases = stold.map(h => h.caseNumber).sort();
+    expect(stoldCases).toEqual(["B 1697-22", "B 6537-24", "B 872-26"]);
+
+    // Multi-case: B 8742-25 + B 7687-25
+    const knivar = result.filter(h => h.saken.includes("knivar"));
+    expect(knivar).toHaveLength(2);
+    const knivarCases = knivar.map(h => h.caseNumber).sort();
+    expect(knivarCases).toEqual(["B 7687-25", "B 8742-25"]);
+
+    // Friday entry
+    const friday = result.find(h => h.caseNumber === "B 998-25");
+    expect(friday).toBeDefined();
+    expect(friday!.date).toBe("2026-02-27");
+    expect(friday!.saken).toBe("misshandel");
+    expect(friday!.room).toBe("Sal 16");
+  });
 });
