@@ -74,7 +74,6 @@ export const formatStandard: ParserStrategy = {
     const { text } = ctx;
     if (!text || text.trim().length === 0) return [];
 
-    console.log("PDF text first 500 chars:", text.substring(0, 500));
 
     let lines = preprocessLines(text);
 
@@ -100,7 +99,6 @@ export const formatStandard: ParserStrategy = {
       const shortDate = extractShortDate(line);
       if (shortDate) {
         currentDate = shortDate;
-        console.log("Short date matched:", currentDate, "from line:", line);
       } else {
         const isoDate = extractIsoDate(line);
         if (isoDate) {
