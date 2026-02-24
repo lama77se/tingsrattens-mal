@@ -105,6 +105,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["RB 27 kap.", "BrB 36 kap."],
     kommentar: "Avser processuell prövning av beslag och självständigt förverkande.",
   },
+  "otillåten taxitrafik": {
+    sakomrade: "Trafik- och näringsregleringsbrott",
+    primart_lagrum: ["Taxitrafiklagen (2012:211) 5 kap. 1 §"],
+    kommentar: "Avser bedrivande av taxitrafik utan tillstånd eller i strid med lagens krav.",
+  },
   "olaga taxitrafik": {
     sakomrade: "Trafik- och näringsregleringsbrott",
     primart_lagrum: ["Yrkestrafiklagen (2012:210) 5 kap. 1 §"],
@@ -223,6 +228,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Allmänfarliga brott",
     primart_lagrum: ["BrB 13 kap. 6 §"],
     alternativa_lagrum: ["BrB 13 kap. 6 § (grovt brott)"],
+  },
+  "allmänfarlig ödeläggelse": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 3 §"],
+    alternativa_lagrum: ["BrB 13 kap. 3 § (grovt brott)"],
   },
   "grov allmänfarlig ödeläggelse": {
     sakomrade: "Allmänfarliga brott",
@@ -511,6 +521,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
     alternativa_lagrum: ["Lag (2000:1225) 6 § (grovt smugglingsbrott)"],
   },
+  "ringa tullbrott": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
+    kommentar: "Ringa tullbrott bedöms enligt smugglingslagen; graden avgörs enligt lagens särskilda bestämmelser.",
+  },
   "ansökan om förverkande": {
     sakomrade: "Straffprocessuella frågor",
     primart_lagrum: ["BrB 36 kap."],
@@ -681,6 +696,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["BrB 4 kap. 3 §"],
     alternativa_lagrum: ["BrB 4 kap. 3 § (grovt barnfridsbrott)"],
+  },
+  "brott mot lagen om tillträdesförbud vid idrottsarrangemang": {
+    sakomrade: "Ordnings- och säkerhetsbrott",
+    primart_lagrum: ["Lag (2005:321) om tillträdesförbud vid idrottsarrangemang 22 §"],
+    kommentar: "Straffbestämmelser finns i lagen om tillträdesförbud; exakt paragraf beror på överträdelsens art.",
   },
   "brott mot ordningslagen": {
     sakomrade: "Ordningsbrott",
