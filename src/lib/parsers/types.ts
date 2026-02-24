@@ -28,6 +28,7 @@ export interface Hearing {
   lagrum: string;
   sakomrade: string;
   fleraSakfragor: boolean;
+  pdfUrl?: string;
 }
 
 export interface ParserContext {
