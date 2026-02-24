@@ -145,6 +145,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 2 § (grovt brott)"],
   },
+  "sexuellt utnyttjande av barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 5 §"],
+    alternativa_lagrum: ["BrB 6 kap. 5 § (grovt brott)"],
+  },
   "sexuellt övergrepp mot barn": {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 6 §"],
@@ -314,6 +319,11 @@ const mappings: Record<string, LagrumEntry> = {
   "djurplågeri": {
     sakomrade: "Brott mot allmän ordning (brott mot djur)",
     primart_lagrum: ["BrB 16 kap. 13 §"],
+  },
+  "olovlig energiavledning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 10 §"],
+    kommentar: "Avser olovlig avledning eller tillgodogörande av elektrisk kraft eller annan energi.",
   },
   "grovt olovligt förfogande": {
     sakomrade: "Förmögenhetsbrott",
@@ -730,6 +740,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Ordnings- och säkerhetsbrott",
     primart_lagrum: ["Lag (2005:321) om tillträdesförbud vid idrottsarrangemang 22 §"],
     kommentar: "Straffbestämmelser finns i lagen om tillträdesförbud; exakt paragraf beror på överträdelsens art.",
+  },
+  "hets mot folkgrupp": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["BrB 16 kap. 8 §"],
+    alternativa_lagrum: ["BrB 16 kap. 8 § (grovt brott)"],
   },
   "brott mot ordningslagen": {
     sakomrade: "Ordningsbrott",
