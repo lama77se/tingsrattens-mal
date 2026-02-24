@@ -13,6 +13,7 @@ import {
   ISO_DATE_REGEX,
   CASE_NUMBER_REGEX,
   TIME_RANGE_REGEX,
+  ROOM_REGEX,
 } from "./extractors";
 
 /**
@@ -80,9 +81,12 @@ export const formatStandard: ParserStrategy = {
     // Detect tabular "Sal" column header (e.g., Helsingborg):
     // header ends with "Sal", data rows have bare room numbers at end.
     // Insert "Sal " prefix so extractRoom/cleanSaken work correctly.
+    // Skip lines that already contain a room pattern (e.g., Alingsås "...Sal 2").
     if (lines.some((l) => /\bSal\s*$/i.test(l))) {
       lines = lines.map((l) =>
-        /\bSal\s*$/i.test(l) ? l : l.replace(/\s(\d{1,3})\s*$/, " Sal $1"),
+        /\bSal\s*$/i.test(l) || ROOM_REGEX.test(l)
+          ? l
+          : l.replace(/\s(\d{1,3})\s*$/, " Sal $1"),
       );
     }
 
