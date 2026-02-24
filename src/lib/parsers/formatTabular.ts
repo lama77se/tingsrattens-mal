@@ -140,14 +140,42 @@ function extractTypeFromText(text: string): { type: string; remainder: string } 
   return { type: "Förhandling", remainder: text };
 }
 
-function extractRoomFromText(text: string): string {
+function extractRoomAndLocation(text: string): { room: string; location?: string } {
   const m = text.match(ROOM_REGEX);
-  if (!m) return "";
-  return `${roomPrefix(m[0])} ${m[1]}`;
+  if (!m) return { room: "" };
+  const rawNum = m[1].replace(/,$/, ""); // strip trailing comma ("2," → "2")
+  const room = `${roomPrefix(m[0])} ${rawNum}`;
+  // Check for trailing ", CityName" after the room match (e.g. "Sal 2, Härnösand")
+  const afterRoom = text.substring(m.index! + m[0].length).trim();
+  // Also check if the comma was part of the captured group (room number ended with comma)
+  const locationText = m[1].endsWith(",")
+    ? afterRoom
+    : afterRoom.replace(/^,\s*/, "");
+  // Location is a bare city name (no digits, no legal terms)
+  if (locationText && /^[A-ZÅÄÖ][a-zåäöé]+$/.test(locationText.split(/\s/)[0])) {
+    const candidate = locationText.split(/\s+(?:sal|tings|sessions|angående|\d)/i)[0].trim();
+    if (candidate && !/\d/.test(candidate) && candidate.length >= 3) {
+      return { room, location: candidate };
+    }
+  }
+  return { room };
 }
 
+function extractRoomFromText(text: string): string {
+  return extractRoomAndLocation(text).room;
+}
+
+// Room + optional trailing location pattern (case-sensitive city name to avoid stripping saken words)
+const ROOM_WITH_LOCATION_REGEX = /(?:[Tt]ingsrättens\s+)?(?:[Ss]essions|[Tt]ings)?[Ss]al\s+\d+\S*(?:,?\s+[A-ZÅÄÖ][a-zåäöé]+)?/;
+
 function stripRoom(text: string): string {
-  return text.replace(ROOM_REGEX, "").replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "").trim();
+  // Strip room and trailing location (e.g. "Sal 2, Härnösand" or "Tingsrättens sal 1, Örnsköldsvik")
+  // Uses case-sensitive regex for the city name part to avoid matching lowercase saken words like "och"
+  return text
+    .replace(ROOM_WITH_LOCATION_REGEX, "")
+    .replace(ROOM_REGEX, "")
+    .replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "")
+    .trim();
 }
 
 /**
@@ -341,9 +369,10 @@ export const formatTabular: ParserStrategy = {
       afterCase = afterCase.replace(/^med\s+flera\s*/i, "");
 
       // Extract room and saken from the text after type (and case number)
-      let room = extractRoomFromText(afterCase);
+      const roomAndLoc = extractRoomAndLocation(afterCase);
+      let room = roomAndLoc.room;
       let saken = stripRoom(afterCase);
-      let location: string | undefined;
+      let location: string | undefined = roomAndLoc.location;
 
       // Extract trailing case numbers from saken (same-line overflow from
       // the PDF case column, e.g., "misshandel B 2327-24" after room stripping)
