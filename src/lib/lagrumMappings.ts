@@ -841,6 +841,74 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 32 kap. 4 §"],
     kommentar: "Avser undanröjande av påföljden ungdomsvård och bestämmande av ny påföljd.",
   },
+  "olovlig försäljning av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
+    kommentar:
+      "Straffbestämmelser finns i 11 kap. alkohollagen; exakt paragraf beror på omständigheterna (t.ex. försäljning utan tillstånd).",
+  },
+  "brott mot lagen om transport av farligt gods": {
+    sakomrade: "Transport- och säkerhetsreglering",
+    primart_lagrum: ["Lag (2006:263) om transport av farligt gods 16 §"],
+    kommentar:
+      "Straffbestämmelser finns i lagen om transport av farligt gods; exakt paragraf beror på överträdelsens art.",
+  },
+  "överträdelse av tillträdesförbud": {
+    sakomrade: "Ordnings- och säkerhetsbrott",
+    primart_lagrum: [
+      "Lag (2005:321) om tillträdesförbud vid idrottsarrangemang 22 §",
+    ],
+    kommentar:
+      "Avser överträdelse av beslutat tillträdesförbud; kan även förekomma enligt annan speciallag beroende på förbudstyp.",
+  },
+  "grov olovlig befattning med punktskattepliktiga varor": {
+    sakomrade: "Skatte- och punktskattebrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 6 §"],
+    kommentar:
+      "Avser grov form av befattning med punktskattepliktiga varor; regleras i smugglingslagen.",
+  },
+  "brott om lagen om förbud beträffande knivar och andra farliga föremål": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: [
+      "Lag (1988:254) om förbud beträffande knivar och andra farliga föremål 1 §",
+    ],
+    kommentar:
+      "Felskrivning av 'brott mot lagen ...'. Bör normaliseras till korrekt rubricering.",
+  },
+  "missbruk av larmanordning": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 11 §"],
+    kommentar:
+      "Avser obehörig användning av larmanordning som kan föranleda utryckning.",
+  },
+  "olovlig befattning med betalningsverktyg": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 9 kap. 3 c §"],
+    alternativa_lagrum: ["BrB 9 kap. 3 c § (grovt brott)"],
+  },
+  "falsk angivelse": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 6 §"],
+  },
+  "undanröjande av godkänd ordningsbot": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["RB 48 kap. 13 §"],
+    kommentar:
+      "Avser prövning och eventuellt undanröjande av godkänd ordningsbot enligt rättegångsbalken. Inte ett materiellt brott.",
+  },
+  "brott mot förordningen om fordons registrering och användning": {
+    sakomrade: "Trafik- och fordonsregleringsbrott",
+    primart_lagrum: [
+      "Förordning (2019:383) om fordons registrering och användning",
+    ],
+    kommentar:
+      "Exakt paragraf beror på överträdelsens art. Straff- och sanktionsbestämmelser är kopplade till fordonsregelverket.",
+  },
+  "sabotage": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 4 §"],
+    alternativa_lagrum: ["BrB 13 kap. 4 § (grovt sabotage)"],
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
