@@ -1998,4 +1998,48 @@ describe("formatTabular", () => {
     expect(hot).toBeDefined();
     expect(hot!.saken).toBe("hot mot tjänsteman");
   });
+
+  it("parses Växjö tingsrätt with SESSIONSSAL rooms", () => {
+    const text = [
+      "Förhandlingar Allmänna domstolen vid Växjö tingsrätt, listan skapades 2026-02-19",
+      "Dag Datum Förhandlingstid Typ av förhandling Saken Sal",
+      "må 23-feb 09:00 - 09:30 Konkursförhandling ansökan om konkurs SESSIONSSAL 2",
+      "må 23-feb 09:00 - 10:30 Muntlig förberedelse hyra SESSIONSSAL 3",
+      "må 23-feb 09:00 - 16:00 Huvudförhandling grov fridskränkning m.m. SESSIONSSAL 5",
+      "ti 24-feb 09:00 - 12:30 Huvudförhandling bedrägeri m.m. SESSIONSSAL 4",
+      "on 25-feb 15:30 - 16:00 Huvudförhandling brott mot lagen om förbud beträffande knivar och andra farliga föremål SESSIONSSAL 5",
+      "to 26-feb 15:00 - 16:00 Sammanträde undanröjande av ungdomsvård och ungdomstjänst SESSIONSSAL 4",
+      "fr 27-feb 10:15 - 11:00 Huvudförhandling brott mot lagen om förbud beträffande knivar och andra farliga föremål, grovt brott SESSIONSSAL 1",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Växjö tingsrätt", text });
+    expect(result.length).toBe(7);
+
+    const konkurs = result.find(h => h.type === "Konkursförhandling");
+    expect(konkurs).toBeDefined();
+    expect(konkurs!.date).toBe("2026-02-23");
+    expect(konkurs!.time).toBe("09:00 - 09:30");
+    expect(konkurs!.saken).toBe("ansökan om konkurs");
+    expect(konkurs!.room).toBe("Sessionssal 2");
+
+    const hyra = result.find(h => h.saken === "hyra");
+    expect(hyra).toBeDefined();
+    expect(hyra!.type).toBe("Muntlig förberedelse");
+    expect(hyra!.room).toBe("Sessionssal 3");
+
+    const bedrägeri = result.find(h => h.saken?.startsWith("bedrägeri"));
+    expect(bedrägeri).toBeDefined();
+    expect(bedrägeri!.date).toBe("2026-02-24");
+    expect(bedrägeri!.room).toBe("Sessionssal 4");
+
+    const kniv = result.find(h => h.date === "2026-02-25");
+    expect(kniv).toBeDefined();
+    expect(kniv!.saken).toContain("brott mot lagen om förbud beträffande knivar");
+    expect(kniv!.room).toBe("Sessionssal 5");
+
+    // All rooms should use "Sessionssal" prefix
+    for (const h of result) {
+      expect(h.room).toMatch(/^Sessionssal \d+$/);
+    }
+  });
 });

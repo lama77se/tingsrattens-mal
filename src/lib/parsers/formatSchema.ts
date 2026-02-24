@@ -146,7 +146,7 @@ export const formatSchema: ParserStrategy = {
             currentLocation = locMatch[1].trim();
             if (locMatch[2]) {
               currentRoom = `Sal ${locMatch[2]}`;
-            } else if (/(?:Tings)?[Ss]al\b/i.test(line)) {
+            } else if (/(?:Sessions|Tings)?[Ss]al\b/i.test(line)) {
               // "Sal" present but room number didn't follow (wrapped to next line)
               currentRoom = "";
             }
@@ -154,8 +154,8 @@ export const formatSchema: ParserStrategy = {
             let afterLoc = line.substring(locMatch[0].length).trim();
             // Handle orphaned "Sal" when room number wrapped to next line:
             // "Haparanda tingsrätt, Sal angående ..." → strip "Sal" prefix
-            if (!locMatch[2] && /^(?:(?:Tings)?[Ss]al)\s+/i.test(afterLoc)) {
-              afterLoc = afterLoc.replace(/^(?:(?:Tings)?[Ss]al)\s+/i, "");
+            if (!locMatch[2] && /^(?:(?:Sessions|Tings)?[Ss]al)\s+/i.test(afterLoc)) {
+              afterLoc = afterLoc.replace(/^(?:(?:Sessions|Tings)?[Ss]al)\s+/i, "");
             }
             const angInRemainder = afterLoc.match(ANGAENDE_REGEX);
             if (angInRemainder) {
@@ -171,9 +171,9 @@ export const formatSchema: ParserStrategy = {
       //   "Sal 22 angående penningtvättsbrott"
       //   "Sal 52, Säkerhetssal angående grovt vapenbrott..."
       //   "Sal 10 (säkerhetssal) angående våldtäkt m.m."
-      const bareRoomMatch = line.match(/^((?:Tings)?[Ss]al)\s+(\d+)/);
+      const bareRoomMatch = line.match(/^((?:sessions|tings)?sal)\s+(\d+)/i);
       if (bareRoomMatch) {
-        const prefix = bareRoomMatch[1].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+        const prefix = bareRoomMatch[1].toLowerCase().startsWith("sessions") ? "Sessionssal" : bareRoomMatch[1].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
         currentRoom = `${prefix} ${bareRoomMatch[2]}`;
         // Check for angående merged on same line
         const afterRoom = line.substring(bareRoomMatch[0].length);

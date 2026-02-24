@@ -5,6 +5,7 @@ import {
   extractShortDate,
   NORMALIZED_TYPES,
   ROOM_REGEX,
+  roomPrefix,
 } from "./extractors";
 
 /**
@@ -142,12 +143,11 @@ function extractTypeFromText(text: string): { type: string; remainder: string } 
 function extractRoomFromText(text: string): string {
   const m = text.match(ROOM_REGEX);
   if (!m) return "";
-  const prefix = m[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
-  return `${prefix} ${m[1]}`;
+  return `${roomPrefix(m[0])} ${m[1]}`;
 }
 
 function stripRoom(text: string): string {
-  return text.replace(ROOM_REGEX, "").replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
+  return text.replace(ROOM_REGEX, "").replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "").trim();
 }
 
 /**
