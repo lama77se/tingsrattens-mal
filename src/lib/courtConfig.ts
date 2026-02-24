@@ -447,6 +447,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/angermanlands_tingsratt/veckans-forhandlingar/v-${week}.pdf`,
   },
   {
+    id: "orebro_tingsratt",
+    name: "Örebro tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: () =>
+      `${BASE}/orebro_tingsratt/schema/schema39.pdf`,
+  },
+  {
     id: "norrtalje_tingsratt",
     name: "Norrtälje tingsrätt",
     formatFamily: "standard",
