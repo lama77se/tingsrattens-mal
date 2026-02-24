@@ -153,7 +153,7 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Info className="h-10 w-10 text-muted-foreground mb-4" />
-        <h3 className="font-semibold text-lg">Ingen data hämtad</h3>
+        <h2 className="font-semibold text-lg">Ingen data hämtad</h2>
         <p className="text-sm text-muted-foreground mt-1 max-w-md">
           Klicka på "Hämta alla" för att ladda förhandlingar från domstol.se, eller gå till fliken "Laddning av data" för att hämta enskilda tingsrätter.
         </p>
