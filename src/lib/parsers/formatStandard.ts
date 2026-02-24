@@ -13,6 +13,7 @@ import {
   ISO_DATE_REGEX,
   CASE_NUMBER_REGEX,
   TIME_RANGE_REGEX,
+  TIME_REGEX,
   ROOM_REGEX,
 } from "./extractors";
 
@@ -156,6 +157,12 @@ export const formatStandard: ParserStrategy = {
             saken = nextLine.replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
             sakenFromNextLine = true;
           }
+        }
+
+        // If still no saken and the line is a bare case number (no time/date),
+        // inherit from previous hearing (secondary case on its own row, e.g. Hälsinglands)
+        if (!saken && hearings.length > 0 && !line.match(TIME_RANGE_REGEX) && !line.match(TIME_REGEX)) {
+          saken = hearings[hearings.length - 1].saken;
         }
 
         // Extract parties only for the last case on the line
