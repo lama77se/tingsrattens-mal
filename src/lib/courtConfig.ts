@@ -440,6 +440,13 @@ export const COURTS: CourtConfig[] = [
     buildUrl: () => "",
   },
   {
+    id: "angermanlands_tingsratt",
+    name: "Ångermanlands tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/angermanlands_tingsratt/veckans-forhandlingar/v-${week}.pdf`,
+  },
+  {
     id: "norrtalje_tingsratt",
     name: "Norrtälje tingsrätt",
     formatFamily: "standard",
