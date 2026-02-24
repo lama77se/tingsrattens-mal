@@ -321,7 +321,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         <div>
           <h2 className="font-semibold">Datahämtning</h2>
           <p className="text-sm text-muted-foreground">
-            Hämtar förhandlingar från {COURTS.length} tingsrätter via domstol.se
+            Hämtar förhandlingar från {COURTS.filter((c) => !c.disabled).length} av {COURTS.length} tingsrätter via domstol.se
           </p>
         </div>
         <Button onClick={handleFetchAll} disabled={anyFetching}>
