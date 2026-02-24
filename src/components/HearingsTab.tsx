@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, Clock, MapPin } from "lucide-react";
+import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, Clock, MapPin, ExternalLink } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 
 interface HearingsTabProps {
@@ -368,11 +368,24 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
           sorted.map((h) => (
             <Card key={h.id} className="overflow-hidden">
               <CardContent className="p-4 space-y-2">
-                {/* Top row: date + time */}
-                <div className="flex items-center gap-1.5 text-sm">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="font-medium">{h.date}</span>
-                  <span className="text-muted-foreground">{h.time}</span>
+                {/* Top row: date + time + PDF link */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="font-medium">{h.date}</span>
+                    <span className="text-muted-foreground">{h.time}</span>
+                  </div>
+                  {h.pdfUrl && (
+                    <a
+                      href={h.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      title="Öppna käll-PDF"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
                 </div>
 
                 {/* Court + hearing type badge */}
@@ -478,12 +491,13 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   Flera{sortIcon("flera")}
                 </button>
               </TableHead>
+              <TableHead className="w-10">PDF</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   Inga förhandlingar matchar filtren.
                 </TableCell>
               </TableRow>
@@ -502,6 +516,19 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   <TableCell className="text-muted-foreground">{h.lagrum || "–"}</TableCell>
                   <TableCell>
                     <Checkbox checked={h.fleraSakfragor} disabled />
+                  </TableCell>
+                  <TableCell>
+                    {h.pdfUrl && (
+                      <a
+                        href={h.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        title="Öppna käll-PDF"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

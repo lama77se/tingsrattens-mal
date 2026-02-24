@@ -193,6 +193,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
           if (seen.has(key)) continue;
           seen.add(key);
           h.id = `${court.id}-w${i}-${hearings.length}`;
+          h.pdfUrl = result.url;
           hearings.push(h);
         }
       }
