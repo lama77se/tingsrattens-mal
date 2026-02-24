@@ -105,6 +105,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["RB 27 kap.", "BrB 36 kap."],
     kommentar: "Avser processuell prövning av beslag och självständigt förverkande.",
   },
+  "otillåten taxitrafik": {
+    sakomrade: "Trafik- och näringsregleringsbrott",
+    primart_lagrum: ["Taxitrafiklagen (2012:211) 5 kap. 1 §"],
+    kommentar: "Avser bedrivande av taxitrafik utan tillstånd eller i strid med lagens krav.",
+  },
   "olaga taxitrafik": {
     sakomrade: "Trafik- och näringsregleringsbrott",
     primart_lagrum: ["Yrkestrafiklagen (2012:210) 5 kap. 1 §"],
@@ -139,6 +144,11 @@ const mappings: Record<string, LagrumEntry> = {
   "grovt sexuellt övergrepp": {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 2 § (grovt brott)"],
+  },
+  "sexuellt utnyttjande av barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 5 §"],
+    alternativa_lagrum: ["BrB 6 kap. 5 § (grovt brott)"],
   },
   "sexuellt övergrepp mot barn": {
     sakomrade: "Sexualbrott",
@@ -191,6 +201,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Penning- och urkundsbrott",
     primart_lagrum: ["BrB 14 kap. 10 § (ringa brott)"],
   },
+  "olovligt innehav av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
+    kommentar: "Straffbestämmelser finns i 11 kap. alkohollagen. Exakt paragraf beror på omständigheterna (t.ex. innehav i försäljningssyfte).",
+  },
   "olovlig hantering av alkohol": {
     sakomrade: "Alkohol- och punktskattebrott",
     primart_lagrum: ["Alkohollagen (2010:1622) 11 kap."],
@@ -218,6 +233,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Allmänfarliga brott",
     primart_lagrum: ["BrB 13 kap. 6 §"],
     alternativa_lagrum: ["BrB 13 kap. 6 § (grovt brott)"],
+  },
+  "allmänfarlig ödeläggelse": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 3 §"],
+    alternativa_lagrum: ["BrB 13 kap. 3 § (grovt brott)"],
   },
   "grov allmänfarlig ödeläggelse": {
     sakomrade: "Allmänfarliga brott",
@@ -263,10 +283,20 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot internationell rätt (folkrätt)",
     primart_lagrum: ["BrB 22 kap. 6 § (grovt brott)"],
   },
+  "brott mot aktiebolagslagen": {
+    sakomrade: "Bolagsrättslig ekonomisk brottslighet",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 30 kap."],
+    kommentar: "Straffbestämmelser finns i 30 kap. aktiebolagslagen; exakt paragraf beror på överträdelsens art (t.ex. otillåten värdeöverföring, bokföringsskyldighet m.m.).",
+  },
   "grovt bokföringsbrott": {
     sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
     primart_lagrum: ["BrB 11 kap. 5 § (grovt bokföringsbrott)"],
     alternativa_lagrum: ["BrB 11 kap. 5 § (bokföringsbrott)"],
+  },
+  "grov oredlighet mot borgenärer": {
+    sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
+    primart_lagrum: ["BrB 11 kap. 1 § (grov)"],
+    alternativa_lagrum: ["BrB 11 kap. 1 § (oredlighet mot borgenärer)"],
   },
   "bokföringsbrott": {
     sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
@@ -289,6 +319,11 @@ const mappings: Record<string, LagrumEntry> = {
   "djurplågeri": {
     sakomrade: "Brott mot allmän ordning (brott mot djur)",
     primart_lagrum: ["BrB 16 kap. 13 §"],
+  },
+  "olovlig energiavledning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 10 §"],
+    kommentar: "Avser olovlig avledning eller tillgodogörande av elektrisk kraft eller annan energi.",
   },
   "grovt olovligt förfogande": {
     sakomrade: "Förmögenhetsbrott",
@@ -357,6 +392,11 @@ const mappings: Record<string, LagrumEntry> = {
   "brott mot lagen om förbud beträffande knivar och andra farliga föremål, grovt brott": {
     sakomrade: "Vapen- och ordningsbrott",
     primart_lagrum: ["Lag (1988:254) 1 § (grovt brott)"],
+  },
+  "brott mot lagen om förbud beträffande knivar etc; grovt brott": {
+    sakomrade: "Vapen- och ordningsbrott",
+    primart_lagrum: ["Lag (1988:254) om förbud beträffande knivar och andra farliga föremål 1 § (grovt brott)"],
+    kommentar: "Avser grov överträdelse av knivlagen. Textvariant ('etc;') bör normaliseras.",
   },
   "brott mot lagen om förbud beträffande knivar och andra farliga föremål": {
     sakomrade: "Vapen- och ordningsbrott",
@@ -467,6 +507,11 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 6 kap. 4 §"],
     alternativa_lagrum: ["BrB 6 kap. 4 § (grovt brott)"],
   },
+  "brott mot lagen om totalförsvarsplikt": {
+    sakomrade: "Totalförsvars- och tjänstepliktsbrott",
+    primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
+    kommentar: "Straffbestämmelser finns i 10 kap. lagen om totalförsvarsplikt; exakt paragraf beror på gärningens art.",
+  },
   "brott mot totalförsvarsplikten": {
     sakomrade: "Totalförsvars- och tjänstepliktsbrott",
     primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
@@ -495,6 +540,16 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Tull- och smugglingsbrott",
     primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
     alternativa_lagrum: ["Lag (2000:1225) 6 § (grovt smugglingsbrott)"],
+  },
+  "grov olovlig befattning med smuggelgods": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 6 §"],
+    kommentar: "Avser grov form av olovlig befattning med smuggelgods enligt smugglingslagen.",
+  },
+  "ringa tullbrott": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
+    kommentar: "Ringa tullbrott bedöms enligt smugglingslagen; graden avgörs enligt lagens särskilda bestämmelser.",
   },
   "ansökan om förverkande": {
     sakomrade: "Straffprocessuella frågor",
@@ -544,6 +599,11 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Lag (2024:79) om vistelseförbud 23 §"],
     kommentar: "Straffbestämmelsen finns i lagen om vistelseförbud.",
+  },
+  "förverkande": {
+    sakomrade: "Särskild rättsverkan av brott",
+    primart_lagrum: ["BrB 36 kap."],
+    kommentar: "Förverkande är inte ett brott utan en särskild rättsverkan. Regleras huvudsakligen i 36 kap. BrB men kan även förekomma i speciallagstiftning.",
   },
   "talan om självständigt förverkande": {
     sakomrade: "Särskild rättsverkan av brott",
@@ -634,10 +694,20 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (1951:649) om straff för vissa trafikbrott 4 a §"],
     kommentar: "Sjöfylleri regleras i samma lag som rattfylleri.",
   },
+  "obehörigt tillträde till skyddsobjekt": {
+    sakomrade: "Säkerhets- och skyddsbrott",
+    primart_lagrum: ["Skyddslagen (2010:305) 7 §"],
+    kommentar: "Avser överträdelse av tillträdesförbud till skyddsobjekt enligt skyddslagen.",
+  },
   "olovlig avbildning av skyddsobjekt": {
     sakomrade: "Säkerhets- och skyddsbrott",
     primart_lagrum: ["Skyddslagen (2010:305) 7 §"],
     kommentar: "Straffbestämmelser finns i skyddslagen.",
+  },
+  "fornminnesbrott": {
+    sakomrade: "Kulturmiljöbrott",
+    primart_lagrum: ["Kulturmiljölagen (1988:950) 2 kap. 21 §"],
+    kommentar: "Straffbestämmelser avseende fornminnen finns i kulturmiljölagen; exakt paragraf beror på gärningens art.",
   },
   "brott mot djurskyddslagen": {
     sakomrade: "Djurskyddsbrott",
@@ -647,6 +717,10 @@ const mappings: Record<string, LagrumEntry> = {
   "våldsamt motstånd": {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 4 §"],
+  },
+  "kränkande fotografering": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 a §"],
   },
   "olovlig identitetsanvändning": {
     sakomrade: "Bedrägerirelaterade brott",
@@ -661,6 +735,16 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["BrB 4 kap. 3 §"],
     alternativa_lagrum: ["BrB 4 kap. 3 § (grovt barnfridsbrott)"],
+  },
+  "brott mot lagen om tillträdesförbud vid idrottsarrangemang": {
+    sakomrade: "Ordnings- och säkerhetsbrott",
+    primart_lagrum: ["Lag (2005:321) om tillträdesförbud vid idrottsarrangemang 22 §"],
+    kommentar: "Straffbestämmelser finns i lagen om tillträdesförbud; exakt paragraf beror på överträdelsens art.",
+  },
+  "hets mot folkgrupp": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["BrB 16 kap. 8 §"],
+    alternativa_lagrum: ["BrB 16 kap. 8 § (grovt brott)"],
   },
   "brott mot ordningslagen": {
     sakomrade: "Ordningsbrott",
@@ -741,6 +825,16 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Järnvägs- och transportreglering",
     primart_lagrum: ["Järnvägssäkerhetslagen (1990:1157) 10 kap."],
     kommentar: "Straffbestämmelser finns i järnvägssäkerhetslagen; exakt paragraf beror på överträdelsens art.",
+  },
+  "olovlig tobaksförsäljning, grovt brott": {
+    sakomrade: "Tobaks- och nikotinreglering",
+    primart_lagrum: ["Lag (2018:2088) om tobak och liknande produkter 10 kap."],
+    kommentar: "Straffbestämmelser finns i lagen om tobak och liknande produkter; exakt paragraf och grad beror på överträdelsens art.",
+  },
+  "brott mot lagen om tobaksfria nikotinprodukter": {
+    sakomrade: "Tobaks- och nikotinreglering",
+    primart_lagrum: ["Lag (2022:1257) om tobaksfria nikotinprodukter 32 §"],
+    kommentar: "Straffbestämmelser finns i lagen om tobaksfria nikotinprodukter; exakt paragraf kan variera beroende på överträdelsens art.",
   },
   "undanröjande av ungdomsvård": {
     sakomrade: "Straffverkställighet",
