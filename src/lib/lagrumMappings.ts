@@ -890,6 +890,25 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["BrB 15 kap. 6 §"],
   },
+  "undanröjande av godkänd ordningsbot": {
+    sakomrade: "Straffprocessuella frågor",
+    primart_lagrum: ["RB 48 kap. 13 §"],
+    kommentar:
+      "Avser prövning och eventuellt undanröjande av godkänd ordningsbot enligt rättegångsbalken. Inte ett materiellt brott.",
+  },
+  "brott mot förordningen om fordons registrering och användning": {
+    sakomrade: "Trafik- och fordonsregleringsbrott",
+    primart_lagrum: [
+      "Förordning (2019:383) om fordons registrering och användning",
+    ],
+    kommentar:
+      "Exakt paragraf beror på överträdelsens art. Straff- och sanktionsbestämmelser är kopplade till fordonsregelverket.",
+  },
+  "sabotage": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 4 §"],
+    alternativa_lagrum: ["BrB 13 kap. 4 § (grovt sabotage)"],
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
