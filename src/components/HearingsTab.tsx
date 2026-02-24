@@ -403,15 +403,13 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                     <span className="text-muted-foreground">{h.time}</span>
                   </div>
                   {h.pdfUrl && (
-                    <a
-                      href={h.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => window.open(h.pdfUrl, '_blank')}
                       className="text-muted-foreground hover:text-foreground transition-colors p-1"
                       title="Öppna käll-PDF"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
+                    </button>
                   )}
                 </div>
 
@@ -546,15 +544,13 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   </TableCell>
                   <TableCell>
                     {h.pdfUrl && (
-                      <a
-                        href={h.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => window.open(h.pdfUrl, '_blank')}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                         title="Öppna käll-PDF"
                       >
                         <ExternalLink className="h-4 w-4" />
-                      </a>
+                      </button>
                     )}
                   </TableCell>
                 </TableRow>
