@@ -2042,4 +2042,56 @@ describe("formatTabular", () => {
       expect(h.room).toMatch(/^Sessionssal \d+$/);
     }
   });
+
+  it("parses Ångermanland with location in Sal field (Härnösand / Örnsköldsvik)", () => {
+    const text = [
+      "Förhandlingar Ångermanlands tingsrätt, listan skapades 2026-02-23",
+      "Dag Datum Förhandlingstid Typ av förhandling Målnr Saken Sal",
+      "må 23-feb 09:00 - 10:00 Huvudförhandling B 156-26 grovt rattfylleri Sal 2, Härnösand",
+      "må 23-feb 09:00 - 10:30 Fortsatt muntlig förb T 510-25 vårdnad m.m. Sal 4, Härnösand",
+      "ti 24-feb 10:30 - 12:00 Huvudförhandling B 2284-25 misshandel Tingsrättens sal 1, Örnsköldsvik",
+      "ti 24-feb 13:00 - 16:30 Huvudförhandling B 2426-24 falsk angivelse Tingsrättens sal 1, Örnsköldsvik",
+      "on 25-feb 09:00 - 16:00 Huvudförhandling B 2794-25 misshandel m.m. Sal 3, Härnösand",
+      "to 26-feb 09:00 - 09:30 Konkursförhandling K 414-26 ansökan om konkurs Sal 4, Härnösand",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Ångermanlands tingsrätt", text });
+    expect(result.length).toBe(6);
+
+    // Härnösand entries
+    const rattfylleri = result.find(h => h.caseNumber === "B 156-26");
+    expect(rattfylleri).toBeDefined();
+    expect(rattfylleri!.date).toBe("2026-02-23");
+    expect(rattfylleri!.saken).toBe("grovt rattfylleri");
+    expect(rattfylleri!.room).toBe("Sal 2");
+    expect(rattfylleri!.location).toBe("Härnösand");
+
+    // Fortsatt muntlig förb → Muntlig förberedelse
+    const vardnad = result.find(h => h.caseNumber === "T 510-25");
+    expect(vardnad).toBeDefined();
+    expect(vardnad!.type).toBe("Muntlig förberedelse");
+    expect(vardnad!.room).toBe("Sal 4");
+    expect(vardnad!.location).toBe("Härnösand");
+
+    // Örnsköldsvik entries — "Tingsrättens sal 1" → "Sal 1"
+    const misshandel = result.find(h => h.caseNumber === "B 2284-25");
+    expect(misshandel).toBeDefined();
+    expect(misshandel!.date).toBe("2026-02-24");
+    expect(misshandel!.saken).toBe("misshandel");
+    expect(misshandel!.room).toBe("Sal 1");
+    expect(misshandel!.location).toBe("Örnsköldsvik");
+
+    const falsk = result.find(h => h.caseNumber === "B 2426-24");
+    expect(falsk).toBeDefined();
+    expect(falsk!.room).toBe("Sal 1");
+    expect(falsk!.location).toBe("Örnsköldsvik");
+
+    // Konkurs
+    const konkurs = result.find(h => h.caseNumber === "K 414-26");
+    expect(konkurs).toBeDefined();
+    expect(konkurs!.type).toBe("Konkursförhandling");
+    expect(konkurs!.saken).toBe("ansökan om konkurs");
+    expect(konkurs!.room).toBe("Sal 4");
+    expect(konkurs!.location).toBe("Härnösand");
+  });
 });
