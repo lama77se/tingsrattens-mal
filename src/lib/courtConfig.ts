@@ -425,6 +425,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/vastmanlands_tingsratt/veckans-forhandlingar/vastmanlands-tingsratt-vecka-${year % 10}${String(week).padStart(2, "0")}.pdf`,
   },
   {
+    id: "vaxjo_tingsratt",
+    name: "Växjö tingsrätt",
+    formatFamily: "tabular",
+    buildUrl: (week) =>
+      `${BASE}/vaxjo_tingsratt/veckans-forhandlingar/webb-forhandlingar-ad-v.${week}.pdf`,
+  },
+  {
     id: "norrtalje_tingsratt",
     name: "Norrtälje tingsrätt",
     formatFamily: "standard",
