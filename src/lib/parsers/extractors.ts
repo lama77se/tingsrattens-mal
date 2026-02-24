@@ -40,7 +40,14 @@ export const TIME_RANGE_REGEX = /(\d{1,2}:\d{2})\s*[-\u2013\u2014]\s*(\d{1,2}:\d
 
 export const TIME_REGEX = /\b(\d{1,2}:\d{2})\b/;
 
-export const ROOM_REGEX = /(?:Tings)?[Ss]al\s+(\S+)/;
+export const ROOM_REGEX = /(?:sessions|tings)?sal\s+(\S+)/i;
+
+export function roomPrefix(matched: string): string {
+  const lower = matched.toLowerCase();
+  if (lower.startsWith("sessions")) return "Sessionssal";
+  if (lower.startsWith("tings")) return "Tingssal";
+  return "Sal";
+}
 
 export const HEARING_TYPES = [
   "Huvudförhandling",
@@ -183,8 +190,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/(\d{2}:\d{2})([A-ZÅÄÖ])/g, "$1 $2")
         // Digit before lowercase: "25fordran" → "25 fordran" (fixes \b in case regex)
         .replace(/(\d)([a-zåäö])/g, "$1 $2")
-        // Lowercase before Sal/Tingssal: "verksamhetSal 4" → "verksamhet Sal 4"
-        .replace(/([a-zåäö.])([ST](?:ingssal|al)\s*\d)/g, "$1 $2")
+        // Lowercase before Sal/Tingssal/Sessionssal: "verksamhetSal 4" → "verksamhet Sal 4"
+        .replace(/([a-zåäö.])([ST](?:ingssal|essionssal|al)\s*\d)/g, "$1 $2")
         // Lowercase before case prefix: "HuvudförhandlingB 14" → "Huvudförhandling B 14"
         .replace(/([a-zåäö.])(?=(?:PMT|FT|[TBKÄ])\s?\d)/g, "$1 ")
     )
@@ -212,7 +219,7 @@ export function extractTime(line: string, prevLine?: string): string {
 export function extractRoom(lines: string[], index: number): string {
   const roomMatch = lines[index].match(ROOM_REGEX);
   if (roomMatch) {
-    const prefix = roomMatch[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+    const prefix = roomPrefix(roomMatch[0]);
     return `${prefix} ${roomMatch[1]}`;
   }
 
@@ -220,7 +227,7 @@ export function extractRoom(lines: string[], index: number): string {
   for (let j = index + 1; j <= Math.min(lines.length - 1, index + 2); j++) {
     const rm = lines[j].match(ROOM_REGEX);
     if (rm) {
-      const prefix = rm[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+      const prefix = roomPrefix(rm[0]);
       return `${prefix} ${rm[1]}`;
     }
   }
@@ -228,7 +235,7 @@ export function extractRoom(lines: string[], index: number): string {
   for (let j = Math.max(0, index - 2); j < index; j++) {
     const rm = lines[j].match(ROOM_REGEX);
     if (rm) {
-      const prefix = rm[0].toLowerCase().startsWith("tings") ? "Tingssal" : "Sal";
+      const prefix = roomPrefix(rm[0]);
       return `${prefix} ${rm[1]}`;
     }
   }
@@ -265,7 +272,7 @@ export function extractHearingType(lines: string[], index: number): string {
 export function cleanSaken(text: string): string {
   let saken = text
     .replace(ROOM_REGEX, "")
-    .replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "")
+    .replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "")
     .replace(TIME_RANGE_REGEX, "")
     .replace(TIME_REGEX, "")
     .trim();
