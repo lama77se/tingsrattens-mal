@@ -23,10 +23,52 @@ interface WeekFetch {
   result?: CourtPdfResult;
 }
 
+export interface FetchAllProgress {
+  total: number;
+  success: number;
+  failed: number;
+}
+
 interface DataLoadingTabProps {
   onHearingsFetched: (hearings: Hearing[]) => void;
   fetchAllTrigger?: number;
   onLoadingChange?: (loading: boolean) => void;
+  onProgressChange?: (progress: FetchAllProgress | null) => void;
+  fetchAllProgress?: FetchAllProgress | null;
+}
+
+function FetchAllProgressBar({ progress }: { progress: FetchAllProgress }) {
+  const { total, success, failed } = progress;
+  const done = success + failed;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const successPct = total > 0 ? (success / total) * 100 : 0;
+  const failedPct = total > 0 ? (failed / total) * 100 : 0;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-muted-foreground">
+          {done} av {total} tingsrätter klara
+          {failed > 0 && <span className="text-destructive ml-1">({failed} misslyckade)</span>}
+        </span>
+        <span className="font-medium">{pct}%</span>
+      </div>
+      <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden flex">
+        {successPct > 0 && (
+          <div
+            className="h-full bg-emerald-500 transition-all duration-300"
+            style={{ width: `${successPct}%` }}
+          />
+        )}
+        {failedPct > 0 && (
+          <div
+            className="h-full bg-destructive transition-all duration-300"
+            style={{ width: `${failedPct}%` }}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 const STEP_LABELS = ["Beräknar URL", "Hämtar PDF", "Bearbetar", "Klar"];
@@ -72,7 +114,7 @@ function initAllCourts(): CourtWeeksState {
   return state;
 }
 
-export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onLoadingChange }: DataLoadingTabProps) {
+export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onLoadingChange, onProgressChange, fetchAllProgress }: DataLoadingTabProps) {
   const [courtWeeks, setCourtWeeks] = useState<CourtWeeksState>(initAllCourts);
   const [fetchingCourts, setFetchingCourts] = useState<Set<string>>(new Set());
   const [isFetchingAll, setIsFetchingAll] = useState(false);
@@ -225,6 +267,9 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     await delay(50);
 
     const fetchable = COURTS.filter((c) => !c.disabled);
+    const progress: FetchAllProgress = { total: fetchable.length, success: 0, failed: 0 };
+    onProgressChange?.({ ...progress });
+
     for (let i = 0; i < fetchable.length; i += BATCH_SIZE) {
       const batch = fetchable.slice(i, i + BATCH_SIZE);
 
@@ -233,6 +278,14 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
           setFetchingCourts((prev) => new Set(prev).add(court.id));
           const hearings = await fetchCourt(court);
           hearingsRef.current[court.id] = hearings;
+
+          if (hearings.length > 0) {
+            progress.success++;
+          } else {
+            progress.failed++;
+          }
+          onProgressChange?.({ ...progress });
+
           setFetchingCourts((prev) => {
             const next = new Set(prev);
             next.delete(court.id);
@@ -276,6 +329,10 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
           Hämta alla
         </Button>
       </div>
+
+      {fetchAllProgress && fetchAllProgress.total > 0 && (
+        <FetchAllProgressBar progress={fetchAllProgress} />
+      )}
 
       {[...COURTS].sort((a, b) => a.name.localeCompare(b.name, "sv")).map((court) => {
         if (court.disabled) {
