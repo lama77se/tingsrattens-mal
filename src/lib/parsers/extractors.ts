@@ -113,7 +113,7 @@ export function extractSwedishDate(line: string): string | null {
  * inter-field spaces, requiring targeted degluing patterns.
  */
 export function preprocessLines(text: string): string[] {
-  let trimmed = text
+  const trimmed = text
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
