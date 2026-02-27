@@ -19,7 +19,7 @@ interface HearingsTabProps {
   fetchAllProgress?: FetchAllProgress | null;
 }
 
-type SortKey = "datetime" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
+type SortKey = "datetime" | "court" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
 type SortDir = "asc" | "desc";
 
 const normalizeType = (t: string) => t.trim().normalize("NFC");
@@ -35,6 +35,7 @@ const typeBadgeVariant = (type: string) => {
 
 const sortKeyLabels: Record<SortKey, string> = {
   datetime: "Datum + Tid",
+  court: "Tingsrätt",
   caseNumber: "Målnummer",
   type: "Typ",
   maltyp: "Måltyp",
@@ -131,6 +132,8 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
       switch (sortKey) {
         case "datetime":
           return dir * (`${a.date} ${a.time}`).localeCompare(`${b.date} ${b.time}`);
+        case "court":
+          return dir * a.court.localeCompare(b.court, "sv");
         case "caseNumber":
           return dir * a.caseNumber.localeCompare(b.caseNumber);
         case "type":
@@ -480,7 +483,11 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   Datum + Tid{sortIcon("datetime")}
                 </button>
               </TableHead>
-              <TableHead>Tingsrätt</TableHead>
+              <TableHead>
+                <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("court")}>
+                  Tingsrätt{sortIcon("court")}
+                </button>
+              </TableHead>
               <TableHead>
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("caseNumber")}>
                   Målnummer{sortIcon("caseNumber")}
