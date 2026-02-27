@@ -909,6 +909,32 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 13 kap. 4 §"],
     alternativa_lagrum: ["BrB 13 kap. 4 § (grovt sabotage)"],
   },
+  "obehörigt tillträde till skyddsobjekt": {
+    sakomrade: "Säkerhets- och skyddsbrott",
+    primart_lagrum: ["Skyddslagen (2010:305) 7 §"],
+    kommentar: "Avser överträdelse av tillträdesförbud till skyddsobjekt enligt skyddslagen.",
+  },
+  "fornminnesbrott": {
+    sakomrade: "Kulturmiljöbrott",
+    primart_lagrum: ["Kulturmiljölagen (1988:950) 2 kap. 21 §"],
+    kommentar: "Straffbestämmelser avseende fornminnen finns i kulturmiljölagen; exakt paragraf beror på gärningens art.",
+  },
+  "marknadsmanipulation": {
+    sakomrade: "Marknadsmissbruksbrott / ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2016:1307) om straff för marknadsmissbruk på värdepappersmarknaden 2 kap. 1 §"],
+    alternativa_lagrum: ["Lag (2016:1307) 2 kap. 3 § (grovt brott)"],
+    kommentar: "Reglerar otillbörlig påverkan på priset av finansiella instrument. Specialstraffrätt.",
+  },
+  "trafikförseelse": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 14 kap."],
+    kommentar: "Samlingsrubrik för mindre överträdelser (t.ex. hastighet, stopplikt, bälte). Exakt paragraf beror på gärningen.",
+  },
+  "förseelse mot områdesskydd": {
+    sakomrade: "Miljö- och naturvårdsbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 2 b §"],
+    kommentar: "Avser överträdelse av bestämmelser om skyddade områden (t.ex. naturreservat). Specialstraffrätt enligt miljöbalken.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
