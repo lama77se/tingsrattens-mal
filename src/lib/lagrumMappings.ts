@@ -935,6 +935,49 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 2 b §"],
     kommentar: "Avser överträdelse av bestämmelser om skyddade områden (t.ex. naturreservat). Specialstraffrätt enligt miljöbalken.",
   },
+  "medhjälp till grovt givande av muta": {
+    sakomrade: "Korruptionsbrott / brott mot allmän verksamhet",
+    primart_lagrum: [
+      "BrB 10 kap. 5 b § (grovt givande av muta)",
+      "BrB 23 kap. 4 §",
+    ],
+    kommentar: "Medhjälp regleras i 23 kap. BrB i kombination med straffbudet för grovt givande av muta.",
+  },
+  "falsk beskyllning": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 7 §"],
+  },
+  "kontakt för att träffa ett barn i sexuellt syfte": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 10 a §"],
+    kommentar: "Avser s.k. grooming, där en vuxen kontaktar ett barn i syfte att begå sexualbrott.",
+  },
+  "nedskräpningsförseelse": {
+    sakomrade: "Miljö- och ordningsbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 7 §"],
+    kommentar: "Avser mindre nedskräpningsbrott enligt miljöbalken.",
+  },
+  "brott mot luftfartslagen": {
+    sakomrade: "Luftfartsreglering",
+    primart_lagrum: ["Luftfartslagen (2010:500) 13 kap."],
+    kommentar: "Straffbestämmelser finns i 13 kap. luftfartslagen; exakt paragraf beror på överträdelsens art (t.ex. flygsäkerhet, obehörig flygning m.m.).",
+  },
+  "framkallande av fara för annan": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 9 §"],
+    alternativa_lagrum: ["BrB 3 kap. 9 § (grovt brott)"],
+    kommentar: "Avser handling som framkallar fara för annans liv eller hälsa.",
+  },
+  "vållande till annans död": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 7 §"],
+    alternativa_lagrum: ["BrB 3 kap. 7 § (grovt brott)"],
+  },
+  "främjande av flykt": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 17 kap. 12 §"],
+    kommentar: "Avser att hjälpa någon som är gripen, anhållen, häktad eller intagen att undkomma.",
+  },
 };
 
 // Sort keys longest-first so "grov misshandel" matches before "misshandel"
