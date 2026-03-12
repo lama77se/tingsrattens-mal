@@ -27,6 +27,7 @@ export interface FetchAllProgress {
   total: number;
   success: number;
   failed: number;
+  failedNames: string[];
 }
 
 interface DataLoadingTabProps {
@@ -53,6 +54,11 @@ function FetchAllProgressBar({ progress }: { progress: FetchAllProgress }) {
         </span>
         <span className="font-medium">{pct}%</span>
       </div>
+      {progress.failedNames.length > 0 && (
+        <p className="text-xs text-destructive">
+          Misslyckade: {progress.failedNames.join(", ")}
+        </p>
+      )}
       <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden flex">
         {successPct > 0 && (
           <div
@@ -267,7 +273,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     await delay(50);
 
     const fetchable = COURTS.filter((c) => !c.disabled);
-    const progress: FetchAllProgress = { total: fetchable.length, success: 0, failed: 0 };
+    const progress: FetchAllProgress = { total: fetchable.length, success: 0, failed: 0, failedNames: [] };
     onProgressChange?.({ ...progress });
 
     for (let i = 0; i < fetchable.length; i += BATCH_SIZE) {
@@ -283,8 +289,9 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
             progress.success++;
           } else {
             progress.failed++;
+            progress.failedNames.push(court.name);
           }
-          onProgressChange?.({ ...progress });
+          onProgressChange?.({ ...progress, failedNames: [...progress.failedNames] });
 
           setFetchingCourts((prev) => {
             const next = new Set(prev);
