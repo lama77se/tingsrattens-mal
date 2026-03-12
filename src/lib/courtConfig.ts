@@ -42,7 +42,7 @@ export const COURTS: CourtConfig[] = [
       const friday = addDays(monday, 4);
       const monStr = format(monday, "yyyy-MM-dd");
       const friDay = format(friday, "dd");
-      return `${BASE}/attunda_tingsratt/veckans-forhandlingar/webb-forhandlingar-v.${week}-${monStr}-${friDay}.pdf`;
+      return `${BASE}/attunda_tingsratt/veckans-forhandlingar/webb-forhandlingar-v.${week}-${monStr}---${friDay}.pdf`;
     },
   },
   {
@@ -75,8 +75,11 @@ export const COURTS: CourtConfig[] = [
     id: "skaraborgs_tingsratt",
     name: "Skaraborgs tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week) =>
+    buildUrl: (week) => [
       `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week}.pdf`,
+      `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week}-${week + 1}.pdf`,
+      `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week - 1}-${week}.pdf`,
+    ],
   },
   {
     id: "boras_tingsratt",
@@ -242,12 +245,34 @@ export const COURTS: CourtConfig[] = [
     id: "kristianstads_tingsratt",
     name: "Kristianstads tingsrätt",
     formatFamily: "tabular",
+    singleUrl: true,
     buildUrl: (week, year) => {
       const monday = getISOWeekMonday(week, year);
-      const endDate = addDays(monday, 12);
-      const monStr = format(monday, "yyMMdd");
-      const endStr = format(endDate, "MMdd");
-      return `${BASE}/kristianstads_tingsratt/webb-forhandlingar-${monStr}-${endStr}.pdf`;
+      const day = monday.getDate();
+      const month = monday.getMonth();
+      const yr = monday.getFullYear();
+      const base = `${BASE}/kristianstads_tingsratt/webb-forhandlingar`;
+
+      const halfMonthUrl = (start: Date, end: Date) =>
+        `${base}-${format(start, "yyMMdd")}-${format(end, "MMdd")}.pdf`;
+
+      const lastDay = (y: number, m: number) => new Date(y, m + 1, 0);
+
+      const urls: string[] = [];
+      if (day <= 15) {
+        // Current: 1st–15th
+        urls.push(halfMonthUrl(new Date(yr, month, 1), new Date(yr, month, 15)));
+        // Previous: 16th–end of prev month
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevYear = month === 0 ? yr - 1 : yr;
+        urls.push(halfMonthUrl(new Date(prevYear, prevMonth, 16), lastDay(prevYear, prevMonth)));
+      } else {
+        // Current: 16th–end of month
+        urls.push(halfMonthUrl(new Date(yr, month, 16), lastDay(yr, month)));
+        // Previous: 1st–15th of same month
+        urls.push(halfMonthUrl(new Date(yr, month, 1), new Date(yr, month, 15)));
+      }
+      return urls;
     },
   },
   {
@@ -386,6 +411,10 @@ export const COURTS: CourtConfig[] = [
     buildUrl: (week) => {
       const base = `${BASE}/varbergs_tingsratt/scheman/webb-forhandlingar`;
       return [
+        `${base}-v-${week}-${week + 3}.pdf`,
+        `${base}-v-${week - 1}-${week + 2}.pdf`,
+        `${base}-v-${week - 2}-${week + 1}.pdf`,
+        `${base}-v-${week - 3}-${week}.pdf`,
         `${base}-v-${week}-${week + 2}.pdf`,
         `${base}-v-${week - 1}-${week + 1}.pdf`,
         `${base}-v-${week - 2}-${week}.pdf`,
