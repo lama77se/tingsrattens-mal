@@ -82,59 +82,65 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Fetching PDF from: ${pdfUrl}`);
+    console.log(`[fetch-court-pdf] Fetching: ${pdfUrl}`);
 
-    // Use proxys to bypass TLS incompatibility between Deno and domstol.se
-    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(pdfUrl)}`;
+    // Fetch methods in priority order: direct first, proxies as fallback
+    const fetchMethods: { name: string; url: string }[] = [
+      { name: "direct", url: pdfUrl },
+      { name: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(pdfUrl)}` },
+      { name: "codetabs", url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(pdfUrl)}` },
+    ];
 
-    let pdfResponse: Response | null = null;
-    let lastError = "";
+    let pdfBytes: ArrayBuffer | null = null;
+    let pdfSize = 0;
+    const errors: string[] = [];
 
-    try {
-      pdfResponse = await fetch(proxyUrl);
-      if (!pdfResponse.ok) {
-        lastError = `Proxy: HTTP ${pdfResponse.status}`;
-        await pdfResponse.text();
-        pdfResponse = null;
-      }
-    } catch (e) {
-      lastError = e instanceof Error ? e.message : String(e);
-    }
-
-    // Fallback: direct fetch
-    if (!pdfResponse) {
+    for (const method of fetchMethods) {
       try {
-        const resp = await fetch(pdfUrl);
-        if (resp.ok) pdfResponse = resp;
-        else {
-          lastError = `Direct: HTTP ${resp.status}`;
+        console.log(`[fetch-court-pdf] Trying ${method.name}...`);
+        const resp = await fetch(method.url);
+
+        if (!resp.ok) {
+          const msg = `${method.name}: HTTP ${resp.status}`;
+          console.log(`[fetch-court-pdf] ${msg}`);
+          errors.push(msg);
           await resp.text();
+          continue;
         }
+
+        const buf = await resp.arrayBuffer();
+        const header = new TextDecoder().decode(new Uint8Array(buf.slice(0, 10)));
+
+        if (!header.startsWith("%PDF")) {
+          const snippet = new TextDecoder().decode(new Uint8Array(buf.slice(0, 200)));
+          const isHtml = snippet.includes("<html") || snippet.includes("<!DOCTYPE");
+          const msg = `${method.name}: got ${isHtml ? "HTML" : "non-PDF"} (${buf.byteLength} bytes)`;
+          console.log(`[fetch-court-pdf] ${msg}`);
+          errors.push(msg);
+          continue;
+        }
+
+        console.log(`[fetch-court-pdf] Success via ${method.name} (${buf.byteLength} bytes)`);
+        pdfBytes = buf;
+        pdfSize = buf.byteLength;
+        break;
       } catch (e) {
-        lastError = `Direct: ${e instanceof Error ? e.message : String(e)}`;
+        const msg = `${method.name}: ${e instanceof Error ? e.message : String(e)}`;
+        console.log(`[fetch-court-pdf] ${msg}`);
+        errors.push(msg);
       }
     }
 
-    if (!pdfResponse) {
-      return new Response(
-        JSON.stringify({ success: false, error: `Kunde inte hämta PDF: ${lastError}`, url: pdfUrl }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    const pdfBytes = await pdfResponse.arrayBuffer();
-    const pdfSize = pdfBytes.byteLength;
-
-    // Check if we got HTML error page instead of PDF
-    const firstBytes = new TextDecoder().decode(new Uint8Array(pdfBytes.slice(0, 10)));
-    if (!firstBytes.startsWith("%PDF")) {
-      const snippet = new TextDecoder().decode(new Uint8Array(pdfBytes.slice(0, 500)));
-      const isNotFound = snippet.includes("404") || snippet.includes("Not Found") || snippet.includes("finns inte");
+    if (!pdfBytes) {
+      const allErrors = errors.join("; ");
+      const isNotFound = errors.some((e) => e.includes("404"));
+      const notFoundLikely = errors.every((e) => e.includes("HTML") || e.includes("non-PDF") || e.includes("404"));
+      console.log(`[fetch-court-pdf] All methods failed: ${allErrors}`);
       return new Response(
         JSON.stringify({
           success: false,
-          error: isNotFound ? "PDF inte publicerad ännu" : "Fick inte en PDF-fil tillbaka",
-          notFound: isNotFound,
+          error: notFoundLikely ? "PDF inte publicerad ännu" : `Kunde inte hämta PDF: ${allErrors}`,
+          notFound: isNotFound || notFoundLikely,
           url: pdfUrl,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
