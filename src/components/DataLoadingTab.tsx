@@ -169,14 +169,17 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     // Step 1: Hämtar PDF — try each candidate URL in order
     updateStep(court.id, weekIndex, 1, { status: "active" });
     let result: CourtPdfResult | undefined;
-    const triedUrls: { url: string; ok: boolean }[] = [];
+    const triedUrls: { url: string; ok: boolean; reason?: string }[] = [];
     for (const url of urls) {
       updateStep(court.id, weekIndex, 1, {
         status: "active",
         detail: urls.length > 1 ? `Testar ${triedUrls.length + 1}/${urls.length}...` : undefined,
       });
       const attempt = await fetchCourtPdf(url, week, year, court.pdfYTolerance);
-      triedUrls.push({ url, ok: attempt.success });
+      const reason = !attempt.success
+        ? (attempt.errorCode === "direct_404" ? "404" : attempt.error?.substring(0, 50))
+        : undefined;
+      triedUrls.push({ url, ok: attempt.success, reason });
       if (attempt.success) {
         result = attempt;
         break;
@@ -185,7 +188,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     }
 
     const urlSummary = triedUrls
-      .map(({ url, ok }) => `${ok ? "\u2713" : "\u2717"} ${url}`)
+      .map(({ url, ok, reason }) => `${ok ? "\u2713" : "\u2717"} ${url}${reason ? ` (${reason})` : ""}`)
       .join("\n");
 
     if (!result || !result.success) {
