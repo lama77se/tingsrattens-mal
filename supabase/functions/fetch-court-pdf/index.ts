@@ -20,10 +20,7 @@ function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
   const filtered = items.filter((item) => item.str.trim().length > 0);
   if (filtered.length === 0) return [];
 
-  // Sort by y descending (top of page = highest y value in PDF coordinates)
   const sorted = [...filtered].sort((a, b) => b.transform[5] - a.transform[5]);
-
-  // X-tolerance for detecting column collisions (two items at similar x = separate rows)
   const xCollisionTolerance = 10;
 
   const rows: { y: number; items: TextItem[] }[] = [];
@@ -32,8 +29,6 @@ function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
     const x = item.transform[4];
     const existingRow = rows.find((r) => {
       if (Math.abs(r.y - y) > yTolerance) return false;
-      // Reject merge if row already has an item at a similar x position
-      // (indicates two distinct visual rows at nearly the same y)
       const hasXCollision = r.items.some(
         (ri) => Math.abs(ri.transform[4] - x) < xCollisionTolerance
       );
@@ -46,13 +41,24 @@ function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
     }
   }
 
-  // Sort rows top-to-bottom (highest y first)
   rows.sort((a, b) => b.y - a.y);
 
   return rows.map((row) => {
     row.items.sort((a, b) => a.transform[4] - b.transform[4]);
     return row.items.map((item) => item.str).join(" ").trim();
   }).filter(Boolean);
+}
+
+/** Fetch with a timeout via AbortController */
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const resp = await fetch(url, { signal: controller.signal });
+    return resp;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 Deno.serve(async (req) => {
@@ -74,7 +80,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate URL is from domstol.se
     if (!pdfUrl.startsWith("https://www.domstol.se/")) {
       return new Response(JSON.stringify({ success: false, error: "Ogiltig URL – måste vara från domstol.se" }), {
         status: 400,
@@ -84,50 +89,100 @@ Deno.serve(async (req) => {
 
     console.log(`[fetch-court-pdf] Fetching: ${pdfUrl}`);
 
-    // Fetch methods in priority order: direct first, proxies as fallback
-    const fetchMethods: { name: string; url: string }[] = [
-      { name: "direct", url: pdfUrl },
-      { name: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(pdfUrl)}` },
-      { name: "codetabs", url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(pdfUrl)}` },
-    ];
-
+    const PROXY_TIMEOUT_MS = 8000;
     let pdfBytes: ArrayBuffer | null = null;
     let pdfSize = 0;
     const errors: string[] = [];
 
-    for (const method of fetchMethods) {
-      try {
-        console.log(`[fetch-court-pdf] Trying ${method.name}...`);
-        const resp = await fetch(method.url);
+    // 1) Try direct fetch first
+    try {
+      console.log(`[fetch-court-pdf] Trying direct...`);
+      const resp = await fetchWithTimeout(pdfUrl, 10000);
 
-        if (!resp.ok) {
-          const msg = `${method.name}: HTTP ${resp.status}`;
-          console.log(`[fetch-court-pdf] ${msg}`);
-          errors.push(msg);
-          await resp.text();
-          continue;
-        }
+      if (resp.status === 404) {
+        // Direct 404 → skip proxies entirely, this URL doesn't exist
+        await resp.text();
+        console.log(`[fetch-court-pdf] Direct 404 — skipping proxies`);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "404 på källan",
+            errorCode: "direct_404",
+            notFound: true,
+            url: pdfUrl,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
 
+      if (!resp.ok) {
+        const msg = `direct: HTTP ${resp.status}`;
+        console.log(`[fetch-court-pdf] ${msg}`);
+        errors.push(msg);
+        await resp.text();
+      } else {
         const buf = await resp.arrayBuffer();
         const header = new TextDecoder().decode(new Uint8Array(buf.slice(0, 10)));
-
         if (!header.startsWith("%PDF")) {
           const snippet = new TextDecoder().decode(new Uint8Array(buf.slice(0, 200)));
           const isHtml = snippet.includes("<html") || snippet.includes("<!DOCTYPE");
-          const msg = `${method.name}: got ${isHtml ? "HTML" : "non-PDF"} (${buf.byteLength} bytes)`;
+          const msg = `direct: got ${isHtml ? "HTML" : "non-PDF"} (${buf.byteLength} bytes)`;
           console.log(`[fetch-court-pdf] ${msg}`);
           errors.push(msg);
-          continue;
+        } else {
+          console.log(`[fetch-court-pdf] Success via direct (${buf.byteLength} bytes)`);
+          pdfBytes = buf;
+          pdfSize = buf.byteLength;
         }
+      }
+    } catch (e) {
+      const msg = `direct: ${e instanceof Error ? e.message : String(e)}`;
+      console.log(`[fetch-court-pdf] ${msg}`);
+      errors.push(msg);
+    }
 
-        console.log(`[fetch-court-pdf] Success via ${method.name} (${buf.byteLength} bytes)`);
-        pdfBytes = buf;
-        pdfSize = buf.byteLength;
-        break;
-      } catch (e) {
-        const msg = `${method.name}: ${e instanceof Error ? e.message : String(e)}`;
-        console.log(`[fetch-court-pdf] ${msg}`);
-        errors.push(msg);
+    // 2) Try proxies only if direct didn't return 404 and didn't succeed
+    if (!pdfBytes) {
+      const proxies = [
+        { name: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(pdfUrl)}` },
+        { name: "codetabs", url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(pdfUrl)}` },
+      ];
+
+      for (const proxy of proxies) {
+        try {
+          console.log(`[fetch-court-pdf] Trying ${proxy.name}...`);
+          const resp = await fetchWithTimeout(proxy.url, PROXY_TIMEOUT_MS);
+
+          if (!resp.ok) {
+            const msg = `${proxy.name}: HTTP ${resp.status}`;
+            console.log(`[fetch-court-pdf] ${msg}`);
+            errors.push(msg);
+            await resp.text();
+            continue;
+          }
+
+          const buf = await resp.arrayBuffer();
+          const header = new TextDecoder().decode(new Uint8Array(buf.slice(0, 10)));
+
+          if (!header.startsWith("%PDF")) {
+            const snippet = new TextDecoder().decode(new Uint8Array(buf.slice(0, 200)));
+            const isHtml = snippet.includes("<html") || snippet.includes("<!DOCTYPE");
+            const msg = `${proxy.name}: got ${isHtml ? "HTML" : "non-PDF"} (${buf.byteLength} bytes)`;
+            console.log(`[fetch-court-pdf] ${msg}`);
+            errors.push(msg);
+            continue;
+          }
+
+          console.log(`[fetch-court-pdf] Success via ${proxy.name} (${buf.byteLength} bytes)`);
+          pdfBytes = buf;
+          pdfSize = buf.byteLength;
+          break;
+        } catch (e) {
+          const isTimeout = e instanceof DOMException && e.name === "AbortError";
+          const msg = `${proxy.name}: ${isTimeout ? "timeout" : (e instanceof Error ? e.message : String(e))}`;
+          console.log(`[fetch-court-pdf] ${msg}`);
+          errors.push(msg);
+        }
       }
     }
 
@@ -140,6 +195,7 @@ Deno.serve(async (req) => {
         JSON.stringify({
           success: false,
           error: notFoundLikely ? "PDF inte publicerad ännu" : `Kunde inte hämta PDF: ${allErrors}`,
+          errorDetail: allErrors,
           notFound: isNotFound || notFoundLikely,
           url: pdfUrl,
         }),
@@ -147,7 +203,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract text using pdfjs-serverless with coordinate-based row grouping
+    // Extract text using pdfjs-serverless
     const doc = await getDocument(new Uint8Array(pdfBytes)).promise;
     const numPages = doc.numPages;
     const allLines: string[] = [];
@@ -161,8 +217,6 @@ Deno.serve(async (req) => {
     }
 
     const extractedText = allLines.join("\n");
-
-    // Count hearings by looking for time patterns (e.g. 09:00, 13.30)
     const timePatterns = extractedText.match(/\d{2}[.:]\d{2}/g) || [];
 
     return new Response(
