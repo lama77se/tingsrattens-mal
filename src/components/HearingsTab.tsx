@@ -191,6 +191,11 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                 />
               )}
             </div>
+            {fetchAllProgress.failedNames.length > 0 && (
+              <p className="text-xs text-destructive">
+                Misslyckade: {fetchAllProgress.failedNames.join(", ")}
+              </p>
+            )}
           </div>
         )}
       </div>
