@@ -9,6 +9,8 @@ export interface CourtPdfResult {
   pdfSizeBytes?: number;
   estimatedHearings?: number;
   error?: string;
+  errorCode?: string;
+  errorDetail?: string;
   notFound?: boolean;
 }
 
