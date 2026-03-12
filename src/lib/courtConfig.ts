@@ -213,15 +213,16 @@ export const COURTS: CourtConfig[] = [
       const base = `${BASE}/haparanda_tingsratt/veckans-forhandlingar/huvudforhandlingar-vecka`;
       const prev = week - 1;
       const next = week + 1;
+      // Prioritize year-based and "och-vecka" variants (most likely to be published)
       return [
-        `${base}-${week}-och-${next}.pdf`,
-        `${base}-${prev}-och-${week}.pdf`,
-        `${base}-${week}-och-vecka-${next}.pdf`,
-        `${base}-${prev}-och-vecka-${week}.pdf`,
-        `${base}-${week}-och-${next}-${year}.pdf`,
-        `${base}-${prev}-och-${week}-${year}.pdf`,
         `${base}-${week}-och-vecka-${next}-${year}.pdf`,
         `${base}-${prev}-och-vecka-${week}-${year}.pdf`,
+        `${base}-${week}-och-${next}-${year}.pdf`,
+        `${base}-${prev}-och-${week}-${year}.pdf`,
+        `${base}-${week}-och-vecka-${next}.pdf`,
+        `${base}-${prev}-och-vecka-${week}.pdf`,
+        `${base}-${week}-och-${next}.pdf`,
+        `${base}-${prev}-och-${week}.pdf`,
       ];
     },
   },
