@@ -43,13 +43,17 @@ node debug-pdf.cjs <pdf-url-or-file>              # download, parse, show result
 node debug-pdf.cjs <pdf-url-or-file> --raw         # output raw extracted text
 node debug-pdf.cjs <pdf-url-or-file> --lines       # numbered lines of extracted text
 node debug-pdf.cjs <pdf-url-or-file> --court solna  # override auto-detected court
+node debug-pdf.cjs <url> --edge                    # use production edge function for text extraction
+node debug-pdf.cjs <url> --edge --raw              # see exact text the production pipeline produces
 ```
 
 When the user provides a PDF URL that fails parsing:
-1. Run `node debug-pdf.cjs <url>` to see parser output and diagnostics
-2. Run with `--raw` or `--lines` to inspect the raw text the parser receives
-3. Compare text structure against the parser in `src/lib/parsers/` for the court's `formatFamily`
-4. Fix the parser, then re-run the tool to verify
+1. Run `node debug-pdf.cjs <url> --edge` to test with the **production text extraction** (pdfjs-serverless)
+2. Compare with `node debug-pdf.cjs <url>` (local pdf-parse) to spot text extraction differences
+3. Run with `--raw` or `--lines` to inspect raw text structure
+4. Fix the parser in `src/lib/parsers/` for the court's `formatFamily`, re-run to verify
+
+**Important:** Local pdf-parse and the production edge function (pdfjs-serverless) extract text differently. Always verify fixes with `--edge` to test the real pipeline.
 
 The tool auto-detects the court from the URL/filename and uses proxy fallback for domstol.se downloads. Court→format mapping is duplicated in the script — keep it in sync with `courtConfig.ts`.
 
