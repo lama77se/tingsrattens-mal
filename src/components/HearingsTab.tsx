@@ -172,16 +172,23 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
           <div className="mt-4 w-full max-w-md space-y-1.5">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                {fetchAllProgress.success + fetchAllProgress.failed} av {fetchAllProgress.total} tingsrätter klara
+                {fetchAllProgress.success + fetchAllProgress.failed + fetchAllProgress.empty} av {fetchAllProgress.total} tingsrätter klara
+                {fetchAllProgress.empty > 0 && <span className="text-amber-500 ml-1">({fetchAllProgress.empty} utan förhandlingar)</span>}
                 {fetchAllProgress.failed > 0 && <span className="text-destructive ml-1">({fetchAllProgress.failed} misslyckade)</span>}
               </span>
-              <span className="font-medium">{Math.round(((fetchAllProgress.success + fetchAllProgress.failed) / fetchAllProgress.total) * 100)}%</span>
+              <span className="font-medium">{Math.round(((fetchAllProgress.success + fetchAllProgress.failed + fetchAllProgress.empty) / fetchAllProgress.total) * 100)}%</span>
             </div>
             <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden flex">
               {fetchAllProgress.success > 0 && (
                 <div
                   className="h-full bg-emerald-500 transition-all duration-300"
                   style={{ width: `${(fetchAllProgress.success / fetchAllProgress.total) * 100}%` }}
+                />
+              )}
+              {fetchAllProgress.empty > 0 && (
+                <div
+                  className="h-full bg-amber-400 transition-all duration-300"
+                  style={{ width: `${(fetchAllProgress.empty / fetchAllProgress.total) * 100}%` }}
                 />
               )}
               {fetchAllProgress.failed > 0 && (
@@ -191,6 +198,11 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                 />
               )}
             </div>
+            {fetchAllProgress.emptyNames.length > 0 && (
+              <p className="text-xs text-amber-500">
+                0 förhandlingar: {fetchAllProgress.emptyNames.join(", ")}
+              </p>
+            )}
             {fetchAllProgress.failedNames.length > 0 && (
               <p className="text-xs text-destructive">
                 Misslyckade: {fetchAllProgress.failedNames.join(", ")}
