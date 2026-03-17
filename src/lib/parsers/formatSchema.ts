@@ -28,8 +28,59 @@ export const formatSchema: ParserStrategy = {
     const { text } = ctx;
     if (!text || text.trim().length === 0) return [];
 
-    const lines = text
-      .split("\n")
+    // Reassemble lines split by coordinate-based PDF extraction (pdfjs-serverless).
+    // Malmö PDFs get split into:
+    //   "kl. 09:00 - B 8544 -"           (time + partial case number)
+    //   "10:00 25, Huvudförhandling"      (end time + case number end + type)
+    //   "Sal 09 angående ..."             (room + saken — already merged, fine as-is)
+    // Also fix split page headers: "Sida 1 )" / "(" / "9" → "Sida 1(9)"
+    const KL_SPLIT_REGEX = /^(kl\.?\s*\d{1,2}:\d{2}\s*-\s*)(.+?)(\s*-\s*)$/;
+    const CONT_TIME_REGEX = /^(\d{1,2}:\d{2})\s+(.+)$/;
+    const rawLines = text.split("\n");
+    const merged: string[] = [];
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i].trim();
+      if (!line) continue;
+
+      // Fix split page headers: "Sida N )" followed by "(" then "M" → "Sida N(M)"
+      if (/Sida\s+\d+\s+\)$/.test(line)) {
+        // Look ahead for "(" and digit
+        if (i + 2 < rawLines.length && rawLines[i + 1].trim() === "(" && /^\d+$/.test(rawLines[i + 2].trim())) {
+          merged.push(line.replace(/\s+\)$/, `(${rawLines[i + 2].trim()})`));
+          i += 2;
+          continue;
+        }
+      }
+
+      // Merge split kl. lines: "kl. 09:00 - B 8544 -" + "10:00 25, Huvudförhandling"
+      // Also handles fully-split case numbers: "kl. 09:00 - B -" + "11:00 8400 25, ..."
+      const klSplit = line.match(KL_SPLIT_REGEX);
+      if (klSplit && i + 1 < rawLines.length) {
+        const nextLine = rawLines[i + 1].trim();
+        const contMatch = nextLine.match(CONT_TIME_REGEX);
+        if (contMatch) {
+          const endTime = contMatch[1];
+          let caseFragment = klSplit[2].trim();
+          let rest = contMatch[2];
+          // Handle "B -" / "8400 25, ..." → merge into "B 8400-25, ..."
+          if (/^[A-ZÄ]{1,3}$/.test(caseFragment)) {
+            // Case prefix only — number is at start of rest: "8400 25, ..."
+            rest = rest.replace(/^(\d{1,6})\s+(\d{2})/, `${caseFragment} $1-$2`);
+          } else {
+            // Normal case: "B 8544" + " -" + "25, ..." → "B 8544-25, ..."
+            rest = `${caseFragment}${klSplit[3]}${rest}`;
+          }
+          merged.push(`${klSplit[1]}${endTime}`);
+          merged.push(rest);
+          i++;
+          continue;
+        }
+      }
+
+      merged.push(line);
+    }
+
+    const lines = merged
       .map((l) => l.trim())
       .filter(Boolean)
       // Normalize case number spaces: "B 784 - 25" / "B 784 -25" → "B 784-25"
