@@ -224,7 +224,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     return result;
   };
 
-  const fetchCourt = async (court: CourtConfig): Promise<Hearing[]> => {
+  const fetchCourt = async (court: CourtConfig): Promise<{ hearings: Hearing[]; anySuccess: boolean }> => {
     const current = getCurrentWeek();
     const weeks = court.singleUrl
       ? [{ week: current.week, year: current.year, steps: createInitialSteps() }]
@@ -234,10 +234,12 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
 
     const hearings: Hearing[] = [];
     const seen = new Set<string>();
+    let anySuccess = false;
     for (let i = 0; i < weeks.length; i++) {
       const w = weeks[i];
       const result = await fetchWeek(court, i, w.week, w.year);
       if (result?.success && result.text) {
+        anySuccess = true;
         const parsed = parseCourtPdf(result.text, court);
         for (const h of parsed) {
           const key = `${h.caseNumber}|${h.date}|${h.time}|${h.saken}`;
@@ -249,12 +251,12 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         }
       }
     }
-    return hearings;
+    return { hearings, anySuccess };
   };
 
   const handleFetchCourt = async (court: CourtConfig) => {
     setFetchingCourts((prev) => new Set(prev).add(court.id));
-    const courtHearings = await fetchCourt(court);
+    const { hearings: courtHearings } = await fetchCourt(court);
 
     // Store in ref and merge all courts
     hearingsRef.current[court.id] = courtHearings;
@@ -285,10 +287,10 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       await Promise.all(
         batch.map(async (court) => {
           setFetchingCourts((prev) => new Set(prev).add(court.id));
-          const hearings = await fetchCourt(court);
+          const { hearings, anySuccess } = await fetchCourt(court);
           hearingsRef.current[court.id] = hearings;
 
-          if (hearings.length > 0) {
+          if (anySuccess) {
             progress.success++;
           } else {
             progress.failed++;
