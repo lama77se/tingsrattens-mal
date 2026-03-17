@@ -102,61 +102,90 @@ async function main() {
   const positional = args.filter((a) => !a.startsWith("--"));
 
   if (positional.length === 0) {
-    console.log("Usage: node debug-pdf.cjs <pdf-url-or-file> [--raw] [--lines] [--court <name>]");
+    console.log("Usage: node debug-pdf.cjs <pdf-url-or-file> [--raw] [--lines] [--court <name>] [--edge]");
+    console.log("  --edge   Use production edge function for text extraction (tests real pipeline)");
     process.exit(1);
   }
 
   const input = positional[0];
   const showRaw = flags.includes("--raw");
   const showLines = flags.includes("--lines");
+  const useEdge = flags.includes("--edge");
   const courtOverrideIdx = args.indexOf("--court");
   const courtOverride = courtOverrideIdx !== -1 ? args[courtOverrideIdx + 1] : null;
 
-  // 1. Get PDF buffer
-  let buffer;
-  if (input.startsWith("http://") || input.startsWith("https://")) {
-    console.error(`Downloading: ${input}`);
-    // Try direct first, then proxies (domstol.se often blocks direct)
-    const methods = [
-      { name: "direct", url: input },
-      { name: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(input)}` },
-      { name: "codetabs", url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(input)}` },
-    ];
-    for (const method of methods) {
-      try {
-        console.error(`  Trying ${method.name}...`);
-        const buf = await downloadUrl(method.url);
-        if (buf.slice(0, 5).toString().startsWith("%PDF")) {
-          console.error(`  Success via ${method.name} (${buf.length} bytes)`);
-          buffer = buf;
-          break;
-        }
-        console.error(`  ${method.name}: got non-PDF response (${buf.length} bytes)`);
-      } catch (e) {
-        console.error(`  ${method.name}: ${e.message}`);
-      }
-    }
-    if (!buffer) {
-      console.error("ERROR: Could not download PDF via any method");
+  // 1. Get text from PDF
+  let text;
+
+  if (useEdge && input.startsWith("http")) {
+    // Call production edge function for text extraction
+    console.error(`Calling edge function for: ${input}`);
+    const edgeUrl = "https://adjhjnlxcfkqbmlzgslj.supabase.co/functions/v1/fetch-court-pdf";
+    const edgeKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkamhqbmx4Y2ZrcWJtbHpnc2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1ODQxMjQsImV4cCI6MjA1NDE2MDEyNH0.dGCfBPOQhjAJTpYqLSKk_iqy6ObrCYg0k5JHcNIhR0w";
+    const body = JSON.stringify({ pdfUrl: input });
+    const resp = await new Promise((resolve, reject) => {
+      const req = https.request(edgeUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${edgeKey}` },
+      }, (res) => {
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => resolve(JSON.parse(Buffer.concat(chunks).toString())));
+        res.on("error", reject);
+      });
+      req.on("error", reject);
+      req.write(body);
+      req.end();
+    });
+    if (!resp.success) {
+      console.error(`Edge function error: ${resp.error}`);
       process.exit(1);
     }
+    text = resp.text;
+    console.error(`Edge function: ${resp.pdfSizeBytes} bytes, ${resp.numPages} pages, ${text.length} chars`);
   } else {
-    buffer = fs.readFileSync(input);
-    console.error(`Read file: ${buffer.length} bytes`);
+    // Local extraction via pdf-parse
+    let buffer;
+    if (input.startsWith("http://") || input.startsWith("https://")) {
+      console.error(`Downloading: ${input}`);
+      const methods = [
+        { name: "direct", url: input },
+        { name: "allorigins", url: `https://api.allorigins.win/raw?url=${encodeURIComponent(input)}` },
+        { name: "codetabs", url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(input)}` },
+      ];
+      for (const method of methods) {
+        try {
+          console.error(`  Trying ${method.name}...`);
+          const buf = await downloadUrl(method.url);
+          if (buf.slice(0, 5).toString().startsWith("%PDF")) {
+            console.error(`  Success via ${method.name} (${buf.length} bytes)`);
+            buffer = buf;
+            break;
+          }
+          console.error(`  ${method.name}: got non-PDF response (${buf.length} bytes)`);
+        } catch (e) {
+          console.error(`  ${method.name}: ${e.message}`);
+        }
+      }
+      if (!buffer) {
+        console.error("ERROR: Could not download PDF via any method");
+        process.exit(1);
+      }
+    } else {
+      buffer = fs.readFileSync(input);
+      console.error(`Read file: ${buffer.length} bytes`);
+    }
+
+    const header = buffer.slice(0, 5).toString();
+    if (!header.startsWith("%PDF")) {
+      console.error(`ERROR: Not a PDF file (starts with: ${JSON.stringify(buffer.slice(0, 50).toString())})`);
+      process.exit(1);
+    }
+
+    const data = await pdfParse(buffer);
+    text = data.text;
+    console.error(`Pages: ${data.numpages}, Text length: ${text.length} chars`);
   }
-
-  // Verify PDF header
-  const header = buffer.slice(0, 5).toString();
-  if (!header.startsWith("%PDF")) {
-    console.error(`ERROR: Not a PDF file (starts with: ${JSON.stringify(buffer.slice(0, 50).toString())})`);
-    process.exit(1);
-  }
-
-  // 2. Extract text
-  const data = await pdfParse(buffer);
-  const text = data.text;
-
-  console.error(`Pages: ${data.numpages}, Text length: ${text.length} chars`);
 
   // 3. Detect court
   const courtSource = courtOverride || input;
