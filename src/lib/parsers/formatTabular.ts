@@ -228,8 +228,30 @@ export const formatTabular: ParserStrategy = {
     const { text } = ctx;
     if (!text || text.trim().length === 0) return [];
 
+    // Reassemble split date lines from coordinate-based PDF extraction.
+    // pdfjs-serverless can split "2026-03-16 09:00 - 16:00" into two lines:
+    //   "må 2026 - - 09:00 - Huvudförhandling ..."   (year + start time)
+    //   "03 16 16:00"                                  (month, day, end time)
+    // We merge these back into a single line with a proper ISO date and time range.
+    const SPLIT_DATE_LINE = /^(.*?\s)(\d{4})\s+-\s+-\s+(\d{1,2}:\d{2})\s+-\s+(.*)$/;
+    const SPLIT_DATE_CONT = /^(\d{2})\s+(\d{2})\s+(\d{1,2}:\d{2})\s*$/;
+    const preprocessed = text.split(/\n/);
+    const merged: string[] = [];
+    for (let i = 0; i < preprocessed.length; i++) {
+      const m = preprocessed[i].match(SPLIT_DATE_LINE);
+      if (m && i + 1 < preprocessed.length) {
+        const cont = preprocessed[i + 1].match(SPLIT_DATE_CONT);
+        if (cont) {
+          // Reassemble: prefix + "YYYY-MM-DD HH:MM - HH:MM rest"
+          merged.push(`${m[1]}${m[2]}-${cont[1]}-${cont[2]} ${m[3]} - ${cont[3]} ${m[4]}`);
+          i++; // skip continuation line
+          continue;
+        }
+      }
+      merged.push(preprocessed[i]);
+    }
 
-    const rawLines = preprocessLines(text);
+    const rawLines = preprocessLines(merged.join("\n"));
     // Convert short dates (e.g., "10-feb") to ISO dates for regex matching
     const lines = rawLines.map(line => {
       if (!/\d{4}-\d{2}-\d{2}/.test(line)) {
