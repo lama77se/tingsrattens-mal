@@ -27,7 +27,9 @@ export interface FetchAllProgress {
   total: number;
   success: number;
   failed: number;
+  empty: number;
   failedNames: string[];
+  emptyNames: string[];
 }
 
 interface DataLoadingTabProps {
@@ -39,10 +41,11 @@ interface DataLoadingTabProps {
 }
 
 function FetchAllProgressBar({ progress }: { progress: FetchAllProgress }) {
-  const { total, success, failed } = progress;
-  const done = success + failed;
+  const { total, success, failed, empty } = progress;
+  const done = success + failed + empty;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   const successPct = total > 0 ? (success / total) * 100 : 0;
+  const emptyPct = total > 0 ? (empty / total) * 100 : 0;
   const failedPct = total > 0 ? (failed / total) * 100 : 0;
 
   return (
@@ -50,20 +53,22 @@ function FetchAllProgressBar({ progress }: { progress: FetchAllProgress }) {
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
           {done} av {total} tingsrätter klara
+          {empty > 0 && <span className="text-amber-500 ml-1">({empty} utan förhandlingar)</span>}
           {failed > 0 && <span className="text-destructive ml-1">({failed} misslyckade)</span>}
         </span>
         <span className="font-medium">{pct}%</span>
       </div>
-      {progress.failedNames.length > 0 && (
-        <p className="text-xs text-destructive">
-          Misslyckade: {progress.failedNames.join(", ")}
-        </p>
-      )}
       <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden flex">
         {successPct > 0 && (
           <div
             className="h-full bg-emerald-500 transition-all duration-300"
             style={{ width: `${successPct}%` }}
+          />
+        )}
+        {emptyPct > 0 && (
+          <div
+            className="h-full bg-amber-400 transition-all duration-300"
+            style={{ width: `${emptyPct}%` }}
           />
         )}
         {failedPct > 0 && (
@@ -73,6 +78,16 @@ function FetchAllProgressBar({ progress }: { progress: FetchAllProgress }) {
           />
         )}
       </div>
+      {progress.emptyNames.length > 0 && (
+        <p className="text-xs text-amber-500">
+          0 förhandlingar: {progress.emptyNames.join(", ")}
+        </p>
+      )}
+      {progress.failedNames.length > 0 && (
+        <p className="text-xs text-destructive">
+          Misslyckade: {progress.failedNames.join(", ")}
+        </p>
+      )}
     </div>
   );
 }
@@ -278,7 +293,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     await delay(50);
 
     const fetchable = COURTS.filter((c) => !c.disabled);
-    const progress: FetchAllProgress = { total: fetchable.length, success: 0, failed: 0, failedNames: [] };
+    const progress: FetchAllProgress = { total: fetchable.length, success: 0, failed: 0, empty: 0, failedNames: [], emptyNames: [] };
     onProgressChange?.({ ...progress });
 
     for (let i = 0; i < fetchable.length; i += BATCH_SIZE) {
@@ -290,13 +305,16 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
           const { hearings, anySuccess } = await fetchCourt(court);
           hearingsRef.current[court.id] = hearings;
 
-          if (anySuccess) {
-            progress.success++;
-          } else {
+          if (!anySuccess) {
             progress.failed++;
             progress.failedNames.push(court.name);
+          } else if (hearings.length === 0) {
+            progress.empty++;
+            progress.emptyNames.push(court.name);
+          } else {
+            progress.success++;
           }
-          onProgressChange?.({ ...progress, failedNames: [...progress.failedNames] });
+          onProgressChange?.({ ...progress, failedNames: [...progress.failedNames], emptyNames: [...progress.emptyNames] });
 
           setFetchingCourts((prev) => {
             const next = new Set(prev);
