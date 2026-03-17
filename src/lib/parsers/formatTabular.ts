@@ -229,12 +229,20 @@ export const formatTabular: ParserStrategy = {
     if (!text || text.trim().length === 0) return [];
 
     // Reassemble split date lines from coordinate-based PDF extraction.
-    // pdfjs-serverless can split "2026-03-16 09:00 - 16:00" into two lines:
-    //   "må 2026 - - 09:00 - Huvudförhandling ..."   (year + start time)
-    //   "03 16 16:00"                                  (month, day, end time)
-    // We merge these back into a single line with a proper ISO date and time range.
+    // pdfjs-serverless can split dates and case numbers across two lines:
+    //
+    // Eksjö style (no case numbers):
+    //   "må 2026 - - 09:00 - Huvudförhandling ..."   →  date + start time
+    //   "03 16 16:00"                                  →  month, day, end time
+    //
+    // Nyköping style (with case numbers):
+    //   "må 2026 - - 09:00 - Huvudförhandling B 4624 - misshandel Tingssal 5"
+    //   "03 23 09:45 25"                               →  month, day, end time, case-year
+    //
+    // We merge these back into a single line with proper ISO date, time range,
+    // and reassembled case number.
     const SPLIT_DATE_LINE = /^(.*?\s)(\d{4})\s+-\s+-\s+(\d{1,2}:\d{2})\s+-\s+(.*)$/;
-    const SPLIT_DATE_CONT = /^(\d{2})\s+(\d{2})\s+(\d{1,2}:\d{2})\s*$/;
+    const SPLIT_DATE_CONT = /^(\d{2})\s+(\d{2})\s+(\d{1,2}:\d{2})(?:\s+(\d{2}))?\s*$/;
     const preprocessed = text.split(/\n/);
     const merged: string[] = [];
     for (let i = 0; i < preprocessed.length; i++) {
@@ -242,9 +250,17 @@ export const formatTabular: ParserStrategy = {
       if (m && i + 1 < preprocessed.length) {
         const cont = preprocessed[i + 1].match(SPLIT_DATE_CONT);
         if (cont) {
-          // Reassemble: prefix + "YYYY-MM-DD HH:MM - HH:MM rest"
-          merged.push(`${m[1]}${m[2]}-${cont[1]}-${cont[2]} ${m[3]} - ${cont[3]} ${m[4]}`);
-          i++; // skip continuation line
+          let rest = m[4];
+          // If continuation has a case-year suffix (e.g. "25"),
+          // reassemble the split case number: "B 4624 - saken" + "25" → "B 4624-25 saken"
+          if (cont[4]) {
+            rest = rest.replace(
+              /((?:PMT|FT|[TBKMFÄ])\s?\d{1,6})\s*-\s*/i,
+              `$1-${cont[4]} `
+            );
+          }
+          merged.push(`${m[1]}${m[2]}-${cont[1]}-${cont[2]} ${m[3]} - ${cont[3]} ${rest}`);
+          i++;
           continue;
         }
       }
