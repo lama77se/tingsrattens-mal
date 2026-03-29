@@ -243,6 +243,12 @@ export const formatTabular: ParserStrategy = {
     // and reassembled case number.
     const SPLIT_DATE_LINE = /^(.*?\s)(\d{4})\s+-\s+-\s+(\d{1,2}:\d{2})\s+-\s+(.*)$/;
     const SPLIT_DATE_CONT = /^(\d{2})\s+(\d{2})\s+(\d{1,2}:\d{2})(?:\s+(\d{2}))?\s*$/;
+    // Örebro 3-line split: day abbreviation and day-of-month digits split across 3 lines:
+    //   "t 2026 - - 09:00 - Huvudförhandling B 1130 - olaga hot Sal 11"
+    //   "i 03 2 10:30 26"        ← char2, month, day-tens, end-time, case-year [+ extra]
+    //   "4"                       ← day-units
+    const SPLIT_3LINE_CONT = /^([a-zåäö])\s+(\d{2})\s+(\d)\s+(\d{1,2}:\d{2})\s+(\d{2})(.*)?$/i;
+    const SINGLE_DIGIT_LINE = /^(\d)$/;
     const preprocessed = text.split(/\n/);
     const merged: string[] = [];
     for (let i = 0; i < preprocessed.length; i++) {
@@ -262,6 +268,30 @@ export const formatTabular: ParserStrategy = {
           merged.push(`${m[1]}${m[2]}-${cont[1]}-${cont[2]} ${m[3]} - ${cont[3]} ${rest}`);
           i++;
           continue;
+        }
+        // Örebro 3-line variant: day abbreviation letter on line 2, day-units digit on line 3
+        const cont3 = preprocessed[i + 1].match(SPLIT_3LINE_CONT);
+        if (cont3 && i + 2 < preprocessed.length) {
+          const digitLine = preprocessed[i + 2].match(SINGLE_DIGIT_LINE);
+          if (digitLine) {
+            const dayAbbr = m[1].trim() + cont3[1]; // e.g. "t" + "i" = "ti"
+            const month = cont3[2];
+            const day = cont3[3] + digitLine[1]; // e.g. "2" + "4" = "24"
+            const endTime = cont3[4];
+            const caseYear = cont3[5];
+            const extra = (cont3[6] || "").trim();
+            let rest = m[4];
+            // Reassemble split case number
+            rest = rest.replace(
+              /((?:PMT|FT|[TBKMFÄ])\s?\d{1,6})\s*-\s*/i,
+              `$1-${caseYear} `
+            );
+            // Append any extra text from line 2 (e.g. "24)" from split parenthetical)
+            if (extra) rest += " " + extra;
+            merged.push(`${dayAbbr} ${m[2]}-${month}-${day} ${m[3]} - ${endTime} ${rest}`);
+            i += 2;
+            continue;
+          }
         }
       }
       merged.push(preprocessed[i]);
