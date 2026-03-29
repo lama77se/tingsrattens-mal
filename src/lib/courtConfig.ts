@@ -288,6 +288,8 @@ export const COURTS: CourtConfig[] = [
     name: "Lunds tingsrätt",
     formatFamily: "schema",
     buildUrl: (week) => [
+      `${BASE}/lunds_tingsratt/veckans-forhandlingar/v.-${week}.pdf`,
+      `${BASE}/lunds_tingsratt/veckans-forhandlingar/veckaa-${week}.pdf`,
       `${BASE}/lunds_tingsratt/veckans-forhandlingar/vecka-${week}.pdf`,
       `${BASE}/lunds_tingsratt/veckans-forhandlingar/vecka-${String(week).padStart(2, "0")}.pdf`,
     ],
