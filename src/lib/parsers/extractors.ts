@@ -194,6 +194,8 @@ export function preprocessLines(text: string): string[] {
         .replace(/([a-zåäö.])([ST](?:ingssal|essionssal|al)\s*\d)/g, "$1 $2")
         // Lowercase before case prefix: "HuvudförhandlingB 14" → "Huvudförhandling B 14"
         .replace(/([a-zåäö.])(?=(?:PMT|FT|[TBKÄ])\s?\d)/g, "$1 ")
+        // "Hf i förenklad form" glued to saken: "formöverflyttande" → "form överflyttande"
+        .replace(/\bform([a-zåäö])/g, "form $1")
     )
     .filter(Boolean);
 }

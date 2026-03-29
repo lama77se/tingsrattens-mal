@@ -14,9 +14,10 @@ import {
 const CASE_AT_START_REGEX = /^((?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
 
 /**
- * Regex matching a hearing line: YYYY-MM-DD HH:MM - HH:MM <rest>
+ * Regex matching a hearing line: YYYY-MM-DD HH:MM - HH:MM [<rest>]
+ * Rest is optional to support PDFs where the hearing type/case is on the next line.
  */
-const HEARING_LINE_REGEX = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(.*)/;
+const HEARING_LINE_REGEX = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})(?:\s+(.*))?/;
 
 /**
  * Regex matching a time-only line (no date): HH:MM - HH:MM [<rest>]
@@ -348,7 +349,7 @@ export const formatTabular: ParserStrategy = {
       if (fullMatch) {
         date = fullMatch[1];
         time = `${fullMatch[2]} - ${fullMatch[3]}`;
-        rest = fullMatch[4].trim();
+        rest = (fullMatch[4] || "").trim();
         currentDate = date;
 
         // Detect phantom merged lines from multi-page PDFs where two rows at
@@ -356,6 +357,19 @@ export const formatTabular: ParserStrategy = {
         // row"). The rest will start with another time range from the second entry.
         if (/^\d{1,2}:\d{2}\s*[-–—]\s*\d{1,2}:\d{2}\s/.test(rest)) {
           continue;
+        }
+        // Empty rest: hearing type/case may be on subsequent lines (Linköping-style).
+        // Look ahead and merge continuation lines until a new hearing starts.
+        if (!rest) {
+          for (let k = i + 1; k < lines.length; k++) {
+            const peek = lines[k].trim();
+            if (!peek || peek.length <= 1) continue;
+            if (isContinuationBreak(peek)) break;
+            if (DAG_REGEX.test(peek) || HEADER_REGEX.test(peek)) continue;
+            rest = peek;
+            i = k;
+            break;
+          }
         }
       } else {
         // Check for time-only line (needs tracked date)

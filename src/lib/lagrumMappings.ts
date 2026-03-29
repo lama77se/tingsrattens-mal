@@ -303,6 +303,12 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 11 kap. 5 §"],
     alternativa_lagrum: ["BrB 11 kap. 5 § (ringa bokföringsbrott)"],
   },
+  "näringspenningbrott, grovt brott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["BrB 11 kap. 6 § (grovt brott)"],
+    alternativa_lagrum: ["BrB 11 kap. 6 §"],
+    kommentar: "Avser otillåten hantering av betydande kontanta medel i näringsverksamhet.",
+  },
   "människorov": {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["BrB 4 kap. 1 §"],
@@ -551,6 +557,12 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
     kommentar: "Ringa tullbrott bedöms enligt smugglingslagen; graden avgörs enligt lagens särskilda bestämmelser.",
   },
+  "tullbrott": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (2000:1225) om straff för smuggling 3 §"],
+    alternativa_lagrum: ["Lag (2000:1225) 5 § (grovt tullbrott)"],
+    kommentar: "Tullbrott regleras i smugglingslagen och avser otillåten införsel/utförsel av varor.",
+  },
   "ansökan om förverkande": {
     sakomrade: "Straffprocessuella frågor",
     primart_lagrum: ["BrB 36 kap."],
@@ -652,6 +664,22 @@ const mappings: Record<string, LagrumEntry> = {
     primart_lagrum: ["BrB 4 kap. 1 a §"],
     alternativa_lagrum: ["BrB 4 kap. 1 a § (grovt brott)"],
   },
+  "egenmäktighet med barn, grovt brott": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 7 kap. 4 § (grovt brott)"],
+    alternativa_lagrum: ["BrB 7 kap. 4 §"],
+    kommentar: "Avser olovligt bortförande eller kvarhållande av barn; grov grad vid särskilt försvårande omständigheter.",
+  },
+  "osann försäkran, grovt brott": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 10 § (grovt brott)"],
+    alternativa_lagrum: ["BrB 15 kap. 10 §"],
+  },
+  "missbruk av handling": {
+    sakomrade: "Urkundsbrott / förmögenhetsbrott",
+    primart_lagrum: ["BrB 15 kap. 12 §"],
+    kommentar: "Avser obehörigt bruk av handling som kan medföra skada eller vinning.",
+  },
   "missbruk av urkund": {
     sakomrade: "Urkundsbrott",
     primart_lagrum: ["BrB 15 kap. 12 §"],
@@ -693,6 +721,12 @@ const mappings: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott (sjötrafik)",
     primart_lagrum: ["Lag (1951:649) om straff för vissa trafikbrott 4 a §"],
     kommentar: "Sjöfylleri regleras i samma lag som rattfylleri.",
+  },
+  "flygfylleri": {
+    sakomrade: "Trafikbrott (luftfart)",
+    primart_lagrum: ["Lag (1951:649) om straff för vissa trafikbrott 4 §"],
+    alternativa_lagrum: ["Lag (1951:649) 4 § (grovt flygfylleri)"],
+    kommentar: "Motsvarar rattfylleri men inom luftfart.",
   },
   "obehörigt tillträde till skyddsobjekt": {
     sakomrade: "Säkerhets- och skyddsbrott",
