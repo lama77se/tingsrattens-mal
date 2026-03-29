@@ -1,7 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+// Import the lib directly to avoid pdf-parse's index.js test-mode check
+// (index.js tries to read a test PDF when module.parent is undefined)
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse");
+const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 
 /** Fetch with a timeout via AbortController */
 async function fetchWithTimeout(
