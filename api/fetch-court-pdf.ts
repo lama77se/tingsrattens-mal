@@ -22,7 +22,13 @@ if (typeof globalThis.DOMMatrix === "undefined") {
 
 async function loadPdfjs() {
   const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+  // Point to the worker module so the fake worker can load it
+  const path = await import("path");
+  const workerPath = path.join(
+    process.cwd(),
+    "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
+  );
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerPath;
   return pdfjsLib;
 }
 
