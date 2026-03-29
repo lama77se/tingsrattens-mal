@@ -7,7 +7,7 @@ Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, ext
 - **Frontend**: React 18 + TypeScript + Vite (port 5174)
 - **Styling**: Tailwind CSS + shadcn-ui (Radix primitives)
 - **State/Data**: TanStack React Query, React Hook Form + Zod
-- **Backend**: Vercel serverless function (PDF fetch + text extraction via pdfjs-dist)
+- **Backend**: Vercel serverless function (PDF fetch + text extraction via pdf-parse)
 - **Hosting**: Vercel
 - **Routing**: React Router v6 (single page with tabs)
 
@@ -42,17 +42,17 @@ node debug-pdf.cjs <pdf-url-or-file>              # download, parse, show result
 node debug-pdf.cjs <pdf-url-or-file> --raw         # output raw extracted text
 node debug-pdf.cjs <pdf-url-or-file> --lines       # numbered lines of extracted text
 node debug-pdf.cjs <pdf-url-or-file> --court solna  # override auto-detected court
-node debug-pdf.cjs <url> --edge                    # use production edge function for text extraction
+node debug-pdf.cjs <url> --edge                    # use production Vercel function for text extraction
 node debug-pdf.cjs <url> --edge --raw              # see exact text the production pipeline produces
 ```
 
 When the user provides a PDF URL that fails parsing:
-1. Run `node debug-pdf.cjs <url> --edge` to test with the **production text extraction** (pdfjs-serverless)
-2. Compare with `node debug-pdf.cjs <url>` (local pdf-parse) to spot text extraction differences
-3. Run with `--raw` or `--lines` to inspect raw text structure
-4. Fix the parser in `src/lib/parsers/` for the court's `formatFamily`, re-run to verify
+1. Run `node debug-pdf.cjs <url>` to parse locally
+2. Run with `--raw` or `--lines` to inspect raw text structure
+3. Fix the parser in `src/lib/parsers/` for the court's `formatFamily`, re-run to verify
+4. Optionally run with `--edge` to verify the deployed Vercel function produces the same result
 
-**Important:** Local pdf-parse and the production Vercel function (pdfjs-dist) extract text differently. Always verify fixes with `--edge` to test the real pipeline.
+Local and production both use pdf-parse, so text extraction is identical.
 
 The tool auto-detects the court from the URL/filename and uses proxy fallback for domstol.se downloads. Court→format mapping is duplicated in the script — keep it in sync with `courtConfig.ts`.
 
@@ -60,7 +60,7 @@ The tool auto-detects the court from the URL/filename and uses proxy fallback fo
 - Courts defined in `courtConfig.ts` — each has unique PDF URL pattern
 - PDF parsing is regex-heavy with Swedish character normalization (ä→a, ö→o, å→a)
 - DataLoadingTab uses ref-based state accumulation across multiple fetches
-- 4 courts: Alingsås, Attunda, Blekinge, Solna tingsrätter
+- 30+ courts configured (some disabled — no online schedules)
 - Case types: B=Brottmål, T=Tvistemål, FT=Förenklat tvistemål, etc.
 
 ## Port Allocation (c:\dev projects)
