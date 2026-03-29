@@ -1,8 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createRequire } from "module";
 
-// Import the lib directly to avoid pdf-parse's index.js test-mode check
-// (index.js tries to read a test PDF when module.parent is undefined)
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// pdf-parse is CJS-only; its index.js has a test-mode check that
+// crashes in bundlers, so import the lib entry directly.
+const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 
 /** Fetch with a timeout via AbortController */
