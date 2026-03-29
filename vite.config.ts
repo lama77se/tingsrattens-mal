@@ -10,6 +10,12 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/api": {
+        target: "https://tingsrattens-mal.vercel.app",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react()],
   resolve: {
