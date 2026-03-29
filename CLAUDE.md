@@ -1,14 +1,14 @@
 # Tingsrättens Mål - Project Guide
 
 ## What This Is
-Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, extracts hearing data, and presents them in a searchable/filterable UI. Built with Lovable, also developed locally with Claude Code.
+Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, extracts hearing data, and presents them in a searchable/filterable UI.
 
 ## Tech Stack
 - **Frontend**: React 18 + TypeScript + Vite (port 5174)
 - **Styling**: Tailwind CSS + shadcn-ui (Radix primitives)
 - **State/Data**: TanStack React Query, React Hook Form + Zod
-- **Backend**: Supabase (edge functions, auth) — project ID: `adjhjnlxcfkqbmlzgslj`
-- **PDF Parsing**: Deno edge function using pdf-parse
+- **Backend**: Vercel serverless function (PDF fetch + text extraction via pdfjs-dist)
+- **Hosting**: Vercel
 - **Routing**: React Router v6 (single page with tabs)
 
 ## Commands
@@ -31,10 +31,9 @@ src/
     lagrumMappings.ts      — Legal statute → subject area mappings
     maltypMappings.ts      — Case number prefix → case type
     weekUtils.ts           — ISO week calculations
-    api/courtPdf.ts        — Supabase edge function caller
-  integrations/supabase/   — Client + auto-generated types
-supabase/functions/
-  fetch-court-pdf/index.ts — Deno edge function: fetch + parse PDFs
+    api/courtPdf.ts        — Vercel API caller
+api/
+  fetch-court-pdf.ts       — Vercel serverless function: fetch + parse PDFs
 ```
 
 ## PDF Troubleshooting Tool
@@ -53,7 +52,7 @@ When the user provides a PDF URL that fails parsing:
 3. Run with `--raw` or `--lines` to inspect raw text structure
 4. Fix the parser in `src/lib/parsers/` for the court's `formatFamily`, re-run to verify
 
-**Important:** Local pdf-parse and the production edge function (pdfjs-serverless) extract text differently. Always verify fixes with `--edge` to test the real pipeline.
+**Important:** Local pdf-parse and the production Vercel function (pdfjs-dist) extract text differently. Always verify fixes with `--edge` to test the real pipeline.
 
 The tool auto-detects the court from the URL/filename and uses proxy fallback for domstol.se downloads. Court→format mapping is duplicated in the script — keep it in sync with `courtConfig.ts`.
 
@@ -69,5 +68,3 @@ The tool auto-detects the court from the URL/filename and uses proxy fallback fo
 - 5174 — tingsrattens-mal (this project)
 - 8080 — sweden-transit-wonderland-mapper
 
-## Working with Lovable
-This project is also edited in Lovable. Always pull before starting work to get latest changes. Don't restructure the project layout or rename files that Lovable manages without good reason.
