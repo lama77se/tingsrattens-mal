@@ -122,7 +122,14 @@ async function main() {
     console.error(`Calling edge function for: ${input}`);
     const edgeUrl = "https://adjhjnlxcfkqbmlzgslj.supabase.co/functions/v1/fetch-court-pdf";
     const edgeKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkamhqbmx4Y2ZrcWJtbHpnc2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1ODQxMjQsImV4cCI6MjA1NDE2MDEyNH0.dGCfBPOQhjAJTpYqLSKk_iqy6ObrCYg0k5JHcNIhR0w";
-    const body = JSON.stringify({ pdfUrl: input });
+    const edgeBody = { pdfUrl: input };
+    // Pass yTolerance if specified via --ytol flag
+    const ytolIdx = args.indexOf("--ytol");
+    if (ytolIdx !== -1 && args[ytolIdx + 1]) {
+      edgeBody.yTolerance = Number(args[ytolIdx + 1]);
+      console.error(`  yTolerance: ${edgeBody.yTolerance}`);
+    }
+    const body = JSON.stringify(edgeBody);
     const resp = await new Promise((resolve, reject) => {
       const req = https.request(edgeUrl, {
         method: "POST",
