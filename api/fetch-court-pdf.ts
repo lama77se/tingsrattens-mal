@@ -1,8 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
 
-// Disable worker in serverless environment
-GlobalWorkerOptions.workerSrc = "";
+async function loadPdfjs() {
+  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+  return pdfjsLib;
+}
 
 interface TextItem {
   str: string;
@@ -232,8 +234,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Extract text using pdfjs-dist
+    const pdfjsLib = await loadPdfjs();
     const data = new Uint8Array(pdfBytes);
-    const doc = await getDocument({
+    const doc = await pdfjsLib.getDocument({
       data,
       useSystemFonts: true,
       disableFontFace: true,
