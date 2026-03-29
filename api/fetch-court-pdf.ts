@@ -1,5 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
+
+// Disable worker in serverless environment
+GlobalWorkerOptions.workerSrc = "";
 
 interface TextItem {
   str: string;
