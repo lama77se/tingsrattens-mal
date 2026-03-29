@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-// @ts-expect-error pdf-parse has no types
-import pdfParse from "pdf-parse";
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require("pdf-parse");
 
 /** Fetch with a timeout via AbortController */
 async function fetchWithTimeout(
