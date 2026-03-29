@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 export interface CourtPdfResult {
   success: boolean;
   text?: string;
@@ -20,13 +18,27 @@ export async function fetchCourtPdf(
   year?: number,
   yTolerance?: number
 ): Promise<CourtPdfResult> {
-  const { data, error } = await supabase.functions.invoke("fetch-court-pdf", {
-    body: { pdfUrl, weekNumber, year, ...(yTolerance && { yTolerance }) },
-  });
+  try {
+    const resp = await fetch("/api/fetch-court-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pdfUrl,
+        weekNumber,
+        year,
+        ...(yTolerance && { yTolerance }),
+      }),
+    });
 
-  if (error) {
-    return { success: false, error: error.message };
+    if (!resp.ok) {
+      return { success: false, error: `HTTP ${resp.status}` };
+    }
+
+    return (await resp.json()) as CourtPdfResult;
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
-
-  return data as CourtPdfResult;
 }
