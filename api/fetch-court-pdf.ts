@@ -1,84 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-
-// Polyfill DOMMatrix for pdfjs-dist in Node.js serverless environment
-if (typeof globalThis.DOMMatrix === "undefined") {
-  globalThis.DOMMatrix = class DOMMatrix {
-    a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
-    m11 = 1; m12 = 0; m13 = 0; m14 = 0;
-    m21 = 0; m22 = 1; m23 = 0; m24 = 0;
-    m31 = 0; m32 = 0; m33 = 1; m34 = 0;
-    m41 = 0; m42 = 0; m43 = 0; m44 = 1;
-    is2D = true; isIdentity = true;
-    constructor(init?: number[] | string) {
-      if (Array.isArray(init) && init.length >= 6) {
-        [this.a, this.b, this.c, this.d, this.e, this.f] = init;
-        this.m11 = this.a; this.m12 = this.b;
-        this.m21 = this.c; this.m22 = this.d;
-        this.m41 = this.e; this.m42 = this.f;
-      }
-    }
-  } as unknown as typeof DOMMatrix;
-}
-
-async function loadPdfjs() {
-  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  // Point to the worker module so the fake worker can load it
-  const path = await import("path");
-  const workerPath = path.join(
-    process.cwd(),
-    "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
-  );
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerPath;
-  return pdfjsLib;
-}
-
-interface TextItem {
-  str: string;
-  transform: number[];
-  width?: number;
-}
-
-/**
- * Group text items by y-coordinate into visual rows, then sort properly.
- * Returns one string per visual row (top-to-bottom, left-to-right within each row).
- */
-function groupItemsIntoRows(items: TextItem[], yTolerance = 3): string[] {
-  const filtered = items.filter((item) => item.str.trim().length > 0);
-  if (filtered.length === 0) return [];
-
-  const sorted = [...filtered].sort((a, b) => b.transform[5] - a.transform[5]);
-  const xCollisionTolerance = 10;
-
-  const rows: { y: number; items: TextItem[] }[] = [];
-  for (const item of sorted) {
-    const y = item.transform[5];
-    const x = item.transform[4];
-    const existingRow = rows.find((r) => {
-      if (Math.abs(r.y - y) > yTolerance) return false;
-      const hasXCollision = r.items.some(
-        (ri) => Math.abs(ri.transform[4] - x) < xCollisionTolerance
-      );
-      return !hasXCollision;
-    });
-    if (existingRow) {
-      existingRow.items.push(item);
-    } else {
-      rows.push({ y, items: [item] });
-    }
-  }
-
-  rows.sort((a, b) => b.y - a.y);
-
-  return rows
-    .map((row) => {
-      row.items.sort((a, b) => a.transform[4] - b.transform[4]);
-      return row.items
-        .map((item) => item.str)
-        .join(" ")
-        .trim();
-    })
-    .filter(Boolean);
-}
+// @ts-expect-error pdf-parse has no types
+import pdfParse from "pdf-parse";
 
 /** Fetch with a timeout via AbortController */
 async function fetchWithTimeout(
@@ -98,10 +20,7 @@ async function fetchWithTimeout(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "content-type"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
@@ -112,7 +31,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const pdfUrl: string = body.pdfUrl;
     const weekNumber: number | undefined = body.weekNumber;
     const year: number | undefined = body.year;
-    const yTolerance: number = body.yTolerance ?? 3;
 
     if (!pdfUrl) {
       return res
@@ -123,7 +41,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!pdfUrl.startsWith("https://www.domstol.se/")) {
       return res
         .status(400)
-        .json({ success: false, error: "Ogiltig URL -- måste vara från domstol.se" });
+        .json({
+          success: false,
+          error: "Ogiltig URL -- måste vara från domstol.se",
+        });
     }
 
     console.log(`[fetch-court-pdf] Fetching: ${pdfUrl}`);
@@ -157,7 +78,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await resp.text();
       } else {
         const buf = await resp.arrayBuffer();
-        const header = new TextDecoder().decode(new Uint8Array(buf.slice(0, 10)));
+        const header = new TextDecoder().decode(
+          new Uint8Array(buf.slice(0, 10))
+        );
         if (!header.startsWith("%PDF")) {
           const snippet = new TextDecoder().decode(
             new Uint8Array(buf.slice(0, 200))
@@ -259,26 +182,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // Extract text using pdfjs-dist
-    const pdfjsLib = await loadPdfjs();
-    const data = new Uint8Array(pdfBytes);
-    const doc = await pdfjsLib.getDocument({
-      data,
-      useSystemFonts: true,
-      disableFontFace: true,
-    }).promise;
-    const numPages = doc.numPages;
-    const allLines: string[] = [];
-
-    for (let p = 1; p <= numPages; p++) {
-      const page = await doc.getPage(p);
-      const content = await page.getTextContent();
-      const items = content.items as TextItem[];
-      const rows = groupItemsIntoRows(items, yTolerance);
-      allLines.push(...rows);
-    }
-
-    const extractedText = allLines.join("\n");
+    // Extract text using pdf-parse
+    const buffer = Buffer.from(pdfBytes);
+    const parsed = await pdfParse(buffer);
+    const extractedText: string = parsed.text || "";
+    const numPages: number = parsed.numpages || 0;
     const timePatterns = extractedText.match(/\d{2}[.:]\d{2}/g) || [];
 
     return res.status(200).json({
