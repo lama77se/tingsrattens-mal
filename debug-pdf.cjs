@@ -120,8 +120,7 @@ async function main() {
   if (useEdge && input.startsWith("http")) {
     // Call production edge function for text extraction
     console.error(`Calling edge function for: ${input}`);
-    const edgeUrl = "https://adjhjnlxcfkqbmlzgslj.supabase.co/functions/v1/fetch-court-pdf";
-    const edgeKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkamhqbmx4Y2ZrcWJtbHpnc2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1ODQxMjQsImV4cCI6MjA1NDE2MDEyNH0.dGCfBPOQhjAJTpYqLSKk_iqy6ObrCYg0k5JHcNIhR0w";
+    const edgeUrl = "https://tingsrattens-mal.vercel.app/api/fetch-court-pdf";
     const edgeBody = { pdfUrl: input };
     // Pass yTolerance if specified via --ytol flag
     const ytolIdx = args.indexOf("--ytol");
@@ -133,7 +132,7 @@ async function main() {
     const resp = await new Promise((resolve, reject) => {
       const req = https.request(edgeUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${edgeKey}` },
+        headers: { "Content-Type": "application/json" },
       }, (res) => {
         const chunks = [];
         res.on("data", (c) => chunks.push(c));
