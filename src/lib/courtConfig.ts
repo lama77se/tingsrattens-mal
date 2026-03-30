@@ -40,9 +40,18 @@ export const COURTS: CourtConfig[] = [
     buildUrl: (week, year) => {
       const monday = getISOWeekMonday(week, year);
       const friday = addDays(monday, 4);
+      const thursday = addDays(monday, 3);
       const monStr = format(monday, "yyyy-MM-dd");
-      const friDay = format(friday, "dd");
-      return `${BASE}/attunda_tingsratt/veckans-forhandlingar/webb-forhandlingar-v.${week}-${monStr}---${friDay}.pdf`;
+      const base = `${BASE}/attunda_tingsratt/veckans-forhandlingar/webb-forhandlingar-v.${week}-${monStr}`;
+      const candidates: string[] = [];
+      // Generate URL variants for both Friday and Thursday (holidays shorten the week)
+      for (const endDay of [friday, thursday]) {
+        const crossMonth = monday.getMonth() !== endDay.getMonth();
+        const endStr = crossMonth ? format(endDay, "MM-dd") : format(endDay, "dd");
+        const dashes = crossMonth ? "----" : "---";
+        candidates.push(`${base}${dashes}${endStr}.pdf`);
+      }
+      return candidates;
     },
   },
   {
@@ -66,9 +75,16 @@ export const COURTS: CourtConfig[] = [
     buildUrl: (week, year) => {
       const monday = getISOWeekMonday(week, year);
       const friday = addDays(monday, 4);
+      const thursday = addDays(monday, 3);
       const monStr = format(monday, "yyyy-MM-dd");
       const friStr = format(friday, "yyyy-MM-dd");
-      return `${BASE}/stockholms_tingsratt/forhandlingar-${year}/forhandlingar-i-stockholms-tingsratt-vecka-${week}-${monStr}-till-och-med-${friStr}.pdf`;
+      const thuStr = format(thursday, "yyyy-MM-dd");
+      const base = `${BASE}/stockholms_tingsratt/forhandlingar-${year}/forhandlingar-i-stockholms-tingsratt-vecka-${week}-${monStr}-till-och-med-`;
+      // Try Friday first, then Thursday (holidays like Långfredagen shorten the week)
+      return [
+        `${base}${friStr}.pdf`,
+        `${base}${thuStr}.pdf`,
+      ];
     },
   },
   {
