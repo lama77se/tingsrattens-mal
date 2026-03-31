@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Brå PDF (downloaded for lagrum generation)
+bra-klassificering.pdf
