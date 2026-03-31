@@ -331,6 +331,13 @@ function classifyCode(code, desc) {
   const c = parseInt(code, 10);
   const lowerDesc = desc.toLowerCase();
 
+  // Description-based matching FIRST — takes priority over code ranges
+  // because some code ranges overlap (e.g. 3005 is rattfylleri, not miljöbrott)
+  if (lowerDesc.includes("narkotika")) return { sakomrade: "Narkotikabrott", lawHint: "Narkotikastrafflagen" };
+  if (lowerDesc.includes("rattfylleri") || lowerDesc.includes("rattonykter")) return { sakomrade: "Trafikbrott", lawHint: "Trafikbrottslagen" };
+  if (lowerDesc.includes("smuggling") || lowerDesc.includes("tullbrott")) return { sakomrade: "Tull- och smugglingsbrott", lawHint: "Smugglingslagen" };
+  if (lowerDesc.includes("vapen") && !lowerDesc.includes("skjutvapen")) return { sakomrade: "Vapenbrott", lawHint: "Vapenlagen" };
+
   // BrB code ranges — verified against the actual PDF brottskoder listing
   // 0309-0396: 3 kap. BrB (liv och hälsa: mord, misshandel, vållande)
   if (c >= 309 && c <= 399) return { sakomrade: "Brott mot liv och hälsa", lawHint: "BrB 3 kap." };
@@ -489,13 +496,8 @@ function classifyCode(code, desc) {
     return { sakomrade: "Övriga brott", lawHint: "" };
   }
 
-  // Broad catch by description
-  if (lowerDesc.includes("narkotika")) return { sakomrade: "Narkotikabrott", lawHint: "Narkotikastrafflagen" };
-  if (lowerDesc.includes("vapen")) return { sakomrade: "Vapenbrott", lawHint: "Vapenlagen" };
-  if (lowerDesc.includes("smuggling")) return { sakomrade: "Tull- och smugglingsbrott", lawHint: "Smugglingslagen" };
-  if (lowerDesc.includes("trafik") || lowerDesc.includes("rattonykter") || lowerDesc.includes("rattfylleri")) {
-    return { sakomrade: "Trafikbrott", lawHint: "Trafikbrottslagen" };
-  }
+  // Broad catch by description (remaining cases)
+  if (lowerDesc.includes("trafik")) return { sakomrade: "Trafikbrott", lawHint: "Trafikbrottslagen" };
   if (lowerDesc.includes("alkohol") || lowerDesc.includes("sprit")) {
     return { sakomrade: "Alkohol- och punktskattebrott", lawHint: "Alkohollagen" };
   }
@@ -532,6 +534,70 @@ function mergeAndGenerate(pass1, pass2) {
   }
 
   log(`Pass 2: added ${pass2Added} new entries, skipped ${pass2Skipped} duplicates`);
+
+  // Add common court saken terms that Brå doesn't use verbatim.
+  // Courts use short crime names like "stöld" or "misshandel" without Brå's
+  // detailed qualifiers. These are essential for matchLagrum to work.
+  const COMMON_ALIASES = {
+    "stöld": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 8 kap. 1 §"] },
+    "grov stöld": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 8 kap. 4 §"] },
+    "ringa stöld": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 8 kap. 2 §"] },
+    "grov misshandel": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 6 §"] },
+    "ringa misshandel": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 5 §"] },
+    "synnerligen grov misshandel": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 6 §"] },
+    "mord": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 1 §"] },
+    "dråp": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 2 §"] },
+    "våldtäkt": { sakomrade: "Sexualbrott", primart_lagrum: ["BrB 6 kap. 1 §"] },
+    "grov våldtäkt": { sakomrade: "Sexualbrott", primart_lagrum: ["BrB 6 kap. 1 §"] },
+    "våldtäkt mot barn": { sakomrade: "Sexualbrott", primart_lagrum: ["BrB 6 kap. 4 §"] },
+    "bedrägeri": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 9 kap. 1 §"] },
+    "grovt bedrägeri": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 9 kap. 3 §"] },
+    "narkotikabrott": { sakomrade: "Narkotikabrott", primart_lagrum: ["Narkotikastrafflagen (1968:64) 1 §"] },
+    "grovt narkotikabrott": { sakomrade: "Narkotikabrott", primart_lagrum: ["Narkotikastrafflagen (1968:64) 3 §"] },
+    "ringa narkotikabrott": { sakomrade: "Narkotikabrott", primart_lagrum: ["Narkotikastrafflagen (1968:64) 2 §"] },
+    "skadegörelse": { sakomrade: "Skadegörelsebrott", primart_lagrum: ["BrB 12 kap. 1 §"] },
+    "grov skadegörelse": { sakomrade: "Skadegörelsebrott", primart_lagrum: ["BrB 12 kap. 3 §"] },
+    "förfalskning": { sakomrade: "Förfalskningsbrott", primart_lagrum: ["BrB 14 kap. 1 §"] },
+    "urkundsförfalskning": { sakomrade: "Förfalskningsbrott", primart_lagrum: ["BrB 14 kap. 1 §"] },
+    "grov urkundsförfalskning": { sakomrade: "Förfalskningsbrott", primart_lagrum: ["BrB 14 kap. 3 §"] },
+    "bokföringsbrott": { sakomrade: "Brott mot borgenärer / ekonomisk brottslighet", primart_lagrum: ["BrB 11 kap. 5 §"] },
+    "grovt bokföringsbrott": { sakomrade: "Brott mot borgenärer / ekonomisk brottslighet", primart_lagrum: ["BrB 11 kap. 5 §"] },
+    "mordbrand": { sakomrade: "Allmänfarliga brott", primart_lagrum: ["BrB 13 kap. 1 §"] },
+    "grov mordbrand": { sakomrade: "Allmänfarliga brott", primart_lagrum: ["BrB 13 kap. 2 §"] },
+    "förskingring": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 10 kap. 1 §"] },
+    "trolöshet mot huvudman": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 10 kap. 5 §"] },
+    "grovt rattfylleri": { sakomrade: "Trafikbrott", primart_lagrum: ["Trafikbrottslagen (1951:649) 4 a §"] },
+    "vapenbrott": { sakomrade: "Vapenbrott", primart_lagrum: ["Vapenlagen (1996:67) 9 kap."] },
+    "grovt vapenbrott": { sakomrade: "Vapenbrott", primart_lagrum: ["Vapenlagen (1996:67) 9 kap."] },
+    "bidragsbrott": { sakomrade: "Ekonomisk brottslighet", primart_lagrum: ["Bidragsbrottslagen (2007:612) 2 §"] },
+    "vållande till annans död": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 7 §"] },
+    "vållande till kroppsskada": { sakomrade: "Brott mot liv och hälsa", primart_lagrum: ["BrB 3 kap. 8 §"] },
+    "olaga tvång": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 4 §"] },
+    "mened": { sakomrade: "Brott mot rättskipningen", primart_lagrum: ["BrB 15 kap. 1 §"] },
+    "övergrepp i rättssak": { sakomrade: "Brott mot allmän verksamhet", primart_lagrum: ["BrB 17 kap. 10 §"] },
+    "hot mot tjänsteman": { sakomrade: "Brott mot allmän verksamhet", primart_lagrum: ["BrB 17 kap. 1 §"] },
+    "våld mot tjänsteman": { sakomrade: "Brott mot allmän verksamhet", primart_lagrum: ["BrB 17 kap. 1 §"] },
+    "våldsamt motstånd": { sakomrade: "Brott mot allmän verksamhet", primart_lagrum: ["BrB 17 kap. 4 §"] },
+    "hets mot folkgrupp": { sakomrade: "Brott mot allmän ordning", primart_lagrum: ["BrB 16 kap. 8 §"] },
+    "barnfridsbrott": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 3 §"] },
+    "grovt barnfridsbrott": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 3 §"] },
+    "olaga förföljelse": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 4 b §"] },
+    "grov kvinnofridskränkning": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 4 a §"] },
+    "grov fridskränkning": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 4 a §"] },
+    "egenmäktigt förfarande": { sakomrade: "Förmögenhetsbrott", primart_lagrum: ["BrB 8 kap. 8 §"] },
+    "dataintrång": { sakomrade: "Brott mot frihet och frid", primart_lagrum: ["BrB 4 kap. 9 c §"] },
+    "sabotage": { sakomrade: "Allmänfarliga brott", primart_lagrum: ["BrB 13 kap. 4 §"] },
+  };
+
+  let aliasAdded = 0;
+  for (const [key, entry] of Object.entries(COMMON_ALIASES)) {
+    if (!merged[key]) {
+      merged[key] = entry;
+      aliasAdded++;
+    }
+  }
+  log(`Common aliases: added ${aliasAdded} court saken terms`);
+
   return merged;
 }
 

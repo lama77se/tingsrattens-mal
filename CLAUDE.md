@@ -16,6 +16,7 @@ Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, ext
 - `npm run build` — Production build
 - `npm run lint` — ESLint
 - `npm test` — Vitest
+- `node scripts/generate-lagrum.cjs [pdf-url-or-file]` — Regenerate lagrumMappings.ts from Brå PDF
 
 ## Project Structure
 ```
