@@ -312,6 +312,43 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["BrB 4 kap. 6 a §"],
   },
+  // Osann försäkran — BrB 15 kap. 10 §
+  "osann försäkran": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 10 §"],
+  },
+  "vårdslös försäkran": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 10 §"],
+  },
+  // Olovlig hantering av alkohol — Alkohollagen (2010:1622) 11 kap. 9 §
+  "olovlig hantering av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap. 9 §"],
+  },
+  "olovligt innehav av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap. 6 §"],
+  },
+  // Vårdslöshet i trafik / grov vårdslöshet i trafik — Trafikbrottslagen 1 §
+  "vårdslöshet i trafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 1 §"],
+  },
+  "grov vårdslöshet i trafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 1 § 2 st"],
+  },
+  // Brott mot ordningslagen — Ordningslagen (1993:1617)
+  "brott mot ordningslagen": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["Ordningslagen (1993:1617)"],
+  },
+  // Brott mot taxitrafikförordningen — Taxitrafikförordning (2012:238)
+  "brott mot taxitrafikförordningen": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Taxitrafikförordning (2012:238)"],
+  },
   // Olaga integritetsintrång — BrB 4 kap. 6 c § (related but separate)
   "olaga integritetsintrång": {
     sakomrade: "Brott mot frihet och frid",
