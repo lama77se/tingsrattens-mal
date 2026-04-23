@@ -222,6 +222,12 @@
     { "name": "Attunda T: jämkning av bodelningsavtal", "saken": "jämkning av bodelningsavtal", "caseNumber": "T 15644-25", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 12 kap." },
     { "name": "Attunda T: klander av arvskifte", "saken": "klander av arvskifte", "caseNumber": "T 14121-25", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 23 kap. 8 §" },
     { "name": "Attunda T: fel i upplåten bostadsrätt", "saken": "fel i upplåten bostadsrätt", "caseNumber": "T 16253-25", "sakomrade": "Fastighetsrätt", "lagrum": "Bostadsrättslagen (1991:614) 7 kap. 1 §" },
-    { "name": "Attunda FT: mål om parkering", "saken": "mål om parkering (överlämnat mål från kronofogden), ref. 807070-2399342", "caseNumber": "FT 1582-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" }
+    { "name": "Attunda FT: mål om parkering", "saken": "mål om parkering (överlämnat mål från kronofogden), ref. 807070-2399342", "caseNumber": "FT 1582-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" },
+
+    { "name": "Linköping T: handräckning (överlämnat från kronofogden)", "saken": "handräckning (överlämnat från kronofogden)", "caseNumber": "T 260-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1990:746) om betalningsföreläggande och handräckning" },
+    { "name": "Proactive: kränkande fotografering (BrB 4:6a)", "saken": "kränkande fotografering", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 a §" },
+    { "name": "Proactive: olaga integritetsintrång (BrB 4:6c)", "saken": "olaga integritetsintrång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 c §" },
+    { "name": "Empty case number now tries all indexes — family term matches", "saken": "vårdnad, boende och umgänge", "caseNumber": "", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 6 kap." },
+    { "name": "Empty case number — civil term matches", "saken": "fordran", "caseNumber": "", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" }
   ]
 }
