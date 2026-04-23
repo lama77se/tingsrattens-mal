@@ -82,15 +82,24 @@ describe("parseCourtPdf dispatcher", () => {
   });
 
   it("fills missing fields with defaults", () => {
-    // No date, no room, minimal data
-    const text = "B 9999-25";
+    // Minimal data — saken present so row is considered a real hearing
+    // (bare case-number-only rows are now correctly treated as continuation
+    // markers and skipped, matching multi-day PDF formats like Halmstad).
+    const text = "B 9999-25 misshandel";
     const result = parseCourtPdf(text, "Test");
     expect(result).toHaveLength(1);
     expect(result[0].date).toBe("Okänt datum");
     expect(result[0].time).toBe("–");
     expect(result[0].room).toBe("–");
-    expect(result[0].saken).toBe("–");
+    expect(result[0].saken).toBe("misshandel");
     expect(result[0].parties).toBe("–");
+  });
+
+  it("skips bare case-number rows with no time and no saken (continuation markers)", () => {
+    // Halmstad-style multi-day continuation block at top of PDF
+    const text = ["2026-04-27", "2026-04-28", "B 1444-25", "B 930-26"].join("\n");
+    const result = parseCourtPdf(text, "Test");
+    expect(result).toHaveLength(0);
   });
 
   it("resolves externalCourt from tabular format (Stockholm)", () => {
