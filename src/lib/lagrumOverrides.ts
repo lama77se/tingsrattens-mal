@@ -109,6 +109,33 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276) 3 kap. 17 §"],
   },
+  // Smitning från trafikolycksplats — Trafikbrottslagen 5 §
+  "smitning från trafikolycksplats": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 5 §"],
+  },
+  "obehörigt avvikande från trafikolycksplats": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 5 §"],
+  },
+  // Skyddslagen (2010:305) — images of protected objects
+  "olovlig avbildning av skyddsobjekt": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["Skyddslagen (2010:305) 30 a §"],
+  },
+  "olovlig avbildning": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["Skyddslagen (2010:305) 30 a §"],
+  },
+  // Brott mot hundlagen
+  "brott mot lagen om tillsyn över hundar och katter": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Lag (2007:1150) om tillsyn över hundar och katter"],
+  },
+  "brott mot hundlagen": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Lag (2007:1150) om tillsyn över hundar och katter"],
+  },
   // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
   "arbetsmiljöbrott": {
     sakomrade: "Brott mot liv och hälsa",

@@ -173,6 +173,10 @@
 
     { "name": "Helsingborg B: hastighetsöverträdelse", "saken": "hastighetsöverträdelse", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 3 kap. 17 §" },
     { "name": "Helsingborg parser: 'fordran20' (room glued)", "saken": "fordran20", "caseNumber": "T 7515-25", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
-    { "name": "Helsingborg parser: 'misshandel1' (room glued)", "saken": "misshandel1", "caseNumber": "B 4265-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" }
+    { "name": "Helsingborg parser: 'misshandel1' (room glued)", "saken": "misshandel1", "caseNumber": "B 4265-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+
+    { "name": "Blekinge B: olovlig avbildning av skyddsobjekt", "saken": "olovlig avbildning av skyddsobjekt", "caseNumber": "B 1183-26", "sakomrade": "Brott mot Sveriges säkerhet", "lagrum": "Skyddslagen (2010:305) 30 a §" },
+    { "name": "Blekinge B: brott mot lagen om tillsyn över hundar och katter", "saken": "brott mot lagen om tillsyn över hundar och katter", "caseNumber": "B 956-26", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Lag (2007:1150) om tillsyn över hundar och katter" },
+    { "name": "Proactive: smitning från trafikolycksplats", "saken": "smitning från trafikolycksplats", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 5 §" }
   ]
 }
