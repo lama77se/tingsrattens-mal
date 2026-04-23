@@ -12,6 +12,12 @@ import type { LagrumEntry } from "./lagrumMappings";
  */
 export const lagrumOverrides: Record<string, LagrumEntry> = {
   // --- Court PDF typos / truncations ---
+  // The generated "hemfridsbrott" entry is sakomrade "Övriga brott" with no
+  // lagrum; override the correctly-spelled form to the right classification.
+  "hemfridsbrott": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 §"],
+  },
   // "hemfridsbott" (missing 'r') appears in Gävle PDFs
   "hemfridsbott": {
     sakomrade: "Brott mot frihet och frid",
