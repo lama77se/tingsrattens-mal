@@ -137,6 +137,23 @@
     { "name": "Solna T: personligt betalningsansvar ABL 25:18", "saken": "Personligt betalningsansvar jämlikt 25 kap.18 aktiebolagslagen", "caseNumber": "T 7714-25", "sakomrade": "Fordringsrätt", "lagrum": "Aktiebolagslagen (2005:551) 25 kap. 18 §" },
     { "name": "Solna T: bättre rätt till aktier", "saken": "Bättre rätt till aktier", "caseNumber": "T 12663-25", "sakomrade": "Sakrätt", "lagrum": "" },
     { "name": "Solna FT: kontrollavgift vid olovlig parkering", "saken": "Kontrollavgift vid olovlig parkering", "caseNumber": "FT 10038-25", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1984:318) om kontrollavgift vid olovlig parkering" },
-    { "name": "Solna Ä: anordnande av förvaltarskap", "saken": "Anordnande av förvaltarskap", "caseNumber": "Ä 74-26", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap. 7 §" }
+    { "name": "Solna Ä: anordnande av förvaltarskap", "saken": "Anordnande av förvaltarskap", "caseNumber": "Ä 74-26", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap. 7 §" },
+
+    { "name": "Stockholm B: skattebrott (base)", "saken": "skattebrott", "caseNumber": "B 12630-25", "sakomrade": "Skattebrott", "lagrum": "Skattebrottslagen (1971:69) 2 §" },
+    { "name": "Stockholm B: ringa dopningsbrott", "saken": "ringa dopningsbrott", "caseNumber": "B 7108-26", "sakomrade": "Narkotikabrott", "lagrum": "Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 § 2 st" },
+    { "name": "Stockholm B: ohörsamhet mot ordningsmakten", "saken": "ohörsamhet mot ordningsmakten", "caseNumber": "B 1768-26", "sakomrade": "Brott mot allmän ordning", "lagrum": "BrB 16 kap. 3 §" },
+    { "name": "Stockholm B: missbruk av urkund", "saken": "missbruk av urkund", "caseNumber": "B 7261-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 15 kap. 12 §" },
+    { "name": "Stockholm B: medhjälp till folkrättsbrott, grovt brott", "saken": "medhjälp till folkrättsbrott, grovt brott", "caseNumber": "B 11304-14", "sakomrade": "Landsförräderi", "lagrum": "BrB 22 kap. 6 §" },
+    { "name": "Stockholm B: narkotikasmuggling", "saken": "narkotikasmuggling, m.m", "caseNumber": "B 6918-25", "sakomrade": "Tull- och smugglingsbrott", "lagrum": "Smugglingslagen (2000:1225) 6 §" },
+    { "name": "Stockholm B: grovt näringspenningtvättsbrott", "saken": "grovt näringspenningtvättsbrott", "caseNumber": "B 19293-25", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Lagen (2014:307) om straff för penningtvättsbrott 7 §" },
+    { "name": "Stockholm T: semesterersättning", "saken": "semesterersättning", "caseNumber": "T 25565-25", "sakomrade": "Arbetsrätt", "lagrum": "Semesterlagen (1977:480)" },
+    { "name": "Stockholm T: ogiltigförklaring av uppsägning", "saken": "ogiltigförklaring av uppsägning m.m", "caseNumber": "T 20001-25", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80) 34 §" },
+    { "name": "Stockholm T: fel i bostadsrätt", "saken": "fel i bostadsrätt", "caseNumber": "T 25099-25", "sakomrade": "Fastighetsrätt", "lagrum": "Bostadsrättslagen (1991:614)" },
+    { "name": "Stockholm T: avflyttning", "saken": "Avflyttning m.m. (överlämnat från kronofogden)", "caseNumber": "T 593-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
+    { "name": "Stockholm FT: arbetsrätt (bare word)", "saken": "arbetsrätt", "caseNumber": "FT 1871-26", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80)" },
+    { "name": "Stockholm PMT: hävning av företagsnamn", "saken": "hävning av företagsnamn", "caseNumber": "PMT 25020-25", "sakomrade": "Immaterialrätt", "lagrum": "Lag (2018:1653) om företagsnamn" },
+    { "name": "Stockholm PMÄ with saken-embedded case ref", "saken": "PMÄ 8348-25 konkurrensskadeavgift", "caseNumber": "–", "sakomrade": "Konkurrensrätt", "lagrum": "Konkurrenslagen (2008:579) 3 kap. 5 §" },
+    { "name": "Stockholm PMFT with saken-embedded case ref", "saken": "PMFT 19315-25 fordran", "caseNumber": "–", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
+    { "name": "Stockholm Ä: parkeringsanmärkning", "saken": "parkeringsanmärkning", "caseNumber": "Ä 5327-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" }
   ]
 }

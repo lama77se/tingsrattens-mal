@@ -129,7 +129,14 @@ const INDEX_KONKURS = buildIndex(konkursLagrumOverrides);
 function caseTypeFromCaseNumber(caseNumber: string): CaseType {
   const trimmed = caseNumber.trim().toUpperCase();
   if (!trimmed) return "";
-  if (/^FT\b/.test(trimmed)) return "FT";
+  // Patent- och marknadsdomstolen prefixes map to their "mother" case types.
+  // Using lookahead with non-letter char (not \b) so Å/Ä/Ö work correctly.
+  const sep = "(?=\\s|$|[^A-ZÅÄÖa-zåäö])";
+  if (new RegExp(`^PMFT${sep}`).test(trimmed)) return "FT";
+  if (new RegExp(`^PMT${sep}`).test(trimmed)) return "T";
+  if (new RegExp(`^PMÄ${sep}`).test(trimmed)) return "Ä";
+  if (new RegExp(`^PMB${sep}`).test(trimmed)) return "B";
+  if (new RegExp(`^FT${sep}`).test(trimmed)) return "FT";
   const first = trimmed.charAt(0);
   if (first === "B") return "B";
   if (first === "T") return "T";
@@ -137,6 +144,19 @@ function caseTypeFromCaseNumber(caseNumber: string): CaseType {
   if (first === "Ä") return "Ä";
   if (first === "K") return "K";
   return "";
+}
+
+/**
+ * Some parsers put the case-type prefix inside the saken field instead of the
+ * caseNumber field ("PMÄ 8348-25 konkurrensskadeavgift"). Detect that pattern
+ * so we can route correctly.
+ */
+const SAKEN_PREFIX_CASE_RE = /^(PMFT|PMT|PMÄ|PMB|FT|B|T|F|Ä|K)\s+\d+-\d+\s*/i;
+
+function extractCaseTypeFromSaken(saken: string): CaseType {
+  const m = saken.trim().match(SAKEN_PREFIX_CASE_RE);
+  if (!m) return "";
+  return caseTypeFromCaseNumber(m[1]);
 }
 
 function indexesForCaseType(caseType: CaseType): IndexedMap[] {
@@ -250,6 +270,8 @@ function findOnce(
 function cleanFragment(s: string): string {
   return s
     .toLowerCase()
+    // Strip saken-embedded case refs like "PMÄ 8348-25 ..." or "pmft 19315-25 ..."
+    .replace(/^(pmft|pmt|pmä|pmb|ft|b|t|f|ä|k)\s+\d+-\d+\s+/i, "")
     // Strip room/venue artefacts that some court parsers leave in the saken
     // field (e.g. Nyköping's "... Tingssal", Halmstad's "... Sal 3").
     .replace(/\s+(tingssal|tingsrätten)\s*$/i, "")
@@ -278,7 +300,10 @@ function matchFragment(
 export function matchLagrum(saken: string, caseNumber: string): LagrumMatch {
   const empty: LagrumMatch = { lagrum: "", sakomrade: "" };
 
-  const caseType = caseTypeFromCaseNumber(caseNumber);
+  let caseType = caseTypeFromCaseNumber(caseNumber);
+  // Fall back to a saken-embedded case ref ("PMÄ 8348-25 konkurrensskadeavgift")
+  // when the parser couldn't extract the caseNumber field.
+  if (!caseType) caseType = extractCaseTypeFromSaken(saken);
   const cleanSaken = cleanFragment(saken);
   if (!cleanSaken) return empty;
 

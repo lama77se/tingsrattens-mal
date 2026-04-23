@@ -60,6 +60,7 @@ export const SAKOMRADEN = [
   "Hyresrätt",
   "Arrenderätt",
   "Immaterialrätt",
+  "Konkurrensrätt",
   // Family / ärenden / konkurs
   "Familjerätt",
   "Arvsrätt",
