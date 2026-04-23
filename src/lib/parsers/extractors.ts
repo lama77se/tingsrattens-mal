@@ -272,6 +272,14 @@ export function extractHearingType(lines: string[], index: number): string {
  * Clean raw saken text by removing room, time, hearing type artifacts.
  */
 export function cleanSaken(text: string): string {
+  // The PDF header line "Förhandlingar i <court> tingsrätt, vecka N" sometimes
+  // leaks into the saken field for hearings that lack a proper saken column.
+  // Returning empty here avoids matching the header text as a hearing subject.
+  if (
+    /^\s*F[öo]rhandlingar\s+i\s+[\wåäöÅÄÖ]+\s+tingsr[äa]tt/i.test(text)
+  ) {
+    return "";
+  }
   let saken = text
     .replace(ROOM_REGEX, "")
     .replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "")
@@ -279,7 +287,17 @@ export function cleanSaken(text: string): string {
     .replace(TIME_REGEX, "")
     .trim();
   for (const ht of HEARING_TYPES) {
-    saken = saken.replace(new RegExp(ht, "gi"), "").trim();
+    // Word-boundary-aware: don't strip "Förhandling" when it's actually
+    // "Förhandlingar" (e.g. in header lines).
+    saken = saken
+      .replace(
+        new RegExp(
+          `(?<![a-zåäöA-ZÅÄÖ])${ht}(?![a-zåäöA-ZÅÄÖ])`,
+          "gi"
+        ),
+        ""
+      )
+      .trim();
   }
   // Strip trailing court name used as location (e.g., "... Attunda tingsrätt")
   saken = saken.replace(/\s+\S+\s+tingsrätt\s*$/i, "").trim();

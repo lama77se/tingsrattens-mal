@@ -136,6 +136,102 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Övrig speciallagstiftning",
     primart_lagrum: ["Lag (2007:1150) om tillsyn över hundar och katter"],
   },
+  // Totalförsvarsplikten (Blekinge)
+  "brott mot totalförsvarsplikten": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
+  },
+  // Trafikförseelse (Halmstad) — generic traffic offense under Trafikförordningen
+  "trafikförseelse": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276)"],
+  },
+  // Brott mot fordonsförordningen (Göteborg)
+  "brott mot fordonsförordningen": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Fordonsförordningen (2009:211)"],
+  },
+  // Vistelseförbud — Lag (2024:7) om preventiva vistelseförbud
+  "vistelseförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (2024:7) om preventiva vistelseförbud"],
+  },
+  // Tullbrott / grovt tullbrott — Smugglingslagen 8 § / 10 §
+  "tullbrott": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 8 §"],
+  },
+  "grovt tullbrott": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 10 §"],
+  },
+  // Företagsbot — BrB 36 kap. 7 §
+  "företagsbot": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["BrB 36 kap. 7 §"],
+  },
+  // Olaga taxitrafik — Taxitrafiklagen 5 kap. 1 §
+  "olaga taxitrafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Taxitrafiklagen (2012:211) 5 kap. 1 §"],
+  },
+  // Förgripelse mot tjänsteman — BrB 17 kap. 2 §
+  "förgripelse mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 2 §"],
+  },
+  "grov förgripelse mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 2 §"],
+  },
+  // Muta — BrB 10 kap. 5a-5c § (mutbrottsreformen 2012). Generator has these
+  // entries under BrB 17 kap. which is obsolete; override with correct refs.
+  "givande av muta": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 10 kap. 5 b §"],
+  },
+  "grovt givande av muta": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 10 kap. 5 e §"],
+  },
+  "tagande av muta": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 10 kap. 5 a §"],
+  },
+  "grovt tagande av muta": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 10 kap. 5 e §"],
+  },
+  // Köp av sexuella tjänster (plural, Göteborg uses this form)
+  "köp av sexuella tjänster": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 11 §"],
+  },
+  // Punktskattepliktiga varor — Lag (1998:506)
+  "olovlig befattning med punktskattepliktiga varor": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (1998:506) om punktskattekontroll av transporter m.m."],
+  },
+  "grov olovlig befattning med punktskattepliktiga varor": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (1998:506) om punktskattekontroll av transporter m.m."],
+  },
+  // Europeisk utredningsorder — Lag (2017:1000)
+  "europeisk utredningsorder": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (2017:1000) om en europeisk utredningsorder"],
+  },
+  // Överklagande av polisens beslag — Rättegångsbalken 27 kap.
+  "överklagande av polisens beslag": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Rättegångsbalken 27 kap. 6 §"],
+  },
+  // Verkställighet enligt 21 kap. föräldrabalken — tvångsverkställighet av
+  // vårdnad-/boende-/umgängesdom
+  "verkställighet enligt 21 kap. föräldrabalken": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 21 kap."],
+  },
   // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
   "arbetsmiljöbrott": {
     sakomrade: "Brott mot liv och hälsa",
@@ -710,6 +806,67 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lönegarantilagen (1992:497)"],
   },
+  // Hävning av köp / obefogad hävning — Köplagen
+  "obefogad hävning": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Köplagen (1990:931) 25 §"],
+  },
+  "hävning": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Köplagen (1990:931) 25 §"],
+  },
+  // Försäkring
+  "försäkringsfall": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Försäkringsavtalslagen (2005:104)"],
+  },
+  "trafikförsäkring": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Trafikskadelagen (1975:1410)"],
+  },
+  "trafikförsäkringsavgift": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Trafikskadelagen (1975:1410) 34 §"],
+  },
+  // Klander av dispasch — Sjölagen 17-18 kap.
+  "klander av dispasch": {
+    sakomrade: "Sjöfartsbrott",
+    primart_lagrum: ["Sjölagen (1994:1009) 17 kap."],
+  },
+  // Hyra (bare form) — Jordabalken 12 kap.
+  "hyra": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  "hyres- och bostadsrättstvist": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  "hyres- och bostadssrättstvist": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  // Återkrav — generic civil claim for recovery of wrongly paid funds
+  "återkrav": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: [],
+  },
+  // Försträckning — loan agreement (civil law). Usually appears in T/FT.
+  "försträckning": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Skuldebrevslagen (1936:81)"],
+  },
+  // Ansökan om konkurs can arrive as a T case too (some courts); route here
+  // so civil routing picks it up. K-routing also covers it.
+  "ansökan om konkurs": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 2 kap."],
+  },
+  // Skadestånd enligt aktiebolagslagen (Halmstad)
+  "skadestånd enligt aktiebolagslagen": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 29 kap."],
+  },
 };
 
 /**
@@ -811,6 +968,16 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "konkurrensskadeavgift": {
     sakomrade: "Konkurrensrätt",
     primart_lagrum: ["Konkurrenslagen (2008:579) 3 kap. 5 §"],
+  },
+  // Vistelseförbud enforcement — Lag (2024:7). Ärende at tingsrätt.
+  "vistelseförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (2024:7) om preventiva vistelseförbud"],
+  },
+  // Verkställighet enligt 21 kap. FB — tvångsverkställighet av vårdnad/umgänge
+  "verkställighet enligt 21 kap. föräldrabalken": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 21 kap."],
   },
 };
 
