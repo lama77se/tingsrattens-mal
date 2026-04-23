@@ -150,6 +150,66 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["BrB 32 kap. 4 §"],
   },
+  // Skattebrott — base 2 §, skatteförseelse 3 §, grovt 4 § (Solna PR covered
+  // the two qualified forms; this adds the bare short form).
+  "skattebrott": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 2 §"],
+  },
+  "grovt skattebrott": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 4 §"],
+  },
+  // BrB 16:3 ohörsamhet mot ordningsmakten
+  "ohörsamhet mot ordningsmakten": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["BrB 16 kap. 3 §"],
+  },
+  // BrB 15:12 missbruk av urkund
+  "missbruk av urkund": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 12 §"],
+  },
+  // BrB 22:6 folkrättsbrott
+  "folkrättsbrott": {
+    sakomrade: "Landsförräderi",
+    primart_lagrum: ["BrB 22 kap. 6 §"],
+  },
+  "grovt folkrättsbrott": {
+    sakomrade: "Landsförräderi",
+    primart_lagrum: ["BrB 22 kap. 6 §"],
+  },
+  // Narkotikasmuggling — Smugglingslagen 6 §
+  "narkotikasmuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 6 §"],
+  },
+  // Näringspenningtvätt — Lagen (2014:307) 7 §
+  "näringspenningtvätt": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 7 §"],
+  },
+  "näringspenningtvättsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 7 §"],
+  },
+  "grovt näringspenningtvättsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 7 §"],
+  },
+  // Dopningslagen
+  "dopningsbrott": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 §"],
+  },
+  "ringa dopningsbrott": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 § 2 st"],
+  },
+  "grovt dopningsbrott": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 a §"],
+  },
   // Base "smuggling" — generator only has compound variants like
   // "smuggling, olovlig in- och utförsel av ..." that don't substring-match.
   "smuggling": {
@@ -507,6 +567,46 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Immaterialrätt",
     primart_lagrum: ["Varumärkeslagen (2010:1877)"],
   },
+  "hävning av företagsnamn": {
+    sakomrade: "Immaterialrätt",
+    primart_lagrum: ["Lag (2018:1653) om företagsnamn"],
+  },
+  // Arbetsrättsliga saken som tvistemål
+  "semesterersättning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Semesterlagen (1977:480)"],
+  },
+  "ogiltigförklaring av uppsägning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 34 §"],
+  },
+  "ogiltigförklaring av avskedande": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 35 §"],
+  },
+  // Bare word "arbetsrätt" used as saken in FT cases
+  "arbetsrätt": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
+  },
+  // Hyra / bostad
+  "avflyttning": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  "fel i bostadsrätt": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Bostadsrättslagen (1991:614)"],
+  },
+  "rätt till bankkonto": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: [],
+  },
+  // Patent- och marknadsdomstolens civil subjects
+  "konkurrensskadeavgift": {
+    sakomrade: "Konkurrensrätt",
+    primart_lagrum: ["Konkurrenslagen (2008:579) 3 kap. 5 §"],
+  },
 };
 
 /**
@@ -579,6 +679,15 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
   },
+  "utökning av godmanskap till förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
+  // Municipal parking fines are contested in tingsrätt as ärenden
+  "parkeringsanmärkning": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
   "dödsbodelägare": {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken"],
@@ -594,6 +703,11 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "skiftesman": {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 23 kap. 5 §"],
+  },
+  // Patent- och marknadsdomstolen: PMÄ routes via case-type "Ä"
+  "konkurrensskadeavgift": {
+    sakomrade: "Konkurrensrätt",
+    primart_lagrum: ["Konkurrenslagen (2008:579) 3 kap. 5 §"],
   },
 };
 
