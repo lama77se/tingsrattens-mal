@@ -589,14 +589,26 @@ function mergeAndGenerate(pass1, pass2) {
     "sabotage": { sakomrade: "Allmänfarliga brott", primart_lagrum: ["BrB 13 kap. 4 §"] },
   };
 
+  // COMMON_ALIASES are hand-curated with specific paragraph references.
+  // Prefer them over pass-2 entries that only carry a chapter reference
+  // (no "§"), so aliases replace e.g. "BrB 3 kap." with "BrB 3 kap. 7 §".
   let aliasAdded = 0;
+  let aliasOverwritten = 0;
   for (const [key, entry] of Object.entries(COMMON_ALIASES)) {
-    if (!merged[key]) {
+    const existing = merged[key];
+    if (!existing) {
       merged[key] = entry;
       aliasAdded++;
+      continue;
+    }
+    const aliasHasParagraph = entry.primart_lagrum?.some((l) => l.includes("§"));
+    const existingHasParagraph = existing.primart_lagrum?.some((l) => l.includes("§"));
+    if (aliasHasParagraph && !existingHasParagraph) {
+      merged[key] = entry;
+      aliasOverwritten++;
     }
   }
-  log(`Common aliases: added ${aliasAdded} court saken terms`);
+  log(`Common aliases: added ${aliasAdded} saken terms, overwrote ${aliasOverwritten} chapter-only entries with specific paragraph`);
 
   return merged;
 }

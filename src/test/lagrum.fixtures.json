@@ -101,6 +101,19 @@
     { "name": "whitespace-only saken returns empty", "saken": "   ", "caseNumber": "B 1234-25", "sakomrade": "", "lagrum": "" },
     { "name": "empty case number defaults to B matching", "saken": "misshandel", "caseNumber": "", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
 
-    { "name": "hemfridsbrott (override fixes generator dead entry)", "saken": "hemfridsbrott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" }
+    { "name": "hemfridsbrott (override fixes generator dead entry)", "saken": "hemfridsbrott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" },
+
+    { "name": "Övriga-brott audit: terroristbrott", "saken": "terroristbrott", "caseNumber": "B 1234-25", "sakomrade": "Terroristbrott", "lagrum": "Terroristbrottslagen (2022:666) 4 §" },
+    { "name": "Övriga-brott audit: äktenskapstvång", "saken": "äktenskapstvång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 4 c §" },
+    { "name": "Övriga-brott audit: grovt skattebrott (MOMS)", "saken": "grovt skattebrott, avseende övrig skattelagstiftning", "caseNumber": "B 1234-25", "sakomrade": "Skattebrott", "lagrum": "Skattebrottslagen (1971:69) 4 §" },
+    { "name": "Övriga-brott audit: brott mot upphovsrätten (fildelning)", "saken": "brott mot upphovsrätten genom fildelning", "caseNumber": "B 1234-25", "sakomrade": "Immaterialrättsbrott", "lagrum": "Upphovsrättslagen (1960:729) 53 §" },
+    { "name": "Övriga-brott audit: ordningslagen idrott", "saken": "ordningslagen, övriga brott vid idrottsarrangemang", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän ordning", "lagrum": "Ordningslagen (1993:1617) 5 kap." },
+    { "name": "Övriga-brott audit: försvunnen person → Händelser", "saken": "försvunnen person i fjällen", "caseNumber": "B 1234-25", "sakomrade": "Händelser (ej brott)", "lagrum": "" },
+
+    { "name": "strips 'Tingssal' suffix from Nyköping-style saken", "saken": "penningtvätt Tingssal", "caseNumber": "B 1234-25", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Lagen (2014:307) om straff för penningtvättsbrott 3 §" },
+    { "name": "strips 'Sal 5' suffix from tabular-court saken", "saken": "misshandel Sal 5", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+    { "name": "routes T cases to family overrides (vårdnad as T)", "saken": "vårdnad Tingssal", "caseNumber": "T 831-26", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 6 kap." },
+
+    { "name": "does NOT split on 'och' inside crime phrase: 'brott mot lagen ... knivar och andra farliga föremål'", "saken": "brott mot lagen om förbud beträffande knivar och andra farliga föremål", "caseNumber": "B 1234-25", "sakomrade": "Vapenbrott", "lagrum": "Knivlagen (1988:254)" }
   ]
 }

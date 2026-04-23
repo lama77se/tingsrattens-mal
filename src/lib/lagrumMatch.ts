@@ -146,7 +146,9 @@ function indexesForCaseType(caseType: CaseType): IndexedMap[] {
       return [INDEX_OVERRIDES_B, INDEX_GENERATED_B];
     case "T":
     case "FT":
-      return [INDEX_CIVIL];
+      // Some courts (e.g. Nyköping) file custody disputes as T rather than F,
+      // so let tvistemål also fall through to the family vocabulary.
+      return [INDEX_CIVIL, INDEX_FAMILY];
     case "F":
       return [INDEX_FAMILY];
     case "Ä":
@@ -248,7 +250,13 @@ function findOnce(
 function cleanFragment(s: string): string {
   return s
     .toLowerCase()
+    // Strip room/venue artefacts that some court parsers leave in the saken
+    // field (e.g. Nyköping's "... Tingssal", Halmstad's "... Sal 3").
+    .replace(/\s+(tingssal|tingsrätten)\s*$/i, "")
+    .replace(/\s+sal\s*\d*\s*$/i, "")
     .replace(/m\.?\s*m\.?\s*$/, "")
+    .replace(/\s+(tingssal|tingsrätten)\s*$/i, "")
+    .replace(/\s+sal\s*\d*\s*$/i, "")
     .trim();
 }
 
@@ -274,28 +282,36 @@ export function matchLagrum(saken: string, caseNumber: string): LagrumMatch {
   const cleanSaken = cleanFragment(saken);
   if (!cleanSaken) return empty;
 
-  // Split saken on separators (#6). Order matters: first fragment's match
-  // is the primary result, later fragments feed `additional`.
+  // Try fragment-based matching first (#6). Only applies if we actually
+  // split on a separator — otherwise treat saken as single.
   const rawFragments = saken.split(FRAGMENT_SEPARATORS_RE);
-  const fragments: string[] =
-    rawFragments.length > 1
-      ? rawFragments.map(cleanFragment).filter((f) => f.length > 2)
-      : [cleanSaken];
+  if (rawFragments.length > 1) {
+    const fragments = rawFragments
+      .map(cleanFragment)
+      .filter((f) => f.length > 2);
 
-  let primary: { lagrum: string; sakomrade: string } | null = null;
-  const additional: { lagrum: string; sakomrade: string }[] = [];
-  const seen = new Set<string>();
+    let primary: { lagrum: string; sakomrade: string } | null = null;
+    const additional: { lagrum: string; sakomrade: string }[] = [];
+    const seen = new Set<string>();
 
-  for (const fragment of fragments) {
-    const resolved = matchFragment(fragment, caseType);
-    if (!resolved) continue;
-    const k = `${resolved.sakomrade}|${resolved.lagrum}`;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    if (!primary) primary = resolved;
-    else additional.push(resolved);
+    for (const fragment of fragments) {
+      const resolved = matchFragment(fragment, caseType);
+      if (!resolved) continue;
+      const k = `${resolved.sakomrade}|${resolved.lagrum}`;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      if (!primary) primary = resolved;
+      else additional.push(resolved);
+    }
+
+    if (primary) {
+      return additional.length > 0 ? { ...primary, additional } : primary;
+    }
+    // Fragment matching produced nothing (e.g. the "och" is part of a crime
+    // phrase like "knivar och andra farliga föremål") — fall through to a
+    // whole-saken match below.
   }
 
-  if (!primary) return empty;
-  return additional.length > 0 ? { ...primary, additional } : primary;
+  const fullMatch = matchFragment(cleanSaken, caseType);
+  return fullMatch ?? empty;
 }
