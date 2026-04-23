@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, Clock, MapPin, ExternalLink } from "lucide-react";
+import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, MapPin, ExternalLink } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 import { FetchAllProgress } from "@/components/DataLoadingTab";
 
@@ -21,6 +21,9 @@ interface HearingsTabProps {
 
 type SortKey = "datetime" | "court" | "caseNumber" | "type" | "maltyp" | "saken" | "sakomrade" | "lagrum" | "flera";
 type SortDir = "asc" | "desc";
+
+const PAGE_SIZE_OPTIONS = [50, 100, 250, 500] as const;
+const DEFAULT_PAGE_SIZE = 100;
 
 const normalizeType = (t: string) => t.trim().normalize("NFC");
 
@@ -56,6 +59,8 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [page, setPage] = useState(1);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -153,6 +158,17 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
       }
     });
   }, [filtered, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const startIdx = (safePage - 1) * pageSize;
+  const endIdx = Math.min(startIdx + pageSize, sorted.length);
+  const paged = useMemo(() => sorted.slice(startIdx, endIdx), [sorted, startIdx, endIdx]);
+
+  // Reset to page 1 whenever the active result set changes
+  useEffect(() => {
+    setPage(1);
+  }, [search, courtFilter, typeFilter, dateFilter, sakomradeFilter, maltypFilter, fleraSakfragorFilter, sortKey, sortDir, pageSize]);
 
   if (hearings.length === 0) {
     return (
@@ -364,55 +380,69 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
         {filtersContent}
       </div>
 
-      {/* Results count + mobile sort controls */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Results count + pagination + mobile sort controls */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <p className="text-sm text-muted-foreground">
-          Visar {filtered.length} av {hearings.length} förhandlingar
+          {sorted.length === 0
+            ? "Inga förhandlingar matchar filtren"
+            : `Visar ${startIdx + 1}–${endIdx} av ${sorted.length} förhandlingar${
+                sorted.length !== hearings.length ? ` (filtrerade från ${hearings.length})` : ""
+              }`}
         </p>
 
-        {/* Mobile sort — visible below md */}
-        <div className="flex items-center gap-2 md:hidden">
-          <Label className="text-sm whitespace-nowrap text-muted-foreground">Sortera:</Label>
-          <Select
-            value={sortKey ?? "none"}
-            onValueChange={(val) => {
-              if (val === "none") {
-                setSortKey(null);
-              } else {
-                setSortKey(val as SortKey);
-              }
-            }}
-          >
-            <SelectTrigger className="h-10 flex-1">
-              <SelectValue placeholder="Välj..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Standard</SelectItem>
-              {(Object.keys(sortKeyLabels) as SortKey[]).map((key) => (
-                <SelectItem key={key} value={key}>{sortKeyLabels[key]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            disabled={!sortKey}
-            onClick={() => setSortDir((d) => d === "asc" ? "desc" : "asc")}
-          >
-            {sortDir === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-          </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <PaginationBar
+            page={safePage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
+
+          {/* Mobile sort — visible below md */}
+          <div className="flex items-center gap-2 md:hidden w-full">
+            <Label className="text-sm whitespace-nowrap text-muted-foreground">Sortera:</Label>
+            <Select
+              value={sortKey ?? "none"}
+              onValueChange={(val) => {
+                if (val === "none") {
+                  setSortKey(null);
+                } else {
+                  setSortKey(val as SortKey);
+                }
+              }}
+            >
+              <SelectTrigger className="h-10 flex-1">
+                <SelectValue placeholder="Välj..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Standard</SelectItem>
+                {(Object.keys(sortKeyLabels) as SortKey[]).map((key) => (
+                  <SelectItem key={key} value={key}>{sortKeyLabels[key]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 shrink-0"
+              disabled={!sortKey}
+              onClick={() => setSortDir((d) => d === "asc" ? "desc" : "asc")}
+            >
+              {sortDir === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Mobile card list — visible below md */}
       <div className="md:hidden space-y-3">
-        {sorted.length === 0 ? (
+        {paged.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Inga förhandlingar matchar filtren.
           </div>
         ) : (
-          sorted.map((h) => (
+          paged.map((h) => (
             <Card key={h.id} className="overflow-hidden">
               <CardContent className="p-4 space-y-2">
                 {/* Top row: date + time + PDF link */}
@@ -544,14 +574,14 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sorted.length === 0 ? (
+            {paged.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   Inga förhandlingar matchar filtren.
                 </TableCell>
               </TableRow>
             ) : (
-              sorted.map((h) => (
+              paged.map((h) => (
                 <TableRow key={h.id} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="font-medium whitespace-nowrap">{h.date} {h.time}</TableCell>
                   <TableCell className="whitespace-nowrap">{h.court}</TableCell>
@@ -583,6 +613,95 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
           </TableBody>
         </Table>
       </div>
+
+      {/* Bottom pagination */}
+      {sorted.length > 0 && totalPages > 1 && (
+        <div className="flex justify-end">
+          <PaginationBar
+            page={safePage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface PaginationBarProps {
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+}
+
+function PaginationBar({ page, totalPages, pageSize, onPageChange, onPageSizeChange }: PaginationBarProps) {
+  const atFirst = page <= 1;
+  const atLast = page >= totalPages;
+  return (
+    <div className="flex items-center gap-1.5">
+      {totalPages > 1 && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={atFirst}
+            onClick={() => onPageChange(1)}
+            title="Första sidan"
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={atFirst}
+            onClick={() => onPageChange(page - 1)}
+            title="Föregående sida"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground px-1 whitespace-nowrap">
+            Sida {page} av {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={atLast}
+            onClick={() => onPageChange(page + 1)}
+            title="Nästa sida"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            disabled={atLast}
+            onClick={() => onPageChange(totalPages)}
+            title="Sista sidan"
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </>
+      )}
+      <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
+        <SelectTrigger className="h-8 w-24 text-sm ml-2">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PAGE_SIZE_OPTIONS.map((n) => (
+            <SelectItem key={n} value={String(n)}>
+              {n} / sida
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
