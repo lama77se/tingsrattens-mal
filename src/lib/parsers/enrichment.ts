@@ -32,12 +32,22 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
     resolvedCourt = `${otherCourt} (plats: ${courtName})`;
   }
 
-  // Detect "flera sakfrågor" from saken field
+  // Detect "flera sakfrågor" from saken field (checks for "m.m.")
   const cleanedSaken = saken.replace(/[^\w\s.,åäöÅÄÖ]/g, "").trim();
-  const fleraSakfragor = FLERA_SAKFRAGOR_REGEX.test(saken) || FLERA_SAKFRAGOR_REGEX.test(cleanedSaken);
+  const mmPresent = FLERA_SAKFRAGOR_REGEX.test(saken) || FLERA_SAKFRAGOR_REGEX.test(cleanedSaken);
 
-  // Enrich lagrum and sakområde for B-mål
+  // Enrich lagrum and sakområde
   const lagrumMatch = matchLagrum(saken, raw.caseNumber);
+  const extras = lagrumMatch.additional ?? [];
+
+  // Join multiple lagrum references so all apply laws surface in the UI cell.
+  const allLagrum = [lagrumMatch.lagrum, ...extras.map((e) => e.lagrum)]
+    .filter(Boolean)
+    .join("; ");
+
+  // "Flera sakfrågor" is true when either the saken explicitly says "m.m."
+  // or the matcher found distinct additional lagrum references.
+  const fleraSakfragor = mmPresent || extras.length > 0;
 
   return {
     id: `parsed-${index}`,
@@ -50,7 +60,7 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
     room: raw.room || "–",
     saken: saken || "–",
     parties: raw.parties || "–",
-    lagrum: lagrumMatch.lagrum,
+    lagrum: allLagrum,
     sakomrade: lagrumMatch.sakomrade,
     fleraSakfragor,
   };
