@@ -101,6 +101,16 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Skattebrott",
     primart_lagrum: ["Vägtrafikskattelagen (2006:227)"],
   },
+  // Base "smuggling" — generator only has compound variants like
+  // "smuggling, olovlig in- och utförsel av ..." that don't substring-match.
+  "smuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 3 §"],
+  },
+  "grov smuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 5 §"],
+  },
   "förseelse mot jaktlagen": {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["Jaktlagen (1987:259)"],
@@ -378,6 +388,28 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "hyrestvist": {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  "avhysning": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  "hyresfordran": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  "fel i fastighet": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 4 kap. 19 §"],
+  },
+  // "Återvinning" in a T/FT case is overwhelmingly a motion to reopen a
+  // default judgment (tredskodom) — underlying matter is usually a debt.
+  "återvinning": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 44 kap. 9 §"],
+  },
+  "ansökan om återvinning": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 44 kap. 9 §"],
   },
   "arrendetvist": {
     sakomrade: "Arrenderätt",
