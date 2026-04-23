@@ -197,6 +197,16 @@
     { "name": "Göteborg B: grovt givande av muta (BrB 10:5e, not 17 kap)", "saken": "grovt givande av muta m m", "caseNumber": "B 21742-25", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 10 kap. 5 e §" },
     { "name": "Göteborg T: obefogad hävning", "saken": "obefogad hävning m.m.", "caseNumber": "T 23987-24", "sakomrade": "Avtalsrätt", "lagrum": "Köplagen (1990:931) 25 §" },
     { "name": "Göteborg FT: trafikförsäkring", "saken": "trafikförsäkring", "caseNumber": "FT 19063-25", "sakomrade": "Avtalsrätt", "lagrum": "Trafikskadelagen (1975:1410)" },
-    { "name": "Göteborg FT: hyra m.m.", "saken": "hyra m.m.", "caseNumber": "FT 16544-25", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." }
+    { "name": "Göteborg FT: hyra m.m.", "saken": "hyra m.m.", "caseNumber": "FT 16544-25", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
+
+    { "name": "Skaraborg B: överträdelse av tillträdesförbud", "saken": "överträdelse av tillträdesförbud", "caseNumber": "B 1726-26", "sakomrade": "Brott mot frihet och frid", "lagrum": "Lag (2021:34) om tillträdesförbud till butiker m.m. 22 §" },
+    { "name": "Skaraborg B: otillåten avfallstransport", "saken": "otillåten avfallstransport m.m", "caseNumber": "B 5345-25", "sakomrade": "Miljöbrott", "lagrum": "Miljöbalken (1998:808) 29 kap. 4 a §" },
+    { "name": "Skaraborg B: brott mot djurskyddslagen", "saken": "brott mot djurskyddslagen", "caseNumber": "B 680-26", "sakomrade": "Miljöbrott", "lagrum": "Djurskyddslagen (2018:1192) 10 kap. 1 §" },
+    { "name": "Skaraborg B: bilbältesförseelse", "saken": "bilbältesförseelse", "caseNumber": "B 1591-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 4 kap. 10 §" },
+    { "name": "Skaraborg B: parser typo 'våld mot mot tjänsteman'", "saken": "våld mot mot tjänsteman", "caseNumber": "B 5266-25", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 1 §" },
+    { "name": "Skaraborg T: ersättningsrätt (generic)", "saken": "ersättningsrätt", "caseNumber": "T 5703-25", "sakomrade": "Skadeståndsrätt", "lagrum": "Skadeståndslagen (1972:207)" },
+    { "name": "Skaraborg T: fastighetsrätt (generic)", "saken": "fastighetsrätt", "caseNumber": "T 5619-25", "sakomrade": "Fastighetsrätt", "lagrum": "Jordabalken" },
+    { "name": "Skaraborg Ä: företagsrekonstruktion", "saken": "företagsrekonstruktion", "caseNumber": "Ä 1776-26", "sakomrade": "Konkursrätt", "lagrum": "Lag (2022:964) om företagsrekonstruktion" },
+    { "name": "Skaraborg T: verkställighet enligt 21 kap. FB (also T-routed)", "saken": "verkställighet enligt 21 kap. föräldrabalken", "caseNumber": "T 4442-23", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 21 kap." }
   ]
 }
