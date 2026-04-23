@@ -154,6 +154,21 @@
     { "name": "Stockholm PMT: hävning av företagsnamn", "saken": "hävning av företagsnamn", "caseNumber": "PMT 25020-25", "sakomrade": "Immaterialrätt", "lagrum": "Lag (2018:1653) om företagsnamn" },
     { "name": "Stockholm PMÄ with saken-embedded case ref", "saken": "PMÄ 8348-25 konkurrensskadeavgift", "caseNumber": "–", "sakomrade": "Konkurrensrätt", "lagrum": "Konkurrenslagen (2008:579) 3 kap. 5 §" },
     { "name": "Stockholm PMFT with saken-embedded case ref", "saken": "PMFT 19315-25 fordran", "caseNumber": "–", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
-    { "name": "Stockholm Ä: parkeringsanmärkning", "saken": "parkeringsanmärkning", "caseNumber": "Ä 5327-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" }
+    { "name": "Stockholm Ä: parkeringsanmärkning", "saken": "parkeringsanmärkning", "caseNumber": "Ä 5327-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" },
+
+    { "name": "Attunda B: överträdelse av näringsförbud", "saken": "överträdelse av näringsförbud", "caseNumber": "B 1216-25", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Lag (2014:836) om näringsförbud 47 §" },
+    { "name": "Attunda B: brott mot vapenlagen", "saken": "brott mot vapenlagen", "caseNumber": "B 13112-25", "sakomrade": "Vapenbrott", "lagrum": "Vapenlagen (1996:67) 9 kap." },
+    { "name": "Proactive: jaktbrott", "saken": "jaktbrott", "caseNumber": "B 1234-25", "sakomrade": "Miljöbrott", "lagrum": "Jaktlagen (1987:259) 43 §" },
+    { "name": "Proactive: grovt jaktbrott", "saken": "grovt jaktbrott", "caseNumber": "B 1234-25", "sakomrade": "Miljöbrott", "lagrum": "Jaktlagen (1987:259) 44 §" },
+    { "name": "Attunda B: multi-crime 'folkbokföringsbrott, olovligt anskaffande av alkohol'", "saken": "folkbokföringsbrott, olovligt anskaffande av alkohol", "caseNumber": "B 17786-25", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Folkbokföringslagen (1991:481) 42 §", "joinedLagrum": "Folkbokföringslagen (1991:481) 42 §; Alkohollagen (2010:1622) 11 kap. 7 §" },
+    { "name": "Attunda B: talan om utdömande av vite", "saken": "talan om utdömande av vite", "caseNumber": "B 1849-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "Lag (1985:206) om viten" },
+    { "name": "Attunda B: rättslig hjälp åt utländsk domstol", "saken": "rättslig hjälp åt utländsk domstol JUBC2026/00107", "caseNumber": "B 3496-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "Lag (2000:562) om internationell rättslig hjälp i brottmål" },
+    { "name": "Attunda T: kontraktsrätt", "saken": "kontraktsrätt", "caseNumber": "T 11216-25", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
+    { "name": "Attunda T: strip '(överlämnat från kronofogden)' parenthetical", "saken": "kontraktsrätt (överlämnat från kronofogden)", "caseNumber": "T 676-26", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
+    { "name": "Attunda T: strip trailing reference number", "saken": "kontraktsrätt, 13531340 / 25255-0829", "caseNumber": "T 12437-25", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
+    { "name": "Attunda T: strip 'ref' reference", "saken": "kontraktsrätt (överlämnat från kronofogden), ref 1980422", "caseNumber": "T 9059-25", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
+    { "name": "Attunda T: strip '(återförvisat ...)' appended to real saken", "saken": "kontraktsrätt (överlämnat från kronofogden)(återförvisat mål från svea hovrätt t 5916-25)", "caseNumber": "T 11975-25", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
+    { "name": "Attunda T: fastställelsetalan", "saken": "fastställelsetalan m.m.", "caseNumber": "T 7796-24", "sakomrade": "Fordringsrätt", "lagrum": "Rättegångsbalken 13 kap. 2 §" },
+    { "name": "Attunda T: lönegaranti", "saken": "lönegaranti", "caseNumber": "T 17176-25", "sakomrade": "Arbetsrätt", "lagrum": "Lönegarantilagen (1992:497)" }
   ]
 }
