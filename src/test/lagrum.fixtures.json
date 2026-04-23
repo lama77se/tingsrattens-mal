@@ -104,6 +104,10 @@
     { "name": "hemfridsbrott (override fixes generator dead entry)", "saken": "hemfridsbrott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" },
 
     { "name": "Övriga-brott audit: terroristbrott", "saken": "terroristbrott", "caseNumber": "B 1234-25", "sakomrade": "Terroristbrott", "lagrum": "Terroristbrottslagen (2022:666) 4 §" },
+    { "name": "Terroristbrottslagen: deltagande i terroristorganisation (4 a §)", "saken": "deltagande i en terroristorganisation", "caseNumber": "B 1234-25", "sakomrade": "Terroristbrott", "lagrum": "Terroristbrottslagen (2022:666) 4 a §" },
+    { "name": "Terroristbrottslagen: rekrytering (8 §)", "saken": "rekrytering till terrorism eller särskilt allvarlig brottslighet", "caseNumber": "B 1234-25", "sakomrade": "Terroristbrott", "lagrum": "Terroristbrottslagen (2022:666) 8 §" },
+    { "name": "Terroristbrottslagen: resa (10 §)", "saken": "resa för terrorism eller särskilt allvarlig brottslighet", "caseNumber": "B 1234-25", "sakomrade": "Terroristbrott", "lagrum": "Terroristbrottslagen (2022:666) 10 §" },
+    { "name": "Självständigt förverkande — BrB 36 kap.", "saken": "självständigt förverkande", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 36 kap." },
     { "name": "Övriga-brott audit: äktenskapstvång", "saken": "äktenskapstvång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 4 c §" },
     { "name": "Övriga-brott audit: grovt skattebrott (MOMS)", "saken": "grovt skattebrott, avseende övrig skattelagstiftning", "caseNumber": "B 1234-25", "sakomrade": "Skattebrott", "lagrum": "Skattebrottslagen (1971:69) 4 §" },
     { "name": "Övriga-brott audit: brott mot upphovsrätten (fildelning)", "saken": "brott mot upphovsrätten genom fildelning", "caseNumber": "B 1234-25", "sakomrade": "Immaterialrättsbrott", "lagrum": "Upphovsrättslagen (1960:729) 53 §" },
@@ -120,6 +124,19 @@
     { "name": "Alingsås: fel i fastighet (T)", "saken": "fel i fastighet", "caseNumber": "T 1459-25", "sakomrade": "Fastighetsrätt", "lagrum": "Jordabalken 4 kap. 19 §" },
     { "name": "Alingsås: avhysning samt hyresfordran (T)", "saken": "avhysning samt hyresfordran (överlämnat från kronofogden)", "caseNumber": "T 110-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
     { "name": "Alingsås: återvinning (T)", "saken": "återvinning", "caseNumber": "T 252-26", "sakomrade": "Fordringsrätt", "lagrum": "Rättegångsbalken 44 kap. 9 §" },
-    { "name": "Alingsås: ansökan om återvinning (FT)", "saken": "ansökan om återvinning", "caseNumber": "FT 524-26", "sakomrade": "Fordringsrätt", "lagrum": "Rättegångsbalken 44 kap. 9 §" }
+    { "name": "Alingsås: ansökan om återvinning (FT)", "saken": "ansökan om återvinning", "caseNumber": "FT 524-26", "sakomrade": "Fordringsrätt", "lagrum": "Rättegångsbalken 44 kap. 9 §" },
+
+    { "name": "Solna B: grovt arbetsmiljöbrott", "saken": "Arbetsmiljöbrott, grovt brott", "caseNumber": "B 6543-24", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 10 §" },
+    { "name": "Solna B: grovt förtal", "saken": "Grovt förtal m m", "caseNumber": "B 9856-24", "sakomrade": "Ärekränkningsbrott", "lagrum": "BrB 5 kap. 2 §" },
+    { "name": "Solna B: brukande av falsk urkund", "saken": "Brukande av falsk urkund", "caseNumber": "B 3912-26", "sakomrade": "Förfalskningsbrott", "lagrum": "BrB 14 kap. 9 §" },
+    { "name": "Solna B: undanröjande av ungdomstjänst", "saken": "Undanröjande av ungdomstjänst", "caseNumber": "B 3761-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 32 kap. 4 §" },
+    { "name": "Solna B: köp av sexuell handling (försök)", "saken": "Försök till köp av sexuell handling", "caseNumber": "B 3586-26", "sakomrade": "Sexualbrott", "lagrum": "BrB 6 kap. 11 §" },
+    { "name": "Solna B: brott mot trafikförordningen", "saken": "Brott mot trafikförordningen", "caseNumber": "B 2405-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276)" },
+    { "name": "Solna T: arbetstvist", "saken": "Arbetstvist", "caseNumber": "T 681-26", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80)" },
+    { "name": "Solna T: varselavgift", "saken": "Varselavgift", "caseNumber": "T 13464-25", "sakomrade": "Arbetsrätt", "lagrum": "Lag (1974:13) om vissa anställningsfrämjande åtgärder 17 §" },
+    { "name": "Solna T: personligt betalningsansvar ABL 25:18", "saken": "Personligt betalningsansvar jämlikt 25 kap.18 aktiebolagslagen", "caseNumber": "T 7714-25", "sakomrade": "Fordringsrätt", "lagrum": "Aktiebolagslagen (2005:551) 25 kap. 18 §" },
+    { "name": "Solna T: bättre rätt till aktier", "saken": "Bättre rätt till aktier", "caseNumber": "T 12663-25", "sakomrade": "Sakrätt", "lagrum": "" },
+    { "name": "Solna FT: kontrollavgift vid olovlig parkering", "saken": "Kontrollavgift vid olovlig parkering", "caseNumber": "FT 10038-25", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1984:318) om kontrollavgift vid olovlig parkering" },
+    { "name": "Solna Ä: anordnande av förvaltarskap", "saken": "Anordnande av förvaltarskap", "caseNumber": "Ä 74-26", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap. 7 §" }
   ]
 }
