@@ -154,7 +154,7 @@ export const formatStandard: ParserStrategy = {
             !nextLine.match(SHORT_DATE_REGEX) &&
             !nextLine.match(ISO_DATE_REGEX)
           ) {
-            saken = nextLine.replace(/\s*(?:[Tt]ings)?[Ss]al\s+\S+\s*$/, "").trim();
+            saken = cleanSaken(nextLine);
             sakenFromNextLine = true;
           }
         }
