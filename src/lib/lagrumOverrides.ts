@@ -232,6 +232,28 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 21 kap."],
   },
+  // Skaraborg additions (B-routing)
+  "överträdelse av tillträdesförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (2021:34) om tillträdesförbud till butiker m.m. 22 §"],
+  },
+  "otillåten avfallstransport": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 4 a §"],
+  },
+  "brott mot djurskyddslagen": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Djurskyddslagen (2018:1192) 10 kap. 1 §"],
+  },
+  "bilbältesförseelse": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 4 kap. 10 §"],
+  },
+  // Parser typo: "våld mot mot tjänsteman" — duplicated preposition.
+  "våld mot mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 1 §"],
+  },
   // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
   "arbetsmiljöbrott": {
     sakomrade: "Brott mot liv och hälsa",
@@ -867,6 +889,20 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Skadeståndsrätt",
     primart_lagrum: ["Aktiebolagslagen (2005:551) 29 kap."],
   },
+  // Generic civil topic labels used as saken
+  "ersättningsrätt": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Skadeståndslagen (1972:207)"],
+  },
+  "fastighetsrätt": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken"],
+  },
+  // Family-procedural saken also show up on T case numbers in some courts.
+  "verkställighet enligt 21 kap. föräldrabalken": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 21 kap."],
+  },
 };
 
 /**
@@ -979,6 +1015,11 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 21 kap."],
   },
+  // Företagsrekonstruktion — filed as Ä by some courts
+  "företagsrekonstruktion": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Lag (2022:964) om företagsrekonstruktion"],
+  },
 };
 
 /**
@@ -992,6 +1033,10 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
   "konkursansökan": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Konkurslagen (1987:672) 2 kap."],
+  },
+  "företagsrekonstruktion": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Lag (2022:964) om företagsrekonstruktion"],
   },
 };
 
