@@ -228,6 +228,13 @@
     { "name": "Proactive: kränkande fotografering (BrB 4:6a)", "saken": "kränkande fotografering", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 a §" },
     { "name": "Proactive: olaga integritetsintrång (BrB 4:6c)", "saken": "olaga integritetsintrång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 c §" },
     { "name": "Empty case number now tries all indexes — family term matches", "saken": "vårdnad, boende och umgänge", "caseNumber": "", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 6 kap." },
-    { "name": "Empty case number — civil term matches", "saken": "fordran", "caseNumber": "", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" }
+    { "name": "Empty case number — civil term matches", "saken": "fordran", "caseNumber": "", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
+
+    { "name": "Stockholm B: osann försäkran, grovt brott", "saken": "osann försäkran, grovt brott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 15 kap. 10 §" },
+    { "name": "Stockholm B: olovlig hantering av alkohol", "saken": "olovlig hantering av alkohol", "caseNumber": "B 1234-25", "sakomrade": "Alkohol- och punktskattebrott", "lagrum": "Alkohollagen (2010:1622) 11 kap. 9 §" },
+    { "name": "Solna B: vårdslöshet i trafik", "saken": "vårdslöshet i trafik", "caseNumber": "B 6301-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 1 §" },
+    { "name": "Solna B: grov vårdslöshet i trafik (proactive)", "saken": "grov vårdslöshet i trafik", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 1 § 2 st" },
+    { "name": "Solna B: brott mot ordningslagen", "saken": "brott mot ordningslagen", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän ordning", "lagrum": "Ordningslagen (1993:1617)" },
+    { "name": "Solna B: brott mot taxitrafikförordningen", "saken": "brott mot taxitrafikförordningen", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Taxitrafikförordning (2012:238)" }
   ]
 }
