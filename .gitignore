@@ -28,3 +28,4 @@ bra-klassificering.pdf
 
 # Local-only lagrum coverage corpus (real saken strings from PDFs)
 src/test/lagrum-corpus.json
+src/test/lagrum-corpus.ndjson
