@@ -207,6 +207,21 @@
     { "name": "Skaraborg T: ersättningsrätt (generic)", "saken": "ersättningsrätt", "caseNumber": "T 5703-25", "sakomrade": "Skadeståndsrätt", "lagrum": "Skadeståndslagen (1972:207)" },
     { "name": "Skaraborg T: fastighetsrätt (generic)", "saken": "fastighetsrätt", "caseNumber": "T 5619-25", "sakomrade": "Fastighetsrätt", "lagrum": "Jordabalken" },
     { "name": "Skaraborg Ä: företagsrekonstruktion", "saken": "företagsrekonstruktion", "caseNumber": "Ä 1776-26", "sakomrade": "Konkursrätt", "lagrum": "Lag (2022:964) om företagsrekonstruktion" },
-    { "name": "Skaraborg T: verkställighet enligt 21 kap. FB (also T-routed)", "saken": "verkställighet enligt 21 kap. föräldrabalken", "caseNumber": "T 4442-23", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 21 kap." }
+    { "name": "Skaraborg T: verkställighet enligt 21 kap. FB (also T-routed)", "saken": "verkställighet enligt 21 kap. föräldrabalken", "caseNumber": "T 4442-23", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 21 kap." },
+
+    { "name": "Attunda B: vapensmuggling", "saken": "vapensmuggling", "caseNumber": "B 11043-25", "sakomrade": "Tull- och smugglingsbrott", "lagrum": "Smugglingslagen (2000:1225) 6 a §" },
+    { "name": "Attunda B: brott mot utlänningslagen", "saken": "brott mot utlänningslagen", "caseNumber": "B 7751-24", "sakomrade": "Brott mot utlänningslagen", "lagrum": "Utlänningslagen (2005:716) 20 kap." },
+    { "name": "Attunda B: brott mot lagen om bevakningsföretag", "saken": "brott mot lagen om bevakningsföretag m.m", "caseNumber": "B 15530-25", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Lag (1974:191) om bevakningsföretag 14 §" },
+    { "name": "Attunda B: brott mot vägtrafikregisterlagen", "saken": "brott mot vägtrafikregisterlagen", "caseNumber": "B 2633-26", "sakomrade": "Trafikbrott", "lagrum": "Lag (2001:558) om vägtrafikregister" },
+    { "name": "Proactive: brott mot lagen om brandfarliga och explosiva varor", "saken": "brott mot lagen om brandfarliga och explosiva varor", "caseNumber": "B 1234-25", "sakomrade": "Vapenbrott", "lagrum": "Lag (2010:1011) om brandfarliga och explosiva varor 28 §" },
+    { "name": "Attunda B: förvandling av böter (bötesverkställighetslagen 15 §)", "saken": "förvandling av böter enligt 15 § bötes- verkställighetslagen", "caseNumber": "B 6771-25", "sakomrade": "Brott mot rättskipningen", "lagrum": "Bötesverkställighetslagen (1979:189) 15 §" },
+    { "name": "Attunda B: 'inbrottssäld' parser typo", "saken": "försök till inbrottssäld", "caseNumber": "B 3991-26", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 8 kap. 4 §" },
+    { "name": "Attunda Ä: upphörande av förvaltarskap enligt 11:7 FB", "saken": "upphörande av förvaltarskap enligt 11 kap. 7 § föräldrabalken", "caseNumber": "Ä 11708-25", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap. 19 §" },
+    { "name": "Attunda Ä: prövning av beslut om kontaktförbud", "saken": "prövning av beslut om kontaktförbud", "caseNumber": "Ä 4675-26", "sakomrade": "Brott mot frihet och frid", "lagrum": "Kontaktförbudslagen (1988:688)" },
+    { "name": "Attunda T: nyttjanderättsersättning", "saken": "nyttjanderättsersättning", "caseNumber": "T 6827-25", "sakomrade": "Skadeståndsrätt", "lagrum": "" },
+    { "name": "Attunda T: jämkning av bodelningsavtal", "saken": "jämkning av bodelningsavtal", "caseNumber": "T 15644-25", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 12 kap." },
+    { "name": "Attunda T: klander av arvskifte", "saken": "klander av arvskifte", "caseNumber": "T 14121-25", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 23 kap. 8 §" },
+    { "name": "Attunda T: fel i upplåten bostadsrätt", "saken": "fel i upplåten bostadsrätt", "caseNumber": "T 16253-25", "sakomrade": "Fastighetsrätt", "lagrum": "Bostadsrättslagen (1991:614) 7 kap. 1 §" },
+    { "name": "Attunda FT: mål om parkering", "saken": "mål om parkering (överlämnat mål från kronofogden), ref. 807070-2399342", "caseNumber": "FT 1582-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" }
   ]
 }

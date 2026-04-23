@@ -254,6 +254,59 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 1 §"],
   },
+  // Attunda additions
+  // Vapensmuggling — Smugglingslagen 6 a § (specific § for weapons smuggling)
+  "vapensmuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 6 a §"],
+  },
+  "grov vapensmuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 6 a §"],
+  },
+  // Brott mot utlänningslagen — chapter 20
+  "brott mot utlänningslagen": {
+    sakomrade: "Brott mot utlänningslagen",
+    primart_lagrum: ["Utlänningslagen (2005:716) 20 kap."],
+  },
+  // Lag om bevakningsföretag — 14 §
+  "brott mot lagen om bevakningsföretag": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Lag (1974:191) om bevakningsföretag 14 §"],
+  },
+  // Vägtrafikregisterlagen — Lag (2001:558)
+  "brott mot vägtrafikregisterlagen": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Lag (2001:558) om vägtrafikregister"],
+  },
+  // Lag om brandfarliga och explosiva varor — 28-31 §
+  "brott mot lagen om brandfarliga och explosiva varor": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Lag (2010:1011) om brandfarliga och explosiva varor 28 §"],
+  },
+  "grovt brott mot lagen om brandfarliga och explosiva varor": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Lag (2010:1011) om brandfarliga och explosiva varor 29 a §"],
+  },
+  // Bötesverkställighetslagen — 15 § förvandling av böter
+  "förvandling av böter": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["Bötesverkställighetslagen (1979:189) 15 §"],
+  },
+  // Inbrottsstöld (+ typo variant "inbrottssäld" from Attunda parser)
+  "inbrottsstöld": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 4 §"],
+  },
+  "inbrottssäld": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 4 §"],
+  },
+  // Prövning av beslut om kontaktförbud — Kontaktförbudslagen
+  "prövning av beslut om kontaktförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
+  },
   // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
   "arbetsmiljöbrott": {
     sakomrade: "Brott mot liv och hälsa",
@@ -903,6 +956,31 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 21 kap."],
   },
+  // Nyttjanderättsersättning — civil claim, no specific law; Skadeståndsrätt
+  "nyttjanderättsersättning": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: [],
+  },
+  // Jämkning av bodelningsavtal — ÄktB 12 kap.
+  "jämkning av bodelningsavtal": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 12 kap."],
+  },
+  // Klander av arvskifte — ÄB 23 kap. 8 §
+  "klander av arvskifte": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 23 kap. 8 §"],
+  },
+  // Fel i upplåten bostadsrätt — Bostadsrättslagen 7 kap. 1 §
+  "fel i upplåten bostadsrätt": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Bostadsrättslagen (1991:614) 7 kap. 1 §"],
+  },
+  // Mål om parkering — municipal or private parking fee contest
+  "mål om parkering": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
 };
 
 /**
@@ -1019,6 +1097,16 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "företagsrekonstruktion": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Lag (2022:964) om företagsrekonstruktion"],
+  },
+  // Upphörande av förvaltarskap — FB 11:19 (when filed as Ä)
+  "upphörande av förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 19 §"],
+  },
+  // Prövning av beslut om kontaktförbud — also lands as Ä
+  "prövning av beslut om kontaktförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
   },
 };
 
