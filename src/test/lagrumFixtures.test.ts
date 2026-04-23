@@ -8,6 +8,8 @@ interface Fixture {
   caseNumber: string;
   sakomrade: string;
   lagrum: string;
+  /** When set, verifies the joined primary + additional lagrum (;-separated). */
+  joinedLagrum?: string;
 }
 
 describe("matchLagrum — golden set", () => {
@@ -17,8 +19,16 @@ describe("matchLagrum — golden set", () => {
     expect(entries.length).toBeGreaterThan(50);
   });
 
-  it.each(entries)("$name", ({ saken, caseNumber, sakomrade, lagrum }) => {
+  it.each(entries)("$name", (fixture) => {
+    const { saken, caseNumber, sakomrade, lagrum, joinedLagrum } = fixture;
     const result = matchLagrum(saken, caseNumber);
-    expect(result).toEqual({ sakomrade, lagrum });
+    expect(result.sakomrade).toBe(sakomrade);
+    expect(result.lagrum).toBe(lagrum);
+    if (joinedLagrum) {
+      const all = [result.lagrum, ...(result.additional ?? []).map((a) => a.lagrum)]
+        .filter(Boolean)
+        .join("; ");
+      expect(all).toBe(joinedLagrum);
+    }
   });
 });
