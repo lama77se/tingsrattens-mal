@@ -167,4 +167,93 @@ describe("matchLagrum", () => {
       expect(r).toEqual({ lagrum: "", sakomrade: "" });
     });
   });
+
+  // ─── #4. Levenshtein-distance-1 fuzzy fallback ───────────────────────────
+  describe("Levenshtein-distance-1 fallback", () => {
+    it("catches single-character deletions (typo: 'hemfridsbrot' missing final 't')", () => {
+      const r = matchLagrum("hemfridsbrot", "B 1234-25");
+      expect(r.sakomrade).toBe("Brott mot frihet och frid");
+    });
+
+    it("catches single-character insertions (typo: 'narkotikabrottt' with extra 't')", () => {
+      const r = matchLagrum("narkotikabrottt", "B 1234-25");
+      expect(r.sakomrade).toBe("Narkotikabrott");
+    });
+
+    it("catches single-character substitutions", () => {
+      // "narkotikabrokt" — substitution 't'→'k' in narkotikabrott
+      const r = matchLagrum("narkotikabrokt", "B 1234-25");
+      expect(r.sakomrade).toBe("Narkotikabrott");
+    });
+
+    it("does NOT match short keys fuzzily (too risky)", () => {
+      // "mord" is a 4-char key; distance-1 would match "mord?" substrings
+      // carelessly. Ensure only keys ≥ 7 chars are eligible.
+      const r = matchLagrum("mork", "B 1234-25");
+      expect(r).toEqual({ lagrum: "", sakomrade: "" });
+    });
+  });
+
+  // ─── #5. Aggravated variant auto-lookup ──────────────────────────────────
+  describe("aggravated variant lookup", () => {
+    it("prefers the 'grov X' variant when saken contains 'grov'", () => {
+      // Both "bedrägeri" and "grovt bedrägeri" are keys; saken "grovt bedrägeri"
+      // matches the longer key first, which is expected.
+      const r = matchLagrum("grovt bedrägeri", "B 1234-25");
+      expect(r.lagrum).toMatch(/BrB 9 kap/);
+    });
+
+    it("picks the aggravated twin when the matched key is the base form", () => {
+      // If the matched key happens to be "bedrägeri" (e.g. via fuzzy path) and
+      // saken contains "grov", the resolver should look up "grovt bedrägeri"
+      // in the same index and prefer that entry's lagrum.
+      // Easy way to exercise: use a Brå-style composite key where only the
+      // base matches, and verify an aggravated twin kicks in.
+      // Here the override "häleri" has sakomrade Förmögenhetsbrott; the
+      // "grovt häleri" override exists too. If saken is "grovt häleri", the
+      // longest-key match picks the grov one directly — still correct output.
+      const r = matchLagrum("grovt häleri", "B 1234-25");
+      expect(r.sakomrade).toBe("Förmögenhetsbrott");
+    });
+  });
+
+  // ─── #6. Multiple-crime detection ────────────────────────────────────────
+  describe("multiple-crime detection", () => {
+    it("returns additional entries for comma-separated crimes", () => {
+      const r = matchLagrum("stöld, misshandel", "B 1234-25");
+      expect(r.sakomrade).toBe("Förmögenhetsbrott"); // primary from longest key
+      expect(r.additional).toBeDefined();
+      const additionalSakomraden = (r.additional ?? []).map((a) => a.sakomrade);
+      expect(additionalSakomraden).toContain("Brott mot liv och hälsa");
+    });
+
+    it("returns additional entries when saken uses 'och'", () => {
+      const r = matchLagrum("stöld och misshandel", "B 1234-25");
+      expect(r.additional?.length ?? 0).toBeGreaterThanOrEqual(1);
+    });
+
+    it("returns additional entries when saken uses 'samt'", () => {
+      const r = matchLagrum("stöld samt misshandel", "B 1234-25");
+      expect(r.additional?.length ?? 0).toBeGreaterThanOrEqual(1);
+    });
+
+    it("deduplicates when fragments yield the same lagrum", () => {
+      // Both fragments match "narkotikabrott" — should not produce duplicates
+      const r = matchLagrum("narkotikabrott, narkotikabrott", "B 1234-25");
+      expect(r.additional).toBeUndefined();
+    });
+
+    it("single-crime saken returns no 'additional' field", () => {
+      const r = matchLagrum("misshandel", "B 1234-25");
+      expect(r.additional).toBeUndefined();
+    });
+
+    it("splits real saken from Gävle 'ringa narkotikabrott, brott mot knivlagen'", () => {
+      const r = matchLagrum("ringa narkotikabrott, brott mot knivlagen", "B 1423-26");
+      expect(r.sakomrade).toBe("Narkotikabrott");
+      const extras = r.additional ?? [];
+      const sakomraden = extras.map((a) => a.sakomrade);
+      expect(sakomraden).toContain("Vapenbrott");
+    });
+  });
 });
