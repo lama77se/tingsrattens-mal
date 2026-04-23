@@ -1,0 +1,104 @@
+{
+  "description": "Golden-set regression fixtures for matchLagrum. Each entry asserts that a given (saken, caseNumber) produces the listed sakomrade and lagrum. Keep this file stable — changes here should be a deliberate decision visible in diff. Extend by adding new entries; only modify existing ones when the matcher behaviour is intentionally changing.",
+  "entries": [
+    { "name": "misshandel — base (B)", "saken": "misshandel", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+    { "name": "misshandel m.m. stripped (B)", "saken": "misshandel m.m.", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+    { "name": "misshandel m m without dots (B)", "saken": "misshandel m m", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+    { "name": "grov misshandel — aggravated pick", "saken": "grov misshandel", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 6 §" },
+    { "name": "ringa misshandel (alias)", "saken": "ringa misshandel", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+    { "name": "mord", "saken": "mord", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 1 §" },
+    { "name": "dråp", "saken": "dråp", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 2 §" },
+    { "name": "vållande till annans död", "saken": "vållande till annans död", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 7 §" },
+    { "name": "vållande till kroppsskada", "saken": "vållande till kroppsskada", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 8 §" },
+
+    { "name": "olaga hot", "saken": "olaga hot", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 5 §" },
+    { "name": "olaga tvång", "saken": "olaga tvång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 4 §" },
+    { "name": "olaga förföljelse", "saken": "olaga förföljelse", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 4 b §" },
+    { "name": "barnfridsbrott", "saken": "barnfridsbrott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 3 §" },
+    { "name": "grovt barnfridsbrott", "saken": "grovt barnfridsbrott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 3 §" },
+    { "name": "grov kvinnofridskränkning", "saken": "grov kvinnofridskränkning", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 4 a §" },
+    { "name": "ofredande (override)", "saken": "ofredande", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 7 §" },
+    { "name": "olaga intrång (override)", "saken": "olaga intrång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" },
+    { "name": "hemfridsbott — typo tolerance (override)", "saken": "hemfridsbott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" },
+    { "name": "grovt hemfridsbott m m (real Gävle saken)", "saken": "grovt hemfridsbott m m", "caseNumber": "B 4490-24", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" },
+    { "name": "överträdelse av kontaktförbud (override)", "saken": "överträdelse av kontaktförbud", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "Kontaktförbudslagen (1988:688) 24 §" },
+
+    { "name": "våldtäkt", "saken": "våldtäkt", "caseNumber": "B 1234-25", "sakomrade": "Sexualbrott", "lagrum": "BrB 6 kap. 1 §" },
+    { "name": "våldtäkt mot barn", "saken": "våldtäkt mot barn", "caseNumber": "B 1234-25", "sakomrade": "Sexualbrott", "lagrum": "BrB 6 kap. 4 §" },
+    { "name": "sexuellt ofredande (override)", "saken": "sexuellt ofredande", "caseNumber": "B 1234-25", "sakomrade": "Sexualbrott", "lagrum": "BrB 6 kap. 10 §" },
+
+    { "name": "stöld", "saken": "stöld", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 8 kap. 1 §" },
+    { "name": "grov stöld", "saken": "grov stöld", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 8 kap. 4 §" },
+    { "name": "ringa stöld", "saken": "ringa stöld", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 8 kap. 2 §" },
+    { "name": "bedrägeri", "saken": "bedrägeri", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 9 kap. 1 §" },
+    { "name": "grovt bedrägeri", "saken": "grovt bedrägeri", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 9 kap. 3 §" },
+    { "name": "häleri (override)", "saken": "häleri", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 9 kap. 6 §" },
+    { "name": "egenmäktigt förfarande", "saken": "egenmäktigt förfarande", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 8 kap. 8 §" },
+    { "name": "förskingring", "saken": "förskingring", "caseNumber": "B 1234-25", "sakomrade": "Förmögenhetsbrott", "lagrum": "BrB 10 kap. 1 §" },
+
+    { "name": "skadegörelse", "saken": "skadegörelse", "caseNumber": "B 1234-25", "sakomrade": "Skadegörelsebrott", "lagrum": "BrB 12 kap. 1 §" },
+    { "name": "grov skadegörelse", "saken": "grov skadegörelse", "caseNumber": "B 1234-25", "sakomrade": "Skadegörelsebrott", "lagrum": "BrB 12 kap. 3 §" },
+
+    { "name": "mordbrand", "saken": "mordbrand", "caseNumber": "B 1234-25", "sakomrade": "Allmänfarliga brott", "lagrum": "BrB 13 kap. 1 §" },
+    { "name": "allmänfarlig vårdslöshet (override)", "saken": "allmänfarlig vårdslöshet", "caseNumber": "B 1234-25", "sakomrade": "Allmänfarliga brott", "lagrum": "BrB 13 kap. 6 §" },
+
+    { "name": "urkundsförfalskning (override)", "saken": "urkundsförfalskning", "caseNumber": "B 1234-25", "sakomrade": "Förfalskningsbrott", "lagrum": "BrB 14 kap. 1 §" },
+    { "name": "grov urkundsförfalskning (override)", "saken": "grov urkundsförfalskning", "caseNumber": "B 1234-25", "sakomrade": "Förfalskningsbrott", "lagrum": "BrB 14 kap. 3 §" },
+
+    { "name": "mened", "saken": "mened", "caseNumber": "B 1234-25", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 15 kap. 1 §" },
+    { "name": "övergrepp i rättssak", "saken": "övergrepp i rättssak", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 10 §" },
+    { "name": "hot mot tjänsteman", "saken": "hot mot tjänsteman", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 1 §" },
+    { "name": "våld mot tjänsteman", "saken": "våld mot tjänsteman", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 1 §" },
+    { "name": "undanröjande av skyddstillsyn (override)", "saken": "undanröjande av skyddstillsyn", "caseNumber": "B 1234-25", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 28 kap. 9 §" },
+
+    { "name": "narkotikabrott (alias)", "saken": "narkotikabrott", "caseNumber": "B 1234-25", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 1 §" },
+    { "name": "ringa narkotikabrott", "saken": "ringa narkotikabrott", "caseNumber": "B 1234-25", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 2 §" },
+    { "name": "grovt narkotikabrott", "saken": "grovt narkotikabrott", "caseNumber": "B 1234-25", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 3 §" },
+    { "name": "ringa narkotikabrott m m (real Gävle)", "saken": "ringa narkotikabrott m m", "caseNumber": "B 1328-26", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 2 §" },
+
+    { "name": "vapenbrott (alias)", "saken": "vapenbrott", "caseNumber": "B 1234-25", "sakomrade": "Vapenbrott", "lagrum": "Vapenlagen (1996:67) 9 kap." },
+    { "name": "grovt vapenbrott (alias)", "saken": "grovt vapenbrott", "caseNumber": "B 1234-25", "sakomrade": "Vapenbrott", "lagrum": "Vapenlagen (1996:67) 9 kap." },
+    { "name": "brott mot knivlagen (override)", "saken": "brott mot knivlagen", "caseNumber": "B 1234-25", "sakomrade": "Vapenbrott", "lagrum": "Knivlagen (1988:254)" },
+
+    { "name": "grovt rattfylleri (alias)", "saken": "grovt rattfylleri", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 4 a §" },
+    { "name": "olovlig körning (override)", "saken": "olovlig körning", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 3 §" },
+    { "name": "grov olovlig körning (override)", "saken": "grov olovlig körning", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 3 §" },
+
+    { "name": "bidragsbrott (alias)", "saken": "bidragsbrott", "caseNumber": "B 1234-25", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Bidragsbrottslagen (2007:612) 2 §" },
+    { "name": "penningtvättsbrott (override)", "saken": "penningtvättsbrott", "caseNumber": "B 1234-25", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Lagen (2014:307) om straff för penningtvättsbrott 3 §" },
+
+    { "name": "djurplågeri (override)", "saken": "djurplågeri", "caseNumber": "B 1234-25", "sakomrade": "Miljöbrott", "lagrum": "BrB 16 kap. 13 §" },
+    { "name": "förseelse mot jaktlagen (override)", "saken": "förseelse mot jaktlagen", "caseNumber": "B 1234-25", "sakomrade": "Miljöbrott", "lagrum": "Jaktlagen (1987:259)" },
+
+    { "name": "dataintrång", "saken": "dataintrång", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 9 c §" },
+
+    { "name": "fuzzy: double-letter collapse 'missshandel'", "saken": "missshandel", "caseNumber": "B 1234-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+    { "name": "fuzzy: diacritic-free 'skadegorelse'", "saken": "skadegorelse", "caseNumber": "B 1234-25", "sakomrade": "Skadegörelsebrott", "lagrum": "BrB 12 kap. 1 §" },
+
+    { "name": "tvistemål: skadestånd (T)", "saken": "skadestånd", "caseNumber": "T 100-25", "sakomrade": "Skadeståndsrätt", "lagrum": "Skadeståndslagen (1972:207)" },
+    { "name": "tvistemål: fordran (T)", "saken": "fordran", "caseNumber": "T 100-25", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
+    { "name": "förenklat tvistemål: fordran (FT)", "saken": "fordran", "caseNumber": "FT 42-25", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
+    { "name": "tvistemål: hyrestvist (T)", "saken": "hyrestvist", "caseNumber": "T 200-25", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
+    { "name": "tvistemål: upphovsrätt (T)", "saken": "upphovsrätt", "caseNumber": "T 300-25", "sakomrade": "Immaterialrätt", "lagrum": "Upphovsrättslagen (1960:729)" },
+
+    { "name": "familjemål: äktenskapsskillnad (F)", "saken": "äktenskapsskillnad", "caseNumber": "F 50-25", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 5 kap. 1 §" },
+    { "name": "familjemål: vårdnad om barn (F)", "saken": "vårdnad om barn", "caseNumber": "F 51-25", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 6 kap." },
+    { "name": "familjemål: underhållsbidrag (F)", "saken": "underhållsbidrag", "caseNumber": "F 52-25", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 7 kap." },
+    { "name": "familjemål: faderskap (F)", "saken": "faderskap", "caseNumber": "F 53-25", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 1 kap." },
+    { "name": "familjemål: adoption (F)", "saken": "adoption", "caseNumber": "F 54-25", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 4 kap." },
+
+    { "name": "ärende: förordnande av god man (Ä)", "saken": "förordnande av god man", "caseNumber": "Ä 500-25", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap." },
+    { "name": "ärende: testamente (Ä)", "saken": "testamente", "caseNumber": "Ä 501-25", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 10-11 kap." },
+
+    { "name": "konkursmål: konkurs (K)", "saken": "konkurs", "caseNumber": "K 10-25", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672)" },
+    { "name": "konkursmål: konkursansökan (K)", "saken": "konkursansökan", "caseNumber": "K 11-25", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672) 2 kap." },
+
+    { "name": "isolation: criminal term in T case should NOT match criminal law", "saken": "misshandel", "caseNumber": "T 1-25", "sakomrade": "", "lagrum": "" },
+    { "name": "isolation: criminal term in FT case should NOT match criminal law", "saken": "stöld", "caseNumber": "FT 1-25", "sakomrade": "", "lagrum": "" },
+    { "name": "isolation: civil term in B case should NOT match civil law", "saken": "skadestånd", "caseNumber": "B 1-25", "sakomrade": "", "lagrum": "" },
+
+    { "name": "empty saken returns empty", "saken": "", "caseNumber": "B 1234-25", "sakomrade": "", "lagrum": "" },
+    { "name": "whitespace-only saken returns empty", "saken": "   ", "caseNumber": "B 1234-25", "sakomrade": "", "lagrum": "" },
+    { "name": "empty case number defaults to B matching", "saken": "misshandel", "caseNumber": "", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" }
+  ]
+}
