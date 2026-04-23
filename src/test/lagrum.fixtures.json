@@ -99,6 +99,8 @@
 
     { "name": "empty saken returns empty", "saken": "", "caseNumber": "B 1234-25", "sakomrade": "", "lagrum": "" },
     { "name": "whitespace-only saken returns empty", "saken": "   ", "caseNumber": "B 1234-25", "sakomrade": "", "lagrum": "" },
-    { "name": "empty case number defaults to B matching", "saken": "misshandel", "caseNumber": "", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" }
+    { "name": "empty case number defaults to B matching", "saken": "misshandel", "caseNumber": "", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" },
+
+    { "name": "hemfridsbrott (override fixes generator dead entry)", "saken": "hemfridsbrott", "caseNumber": "B 1234-25", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 6 §" }
   ]
 }
