@@ -162,8 +162,18 @@ function extractCaseTypeFromSaken(saken: string): CaseType {
 function indexesForCaseType(caseType: CaseType): IndexedMap[] {
   switch (caseType) {
     case "B":
-    case "":
       return [INDEX_OVERRIDES_B, INDEX_GENERATED_B];
+    case "":
+      // When the caseNumber field is missing/unrecognised, try every index so
+      // we still produce a match when the saken alone is diagnostic.
+      return [
+        INDEX_OVERRIDES_B,
+        INDEX_CIVIL,
+        INDEX_FAMILY,
+        INDEX_ARENDEN,
+        INDEX_KONKURS,
+        INDEX_GENERATED_B,
+      ];
     case "T":
     case "FT":
       // Some courts (e.g. Nyköping) file custody disputes as T rather than F,
