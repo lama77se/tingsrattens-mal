@@ -169,6 +169,10 @@
     { "name": "Attunda T: strip 'ref' reference", "saken": "kontraktsrätt (överlämnat från kronofogden), ref 1980422", "caseNumber": "T 9059-25", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
     { "name": "Attunda T: strip '(återförvisat ...)' appended to real saken", "saken": "kontraktsrätt (överlämnat från kronofogden)(återförvisat mål från svea hovrätt t 5916-25)", "caseNumber": "T 11975-25", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
     { "name": "Attunda T: fastställelsetalan", "saken": "fastställelsetalan m.m.", "caseNumber": "T 7796-24", "sakomrade": "Fordringsrätt", "lagrum": "Rättegångsbalken 13 kap. 2 §" },
-    { "name": "Attunda T: lönegaranti", "saken": "lönegaranti", "caseNumber": "T 17176-25", "sakomrade": "Arbetsrätt", "lagrum": "Lönegarantilagen (1992:497)" }
+    { "name": "Attunda T: lönegaranti", "saken": "lönegaranti", "caseNumber": "T 17176-25", "sakomrade": "Arbetsrätt", "lagrum": "Lönegarantilagen (1992:497)" },
+
+    { "name": "Helsingborg B: hastighetsöverträdelse", "saken": "hastighetsöverträdelse", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 3 kap. 17 §" },
+    { "name": "Helsingborg parser: 'fordran20' (room glued)", "saken": "fordran20", "caseNumber": "T 7515-25", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
+    { "name": "Helsingborg parser: 'misshandel1' (room glued)", "saken": "misshandel1", "caseNumber": "B 4265-25", "sakomrade": "Brott mot liv och hälsa", "lagrum": "BrB 3 kap. 5 §" }
   ]
 }
