@@ -101,6 +101,55 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Skattebrott",
     primart_lagrum: ["Vägtrafikskattelagen (2006:227)"],
   },
+  "brott mot trafikförordningen": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276)"],
+  },
+  // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
+  "arbetsmiljöbrott": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 10 §"],
+  },
+  "grovt arbetsmiljöbrott": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 10 §"],
+  },
+  // Förtal — BrB 5:1 (ärekränkningsbrott); grovt förtal 5:2
+  "förtal": {
+    sakomrade: "Ärekränkningsbrott",
+    primart_lagrum: ["BrB 5 kap. 1 §"],
+  },
+  "grovt förtal": {
+    sakomrade: "Ärekränkningsbrott",
+    primart_lagrum: ["BrB 5 kap. 2 §"],
+  },
+  "förolämpning": {
+    sakomrade: "Ärekränkningsbrott",
+    primart_lagrum: ["BrB 5 kap. 3 §"],
+  },
+  // Köp av sexuell handling/tjänst — BrB 6:11 (renamed from "tjänst" to "handling")
+  "köp av sexuell tjänst": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 11 §"],
+  },
+  "köp av sexuell handling": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 11 §"],
+  },
+  // Brukande av falsk urkund — BrB 14:9
+  "brukande av falsk urkund": {
+    sakomrade: "Förfalskningsbrott",
+    primart_lagrum: ["BrB 14 kap. 9 §"],
+  },
+  // Undanröjande av ungdomspåföljder — BrB 32:4
+  "undanröjande av ungdomstjänst": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 32 kap. 4 §"],
+  },
+  "undanröjande av ungdomsvård": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 32 kap. 4 §"],
+  },
   // Base "smuggling" — generator only has compound variants like
   // "smuggling, olovlig in- och utförsel av ..." that don't substring-match.
   "smuggling": {
@@ -169,66 +218,66 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   },
 
   // --- Reclassification of generator's "Övriga brott" dead bucket ---
-  // Terrorism-related
+  // Terroristbrottslagen (2022:666) — verified paragraphs against lagen.nu
   "terroristbrott": {
     sakomrade: "Terroristbrott",
     primart_lagrum: ["Terroristbrottslagen (2022:666) 4 §"],
   },
   "terroristbrott, förberedelse till terroristbrott": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 11 §"],
   },
   "terroristbrott, försök till terroristbrott": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 11 §"],
   },
   "terroristbrott, stämpling till terroristbrott": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 11 §"],
   },
   "terroristbrott, underlåtenhet att avslöja terroristbrott": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 11 §"],
   },
   "deltagande i en terroristorganisation": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 7 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 4 a §"],
   },
   "samröre med en terroristorganisation": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 8 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 5 §"],
   },
   "finansiering av en terroristorganisation, eller en person eller sammanslutning av personer som begår eller på annat sätt medverkar till terroristbrott eller särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 9 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
   },
   "finansiering för att begå eller på annat sätt medverka till terroristbrott": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 10 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
   },
   "finansiering för att begå eller på annat sätt medverka till annan särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 10 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
   },
   "offentlig uppmaning till terrorism eller särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 11 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 7 §"],
   },
   "rekrytering till terrorism eller särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 12 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 8 §"],
   },
   "ge utbildning för terrorism eller särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 13 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 9 §"],
   },
   "ta del av utbildning för terrorism eller särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 13 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 9 §"],
   },
   "resa för terrorism eller särskilt allvarlig brottslighet": {
     sakomrade: "Terroristbrott",
-    primart_lagrum: ["Terroristbrottslagen (2022:666) 14 §"],
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 10 §"],
   },
 
   // Skattebrott (specific paragraphs)
@@ -325,10 +374,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: [],
   },
 
-  // Misc
+  // Självständigt förverkande introduced via SFS 2024:783 amending BrB 36 kap.;
+  // procedural law is Lagen (2024:782).
   "självständigt förverkande": {
     sakomrade: "Brott mot allmän verksamhet",
-    primart_lagrum: ["Lagen (2024:326) om förverkande av egendom"],
+    primart_lagrum: ["BrB 36 kap."],
   },
 };
 
@@ -411,6 +461,40 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Rättegångsbalken 44 kap. 9 §"],
   },
+  "arbetstvist": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
+  },
+  "varselavgift": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lag (1974:13) om vissa anställningsfrämjande åtgärder 17 §"],
+  },
+  "kontrollavgift vid olovlig parkering": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1984:318) om kontrollavgift vid olovlig parkering"],
+  },
+  "bättre rätt till aktier": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
+  },
+  "bättre rätt till hos länsstyrelsen deponerade medel": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: ["Lag (1927:56) om nedsättning av pengar hos myndighet"],
+  },
+  // Personligt betalningsansvar för styrelseledamöter under ABL 25:18 —
+  // aktiebolagsrättslig åtgärd; klassificerad som fordringsrätt här.
+  "personligt betalningsansvar": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 25 kap. 18 §"],
+  },
+  "återgång av gåva": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
+  "förstärkt laglottsskydd": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
   "arrendetvist": {
     sakomrade: "Arrenderätt",
     primart_lagrum: ["Jordabalken 7-11 kap."],
@@ -479,7 +563,19 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap."],
   },
+  "anordnande av godmanskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 4 §"],
+  },
+  "upphörande av godmanskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 19 §"],
+  },
   "förordnande av förvaltare": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
+  "anordnande av förvaltarskap": {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
   },
