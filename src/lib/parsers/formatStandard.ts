@@ -160,9 +160,28 @@ export const formatStandard: ParserStrategy = {
         }
 
         // If still no saken and the line is a bare case number (no time/date),
-        // inherit from previous hearing (secondary case on its own row, e.g. Hälsinglands)
-        if (!saken && hearings.length > 0 && !line.match(TIME_RANGE_REGEX) && !line.match(TIME_REGEX)) {
+        // inherit from previous hearing (secondary case on its own row, e.g.
+        // Hälsinglands). Conditions:
+        // - previous hearing must have saken (don't propagate empty);
+        // - previous hearing must share this case's time slot. Without the
+        //   time match, a bare case# that just happens to follow another
+        //   hearing (different time) wrongly inherits — e.g. Halmstad's
+        //   B 1216-26 inheriting B 488-26's saken.
+        if (
+          !saken &&
+          hearings.length > 0 &&
+          hearings[hearings.length - 1].saken &&
+          hearings[hearings.length - 1].time === time &&
+          !line.match(TIME_RANGE_REGEX) &&
+          !line.match(TIME_REGEX)
+        ) {
           saken = hearings[hearings.length - 1].saken;
+        }
+
+        // Skip rows that have no time and no saken — these are continuation-day
+        // markers / bare case-number lists that carry no new scheduling info.
+        if (!time && !saken) {
+          continue;
         }
 
         // Extract parties only for the last case on the line
