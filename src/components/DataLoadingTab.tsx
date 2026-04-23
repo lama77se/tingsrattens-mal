@@ -429,7 +429,18 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         return (
           <div key={court.id} className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-sm">{court.name}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium text-sm">{court.name}</h3>
+                {court.listingUrl && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs"
+                    title={`URL skrapas från ${court.listingUrl}`}
+                  >
+                    Skrapar URL
+                  </Badge>
+                )}
+              </div>
               <Button
                 size="sm"
                 variant="outline"
