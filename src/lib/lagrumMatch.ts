@@ -27,7 +27,7 @@ const LEVENSHTEIN_MIN_LENGTH = 7;
 const LEVENSHTEIN_MIN_TOKEN_LENGTH = 6;
 
 /** Separators used when splitting a saken into crime fragments (#6). */
-const FRAGMENT_SEPARATORS_RE = /\s*[;,]\s*|\s+och\s+|\s+samt\s+|\s+jämte\s+/i;
+const FRAGMENT_SEPARATORS_RE = /\s*[;,/]\s*|\s+och\s+|\s+samt\s+|\s+jämte\s+/i;
 
 /**
  * Fuzzy normalization: lowercase, strip diacritics, collapse duplicated letters.
