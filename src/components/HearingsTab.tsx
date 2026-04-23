@@ -495,27 +495,27 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead>
+              <TableHead className="whitespace-nowrap">
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("datetime")}>
                   Datum + Tid{sortIcon("datetime")}
                 </button>
               </TableHead>
-              <TableHead>
+              <TableHead className="whitespace-nowrap">
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("court")}>
                   Tingsrätt{sortIcon("court")}
                 </button>
               </TableHead>
-              <TableHead>
+              <TableHead className="whitespace-nowrap">
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("caseNumber")}>
                   Målnummer{sortIcon("caseNumber")}
                 </button>
               </TableHead>
-              <TableHead>
+              <TableHead className="whitespace-nowrap">
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("type")}>
                   Typ{sortIcon("type")}
                 </button>
               </TableHead>
-              <TableHead>
+              <TableHead className="whitespace-nowrap">
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("maltyp")}>
                   Måltyp{sortIcon("maltyp")}
                 </button>
@@ -535,12 +535,12 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   Lagrum{sortIcon("lagrum")}
                 </button>
               </TableHead>
-              <TableHead>
+              <TableHead className="whitespace-nowrap">
                 <button className="inline-flex items-center hover:text-foreground" onClick={() => toggleSort("flera")}>
                   Flera{sortIcon("flera")}
                 </button>
               </TableHead>
-              <TableHead className="w-10">PDF</TableHead>
+              <TableHead className="w-10 whitespace-nowrap">PDF</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -554,19 +554,19 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
               sorted.map((h) => (
                 <TableRow key={h.id} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="font-medium whitespace-nowrap">{h.date} {h.time}</TableCell>
-                  <TableCell>{h.court}</TableCell>
-                  <TableCell className="font-mono text-sm">{h.caseNumber}</TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">{h.court}</TableCell>
+                  <TableCell className="font-mono text-sm whitespace-nowrap">{h.caseNumber}</TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <Badge variant={typeBadgeVariant(h.type) as any}>{h.type}</Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{h.maltyp || "–"}</TableCell>
+                  <TableCell className="text-muted-foreground whitespace-nowrap">{h.maltyp || "–"}</TableCell>
                   <TableCell>{h.saken}</TableCell>
                   <TableCell className="text-muted-foreground">{h.sakomrade || "–"}</TableCell>
                   <TableCell className="text-muted-foreground">{h.lagrum || "–"}</TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <Checkbox checked={h.fleraSakfragor} disabled />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {h.pdfUrl && (
                       <button
                         onClick={() => window.open(h.pdfUrl, '_blank')}
