@@ -1,4 +1,4 @@
-import { matchLagrum } from "../lagrumMappings";
+import { matchLagrum } from "../lagrumMatch";
 import { getMaltyp } from "../maltypMappings";
 import { COURT_IN_SAKEN_REGEX, FLERA_SAKFRAGOR_REGEX } from "./extractors";
 import type { RawHearing, Hearing } from "./types";
