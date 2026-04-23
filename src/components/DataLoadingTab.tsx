@@ -6,6 +6,7 @@ import { RefreshCw, CheckCircle2, AlertCircle, Circle, FileText, Ban } from "luc
 import { getPreviousWeek, getCurrentWeek, getNextWeek } from "@/lib/weekUtils";
 import { COURTS, CourtConfig } from "@/lib/courtConfig";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
+import { fetchCourtListing } from "@/lib/api/courtListing";
 import { parseCourtPdf, Hearing } from "@/lib/parseCourtPdf";
 
 type StepStatus = "idle" | "active" | "done" | "error";
@@ -173,9 +174,50 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
   ): Promise<CourtPdfResult | undefined> => {
     // Step 0: Beräknar URL
     updateStep(court.id, weekIndex, 0, { status: "active" });
-    const urlOrUrls = court.buildUrl(week, year);
-    const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
-    await delay(300);
+    let urls: string[];
+    if (court.listingUrl && court.pickFromListing) {
+      updateStep(court.id, weekIndex, 0, {
+        status: "active",
+        detail: `Söker PDF-länk på\n${court.listingUrl}`,
+      });
+      const listing = await fetchCourtListing(court.listingUrl);
+      if (!listing.success || !listing.pdfs) {
+        const reason = listing.notFound
+          ? "Listsida kunde inte hittas"
+          : listing.error || "Kunde inte hämta listsida";
+        updateStep(court.id, weekIndex, 0, { status: "error", detail: reason });
+        updateStep(court.id, weekIndex, 1, { status: "idle" });
+        updateStep(court.id, weekIndex, 2, { status: "idle" });
+        updateStep(court.id, weekIndex, 3, { status: "error", detail: reason });
+        const failResult: CourtPdfResult = {
+          success: false,
+          error: reason,
+          notFound: listing.notFound,
+        };
+        setResult(court.id, weekIndex, failResult);
+        return failResult;
+      }
+      const picked = court.pickFromListing(listing.pdfs, week, year);
+      if (!picked) {
+        const reason = `Hittade ${listing.pdfs.length} PDF-länk(ar) men ingen matchade vecka ${week}`;
+        updateStep(court.id, weekIndex, 0, { status: "error", detail: reason });
+        updateStep(court.id, weekIndex, 1, { status: "idle" });
+        updateStep(court.id, weekIndex, 2, { status: "idle" });
+        updateStep(court.id, weekIndex, 3, { status: "error", detail: reason });
+        const failResult: CourtPdfResult = {
+          success: false,
+          error: reason,
+          notFound: true,
+        };
+        setResult(court.id, weekIndex, failResult);
+        return failResult;
+      }
+      urls = [picked];
+    } else {
+      const urlOrUrls = court.buildUrl(week, year);
+      urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
+      await delay(300);
+    }
     updateStep(court.id, weekIndex, 0, {
       status: "done",
       detail: urls.join("\n"),

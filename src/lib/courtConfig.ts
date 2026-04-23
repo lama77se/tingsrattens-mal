@@ -1,5 +1,8 @@
 import { startOfISOWeek, addDays, format } from "date-fns";
 import type { FormatFamily } from "./parsers/types";
+import type { ScrapedPdfLink } from "./scrapePdfLinks";
+
+export type { ScrapedPdfLink };
 
 export interface CourtConfig {
   id: string;
@@ -15,6 +18,14 @@ export interface CourtConfig {
   disabled?: boolean;
   /** Note shown on the loading page (e.g., why a court is disabled). */
   note?: string;
+  /** If set, scrape this HTML page to discover the PDF URL instead of using `buildUrl`. */
+  listingUrl?: string;
+  /** Pick the target PDF from a scraped listing. Return null if no match. */
+  pickFromListing?: (
+    pdfs: ScrapedPdfLink[],
+    week: number,
+    year: number
+  ) => string | null;
 }
 
 const BASE = "https://www.domstol.se/globalassets/filer/domstol";
@@ -48,8 +59,7 @@ export const COURTS: CourtConfig[] = [
       for (const endDay of [friday, thursday]) {
         const crossMonth = monday.getMonth() !== endDay.getMonth();
         const endStr = crossMonth ? format(endDay, "MM-dd") : format(endDay, "dd");
-        const dashes = crossMonth ? "----" : "---";
-        candidates.push(`${base}${dashes}${endStr}.pdf`);
+        candidates.push(`${base}--${endStr}.pdf`);
       }
       return candidates;
     },
@@ -175,51 +185,12 @@ export const COURTS: CourtConfig[] = [
     name: "Gävle tingsrätt",
     formatFamily: "gavle",
     singleUrl: true,
-    buildUrl: (_week, year) => {
-      const now = new Date();
-      const currentMonth = now.getMonth(); // 0-indexed
-      const monthNames = [
-        "januari", "februari", "mars", "april", "maj", "juni",
-        "juli", "augusti", "september", "oktober", "november", "december",
-      ];
-      // Known misspellings on domstol.se
-      const misspellings: Record<string, string[]> = {
-        februari: ["februrai"],
-      };
-      const curr = monthNames[currentMonth];
-      const prev = monthNames[(currentMonth + 11) % 12];
-      const next = monthNames[(currentMonth + 1) % 12];
-      const prevYear = currentMonth === 0 ? year - 1 : year;
-      const nextYear = currentMonth === 11 ? year + 1 : year;
-
-      const base = `${BASE}/gavle_tingsratt/veckans-forhandlingar/forhandlingar`;
-      const urls: string[] = [];
-
-      // current + next month
-      urls.push(`${base}-${curr}-${next}-${nextYear}.pdf`);
-      // prev + current month
-      urls.push(`${base}-${prev}-${curr}-${year}.pdf`);
-      // current month only
-      urls.push(`${base}-${curr}-${year}.pdf`);
-
-      // misspelled variants
-      const currMisspellings = misspellings[curr] || [];
-      const prevMisspellings = misspellings[prev] || [];
-      const nextMisspellings = misspellings[next] || [];
-      for (const alt of currMisspellings) {
-        urls.push(`${base}-${alt}-${next}-${nextYear}.pdf`);
-        urls.push(`${base}-${prev}-${alt}-${year}.pdf`);
-        urls.push(`${base}-${alt}-${year}.pdf`);
-      }
-      for (const alt of prevMisspellings) {
-        urls.push(`${base}-${alt}-${curr}-${year}.pdf`);
-      }
-      for (const alt of nextMisspellings) {
-        urls.push(`${base}-${curr}-${alt}-${nextYear}.pdf`);
-      }
-
-      return urls;
-    },
+    // Filenames are manually chosen by court staff (e.g. "forhandlingar-vecka-16-22.pdf"),
+    // so we scrape the listing page rather than guess.
+    listingUrl:
+      "https://www.domstol.se/gavle-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "haparanda_tingsratt",
@@ -263,34 +234,12 @@ export const COURTS: CourtConfig[] = [
     name: "Kristianstads tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    buildUrl: (week, year) => {
-      const monday = getISOWeekMonday(week, year);
-      const day = monday.getDate();
-      const month = monday.getMonth();
-      const yr = monday.getFullYear();
-      const base = `${BASE}/kristianstads_tingsratt/webb-forhandlingar`;
-
-      const halfMonthUrl = (start: Date, end: Date) =>
-        `${base}-${format(start, "yyMMdd")}-${format(end, "MMdd")}.pdf`;
-
-      const lastDay = (y: number, m: number) => new Date(y, m + 1, 0);
-
-      const urls: string[] = [];
-      if (day <= 15) {
-        // Current: 1st–15th
-        urls.push(halfMonthUrl(new Date(yr, month, 1), new Date(yr, month, 15)));
-        // Previous: 16th–end of prev month
-        const prevMonth = month === 0 ? 11 : month - 1;
-        const prevYear = month === 0 ? yr - 1 : yr;
-        urls.push(halfMonthUrl(new Date(prevYear, prevMonth, 16), lastDay(prevYear, prevMonth)));
-      } else {
-        // Current: 16th–end of month
-        urls.push(halfMonthUrl(new Date(yr, month, 16), lastDay(yr, month)));
-        // Previous: 1st–15th of same month
-        urls.push(halfMonthUrl(new Date(yr, month, 1), new Date(yr, month, 15)));
-      }
-      return urls;
-    },
+    // Rolling multi-week PDF with arbitrary date range in the filename,
+    // so we scrape the listing page rather than guess.
+    listingUrl:
+      "https://www.domstol.se/kristianstads-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "linkopings_tingsratt",
