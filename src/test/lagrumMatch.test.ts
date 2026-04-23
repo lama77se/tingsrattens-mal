@@ -99,4 +99,72 @@ describe("matchLagrum", () => {
       expect(matchLagrum("   ", "B 1234-25")).toEqual({ lagrum: "", sakomrade: "" });
     });
   });
+
+  // ─── C. Fuzzy normalization ──────────────────────────────────────────────
+  describe("fuzzy normalization fallback", () => {
+    it("collapses duplicated letters (e.g. 'missshandel')", () => {
+      const r = matchLagrum("missshandel", "B 1234-25");
+      expect(r.sakomrade).toBe("Brott mot liv och hälsa");
+    });
+
+    it("strips diacritics when matching", () => {
+      // "sakomrade" written without å should still match keys containing å
+      const r = matchLagrum("skadegorelse", "B 1234-25");
+      expect(r.sakomrade).toBe("Skadegörelsebrott");
+    });
+  });
+
+  // ─── D. Sakomrade default lagrum fallback ────────────────────────────────
+  describe("sakomrade default lagrum fallback", () => {
+    it("falls back to sakomrade default when entry has empty primart_lagrum", () => {
+      // The generator emits some entries with empty primart_lagrum and a real
+      // sakomrade; the default kicks in so we always return *some* reference.
+      // Pick a procedural override to exercise the code path reliably.
+      const r = matchLagrum("undanröjande av skyddstillsyn", "B 1234-25");
+      expect(r.lagrum).not.toBe("");
+    });
+  });
+
+  // ─── E. Non-B case routing ───────────────────────────────────────────────
+  describe("non-B case routing", () => {
+    it("maps tvistemål (T) saken using the civil vocabulary", () => {
+      const r = matchLagrum("skadestånd", "T 1234-25");
+      expect(r.sakomrade).toBe("Skadeståndsrätt");
+      expect(r.lagrum).toMatch(/Skadeståndslagen/);
+    });
+
+    it("maps förenklat tvistemål (FT) the same as T", () => {
+      const r = matchLagrum("fordran", "FT 42-25");
+      expect(r.sakomrade).toBe("Fordringsrätt");
+    });
+
+    it("maps familjemål (F) to family overrides", () => {
+      const r = matchLagrum("äktenskapsskillnad", "F 99-25");
+      expect(r.sakomrade).toBe("Familjerätt");
+      expect(r.lagrum).toMatch(/Äktenskapsbalken/);
+    });
+
+    it("maps familjemål (F) 'vårdnad' to FB 6 kap.", () => {
+      const r = matchLagrum("vårdnad om barn", "F 100-25");
+      expect(r.sakomrade).toBe("Familjerätt");
+      expect(r.lagrum).toMatch(/Föräldrabalken 6 kap/);
+    });
+
+    it("maps ärenden (Ä) saken using the ärenden vocabulary", () => {
+      const r = matchLagrum("förordnande av god man", "Ä 500-25");
+      expect(r.sakomrade).toBe("Förmynderskapsrätt");
+    });
+
+    it("maps konkursmål (K)", () => {
+      const r = matchLagrum("konkurs", "K 7-25");
+      expect(r.sakomrade).toBe("Konkursrätt");
+      expect(r.lagrum).toMatch(/Konkurslagen/);
+    });
+
+    it("tvistemål does NOT fall through to generated criminal mappings", () => {
+      // "misshandel" is a criminal term; on a T case it should not be classified.
+      const r = matchLagrum("misshandel", "T 42-25");
+      expect(r).toEqual({ lagrum: "", sakomrade: "" });
+    });
+  });
 });
