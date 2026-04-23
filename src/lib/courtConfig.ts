@@ -440,8 +440,19 @@ export const COURTS: CourtConfig[] = [
     id: "angermanlands_tingsratt",
     name: "Ångermanlands tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week) =>
-      `${BASE}/angermanlands_tingsratt/veckans-forhandlingar/v-${week}.pdf`,
+    // Filenames are inconsistent (observed: "v.18-ny.pdf", "ny-v17.pdf"),
+    // so we scrape the listing page and match by week number.
+    listingUrl:
+      "https://www.domstol.se/angermanlands-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) => {
+      const match = pdfs.find((p) => {
+        const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+        const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
+        return weekInText || weekInHref;
+      });
+      return match?.href ?? null;
+    },
+    buildUrl: () => [],
   },
   {
     id: "orebro_tingsratt",
