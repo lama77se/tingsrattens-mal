@@ -25,3 +25,6 @@ dist-ssr
 
 # Brå PDF (downloaded for lagrum generation)
 bra-klassificering.pdf
+
+# Local-only lagrum coverage corpus (real saken strings from PDFs)
+src/test/lagrum-corpus.json

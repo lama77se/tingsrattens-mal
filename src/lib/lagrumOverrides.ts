@@ -110,6 +110,38 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Sexualbrott",
     primart_lagrum: ["BrB 6 kap. 10 §"],
   },
+
+  // --- Crimes where the generator emitted only a chapter reference ---
+  // COMMON_ALIASES in the generator didn't overwrite the pass-2 chapter-only
+  // entry, so pin the specific paragraph here.
+  "vållande till annans död": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 7 §"],
+  },
+  "olaga förföljelse": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 b §"],
+  },
+  "grov kvinnofridskränkning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 a §"],
+  },
+  "grov fridskränkning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 a §"],
+  },
+  "mordbrand": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 1 §"],
+  },
+  "grov mordbrand": {
+    sakomrade: "Allmänfarliga brott",
+    primart_lagrum: ["BrB 13 kap. 2 §"],
+  },
+  "övergrepp i rättssak": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 10 §"],
+  },
 };
 
 /**
