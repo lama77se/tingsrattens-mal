@@ -307,6 +307,20 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
   },
+  // Kränkande fotografering — BrB 4 kap. 6 a §
+  "kränkande fotografering": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 a §"],
+  },
+  // Olaga integritetsintrång — BrB 4 kap. 6 c § (related but separate)
+  "olaga integritetsintrång": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 c §"],
+  },
+  "grovt olaga integritetsintrång": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 d §"],
+  },
   // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
   "arbetsmiljöbrott": {
     sakomrade: "Brott mot liv och hälsa",
@@ -980,6 +994,11 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "mål om parkering": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
+  // Handräckning (överlämnat från kronofogden) — BfL
+  "handräckning": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1990:746) om betalningsföreläggande och handräckning"],
   },
 };
 
