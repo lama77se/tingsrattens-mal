@@ -272,6 +272,14 @@ function cleanFragment(s: string): string {
     .toLowerCase()
     // Strip saken-embedded case refs like "PMÄ 8348-25 ..." or "pmft 19315-25 ..."
     .replace(/^(pmft|pmt|pmä|pmb|ft|b|t|f|ä|k)\s+\d+-\d+\s+/i, "")
+    // Strip procedural parentheticals that Attunda/Stockholm sometimes append,
+    // which have no legal classification value: (återförvisat ...),
+    // (överlämnat från kronofogden), (ref ...), (d.nr ...), etc.
+    .replace(/\s*\(\s*(återförvisat|överlämnat|ref\.?|d\.?\s*nr|dnr)\b[^)]*\)/gi, "")
+    // Strip trailing reference-number fragments like ", ref 1980422",
+    // ", d.nr 12.1-51727-25", ", 13531340 / 25255-0829"
+    .replace(/,?\s*(ref\.?|d\.?\s*nr|dnr)\s+[\w\-./\s]+$/i, "")
+    .replace(/,\s*[\d][\d\s/.-]+$/, "")
     // Strip room/venue artefacts that some court parsers leave in the saken
     // field (e.g. Nyköping's "... Tingssal", Halmstad's "... Sal 3").
     .replace(/\s+(tingssal|tingsrätten)\s*$/i, "")

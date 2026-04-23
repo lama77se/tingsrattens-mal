@@ -210,6 +210,63 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Narkotikabrott",
     primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 a §"],
   },
+  // Överträdelse av näringsförbud — Lag (2014:836) 47 §
+  "överträdelse av näringsförbud": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lag (2014:836) om näringsförbud 47 §"],
+  },
+  // "brott mot vapenlagen" — Vapenlagen 9 kap. (longer form, matches the
+  // already-present "vapenbrott" alias but keep explicit for clarity)
+  "brott mot vapenlagen": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Vapenlagen (1996:67) 9 kap."],
+  },
+  // Jaktbrott (proactive — Brå doesn't cover directly)
+  "jaktbrott": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Jaktlagen (1987:259) 43 §"],
+  },
+  "grovt jaktbrott": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Jaktlagen (1987:259) 44 §"],
+  },
+  // Folkbokföringsbrott — Folkbokföringslagen 42 §
+  "folkbokföringsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Folkbokföringslagen (1991:481) 42 §"],
+  },
+  "grovt folkbokföringsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Folkbokföringslagen (1991:481) 43 §"],
+  },
+  // Olovligt anskaffande av alkohol — Alkohollagen 11 kap. 7 §
+  "olovligt anskaffande av alkohol": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap. 7 §"],
+  },
+  "olovligt anskaffande av alkoholdrycker": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Alkohollagen (2010:1622) 11 kap. 7 §"],
+  },
+  // Vite — civil procedural enforcement, filed as B case
+  "talan om utdömande av vite": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1985:206) om viten"],
+  },
+  "utdömande av vite": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1985:206) om viten"],
+  },
+  // International judicial assistance (rättslig hjälp)
+  "rättslig hjälp åt utländsk domstol": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
+  },
+  // Typo / compressed variants of näringspenningtvätts*
+  "näringspenningsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 7 §"],
+  },
   // Base "smuggling" — generator only has compound variants like
   // "smuggling, olovlig in- och utförsel av ..." that don't substring-match.
   "smuggling": {
@@ -606,6 +663,21 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "konkurrensskadeavgift": {
     sakomrade: "Konkurrensrätt",
     primart_lagrum: ["Konkurrenslagen (2008:579) 3 kap. 5 §"],
+  },
+  // Kontraktsrätt — broad contract-law umbrella term used verbatim by Attunda
+  "kontraktsrätt": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Avtalslagen (1915:218)"],
+  },
+  // Fastställelsetalan — RB 13 kap. 2 §
+  "fastställelsetalan": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 13 kap. 2 §"],
+  },
+  // Lönegaranti — statlig lönegaranti vid konkurs
+  "lönegaranti": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lönegarantilagen (1992:497)"],
   },
 };
 
