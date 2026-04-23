@@ -105,6 +105,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276)"],
   },
+  "hastighetsöverträdelse": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 3 kap. 17 §"],
+  },
   // Arbetsmiljöbrott — BrB 3:10 (brott mot liv och hälsa)
   "arbetsmiljöbrott": {
     sakomrade: "Brott mot liv och hälsa",

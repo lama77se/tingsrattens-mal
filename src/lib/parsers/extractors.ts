@@ -283,7 +283,16 @@ export function cleanSaken(text: string): string {
   }
   // Strip trailing court name used as location (e.g., "... Attunda tingsrätt")
   saken = saken.replace(/\s+\S+\s+tingsrätt\s*$/i, "").trim();
-  return saken.replace(/^[\s,;:.\-–]+|[\s,;:.\-–]+$/g, "").trim();
+  // Strip a trailing 1-2-digit room number glued directly to the end of saken
+  // (Helsingborg's PDF puts "Sal" in a separate column that pdf-parse fuses
+  // into the saken text, e.g. "misshandel1", "fordran20", "våldtäkt m.m.13").
+  saken = saken.replace(/([A-Za-zÅÄÖåäö.])(\d{1,2})\s*$/, "$1").trim();
+  // Strip leading/trailing junk punctuation, but preserve trailing "." so
+  // abbreviations like "m.m." survive.
+  return saken
+    .replace(/^[\s,;:.\-–]+/, "")
+    .replace(/[\s,;:\-–]+$/, "")
+    .trim();
 }
 
 /**
