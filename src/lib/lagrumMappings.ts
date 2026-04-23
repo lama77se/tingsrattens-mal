@@ -5,8 +5,10 @@
 // The matcher lives in src/lib/lagrumMatch.ts (hand-maintained) and consults
 // src/lib/lagrumOverrides.ts for hand-curated additions and blocklist.
 
+import type { Sakomrade } from "./sakomrade";
+
 export interface LagrumEntry {
-  sakomrade: string;
+  sakomrade: Sakomrade;
   primart_lagrum: string[];
   alternativa_lagrum?: string[];
 }
