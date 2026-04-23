@@ -7,6 +7,7 @@
  *   node debug-pdf.cjs <pdf-url-or-file> --raw          # show raw extracted text only
  *   node debug-pdf.cjs <pdf-url-or-file> --lines        # show numbered lines
  *   node debug-pdf.cjs <pdf-url-or-file> --court solna   # override court detection
+ *   node debug-pdf.cjs <pdf-url-or-file> --corpus       # emit JSON {saken, caseNumber} lines for lagrum coverage
  *
  * Examples:
  *   node debug-pdf.cjs https://www.domstol.se/.../vecka-11.pdf
@@ -111,6 +112,7 @@ async function main() {
   const showRaw = flags.includes("--raw");
   const showLines = flags.includes("--lines");
   const useEdge = flags.includes("--edge");
+  const corpusMode = flags.includes("--corpus");
   const courtOverrideIdx = args.indexOf("--court");
   const courtOverride = courtOverrideIdx !== -1 ? args[courtOverrideIdx + 1] : null;
 
@@ -233,6 +235,14 @@ async function main() {
     const text = fs.readFileSync(${JSON.stringify(tmpText)}, "utf-8");
     const court = { name: ${JSON.stringify(court.name)}, formatFamily: ${JSON.stringify(court.format)} };
     const hearings = parseCourtPdf(text, court);
+
+    if (${corpusMode ? "true" : "false"}) {
+      for (const h of hearings) {
+        if (!h.saken || h.saken === "–") continue;
+        process.stdout.write(JSON.stringify({ saken: h.saken, caseNumber: h.caseNumber || "" }) + "\\n");
+      }
+      process.exit(0);
+    }
 
     // Summary
     console.log("\\n" + "=".repeat(60));

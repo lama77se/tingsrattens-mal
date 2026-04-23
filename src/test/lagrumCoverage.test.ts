@@ -25,19 +25,36 @@ interface CorpusEntry {
   caseNumber: string;
 }
 
+function parseCorpusText(raw: string): CorpusEntry[] {
+  const trimmed = raw.trim();
+  if (!trimmed) return [];
+  // JSON array
+  if (trimmed.startsWith("[")) {
+    return JSON.parse(trimmed) as CorpusEntry[];
+  }
+  // NDJSON (one JSON object per line) — the output of `debug-pdf.cjs --corpus`
+  return trimmed
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0)
+    .map((line) => JSON.parse(line) as CorpusEntry);
+}
+
 function loadCorpus(): { source: string; entries: CorpusEntry[] } {
   const envPath = process.env.LAGRUM_CORPUS;
   if (envPath) {
     const abs = resolve(envPath);
     if (existsSync(abs)) {
-      const raw = readFileSync(abs, "utf8");
-      return { source: abs, entries: JSON.parse(raw) as CorpusEntry[] };
+      return { source: abs, entries: parseCorpusText(readFileSync(abs, "utf8")) };
     }
   }
-  const defaultPath = resolve("src/test/lagrum-corpus.json");
-  if (existsSync(defaultPath)) {
-    const raw = readFileSync(defaultPath, "utf8");
-    return { source: defaultPath, entries: JSON.parse(raw) as CorpusEntry[] };
+  for (const candidate of [
+    "src/test/lagrum-corpus.json",
+    "src/test/lagrum-corpus.ndjson",
+  ]) {
+    const abs = resolve(candidate);
+    if (existsSync(abs)) {
+      return { source: abs, entries: parseCorpusText(readFileSync(abs, "utf8")) };
+    }
   }
   // Fallback: fixtures that aren't negative-assertion / isolation cases
   const fallback = (fixtures.entries as Array<CorpusEntry & { sakomrade: string }>)

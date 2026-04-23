@@ -92,6 +92,15 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Ekonomisk brottslighet",
     primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 5 §"],
   },
+  // Short form commonly used in court listings
+  "penningtvätt": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 3 §"],
+  },
+  "brott mot vägtrafikskattelagen": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Vägtrafikskattelagen (2006:227)"],
+  },
   "förseelse mot jaktlagen": {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["Jaktlagen (1987:259)"],
@@ -147,6 +156,169 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "övergrepp i rättssak": {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 10 §"],
+  },
+
+  // --- Reclassification of generator's "Övriga brott" dead bucket ---
+  // Terrorism-related
+  "terroristbrott": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 4 §"],
+  },
+  "terroristbrott, förberedelse till terroristbrott": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+  },
+  "terroristbrott, försök till terroristbrott": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+  },
+  "terroristbrott, stämpling till terroristbrott": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+  },
+  "terroristbrott, underlåtenhet att avslöja terroristbrott": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 6 §"],
+  },
+  "deltagande i en terroristorganisation": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 7 §"],
+  },
+  "samröre med en terroristorganisation": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 8 §"],
+  },
+  "finansiering av en terroristorganisation, eller en person eller sammanslutning av personer som begår eller på annat sätt medverkar till terroristbrott eller särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 9 §"],
+  },
+  "finansiering för att begå eller på annat sätt medverka till terroristbrott": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 10 §"],
+  },
+  "finansiering för att begå eller på annat sätt medverka till annan särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 10 §"],
+  },
+  "offentlig uppmaning till terrorism eller särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 11 §"],
+  },
+  "rekrytering till terrorism eller särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 12 §"],
+  },
+  "ge utbildning för terrorism eller särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 13 §"],
+  },
+  "ta del av utbildning för terrorism eller särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 13 §"],
+  },
+  "resa för terrorism eller särskilt allvarlig brottslighet": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 14 §"],
+  },
+
+  // Skattebrott (specific paragraphs)
+  "grovt skattebrott, avseende enbart mervärdesskattelagen, vid gränsöverskridande handel eller både handel inom landet och gränsöverskridande handel": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 4 §"],
+  },
+  "grovt skattebrott, avseende enbart mervärdesskattelagen, vid handel endast inom landet": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 4 §"],
+  },
+  "grovt skattebrott, avseende övrig skattelagstiftning": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 4 §"],
+  },
+  "skattebrott, skatteförseelse, avseende enbart mervärdesskattelagen, vid gränsöverskridande handel eller både handel inom landet och gränsöverskridande handel": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 3 §"],
+  },
+  "skattebrott, skatteförseelse, avseende enbart mervärdesskattelagen, vid handel endast inom landet": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 3 §"],
+  },
+  "skattebrott, skatteförseelse, avseende övrig skattelagstiftning": {
+    sakomrade: "Skattebrott",
+    primart_lagrum: ["Skattebrottslagen (1971:69) 3 §"],
+  },
+
+  // Upphovsrätt
+  "brott mot upphovsrätten ej genom fildelning": {
+    sakomrade: "Immaterialrättsbrott",
+    primart_lagrum: ["Upphovsrättslagen (1960:729) 53 §"],
+  },
+  "brott mot upphovsrätten genom fildelning": {
+    sakomrade: "Immaterialrättsbrott",
+    primart_lagrum: ["Upphovsrättslagen (1960:729) 53 §"],
+  },
+
+  // Ordningslagen
+  "ordningslagen, brott mot allmänna sammankomster och offentliga tillställningar": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["Ordningslagen (1993:1617)"],
+  },
+  "ordningslagen, obehörigt beträdande av spelplanen eller motsvarande område avsett för idrottsutövning, vid idrottsarrangemang": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["Ordningslagen (1993:1617) 5 kap."],
+  },
+  "ordningslagen, olovligt innehav, användning av pyrotekniska varor vid idrottsarrangemang på idrottsanläggning": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["Ordningslagen (1993:1617) 5 kap."],
+  },
+  "ordningslagen, övriga brott vid idrottsarrangemang": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["Ordningslagen (1993:1617) 5 kap."],
+  },
+
+  // Family & frid
+  "äktenskapstvång": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 c §"],
+  },
+  "barnäktenskapsbrott": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 c §"],
+  },
+  "brott mot lagen med förbud mot könsstympning av kvinnor": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["Lagen (1982:316) med förbud mot könsstympning av kvinnor 2 §"],
+  },
+  "olovlig avlyssning m.m.": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 9 a §"],
+  },
+
+  // "utan misstanke om brott" belongs in the non-crime bucket, not Övriga brott
+  "brand utan misstanke om brott": {
+    sakomrade: "Händelser (ej brott)",
+    primart_lagrum: [],
+  },
+  "försvunnen person i fjällen": {
+    sakomrade: "Händelser (ej brott)",
+    primart_lagrum: [],
+  },
+  "försvunnen person, ej i fjällen": {
+    sakomrade: "Händelser (ej brott)",
+    primart_lagrum: [],
+  },
+  "försvunnen person, barn utan vårdnadshavare": {
+    sakomrade: "Händelser (ej brott)",
+    primart_lagrum: [],
+  },
+  "personskada utan misstanke om brott till följd av polisverksamhet eller under vistelse i polisarrest": {
+    sakomrade: "Händelser (ej brott)",
+    primart_lagrum: [],
+  },
+
+  // Misc
+  "självständigt förverkande": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lagen (2024:326) om förverkande av egendom"],
   },
 };
 
