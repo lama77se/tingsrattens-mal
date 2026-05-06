@@ -113,10 +113,39 @@ export function extractSwedishDate(line: string): string | null {
  * inter-field spaces, requiring targeted degluing patterns.
  */
 export function preprocessLines(text: string): string[] {
-  const trimmed = text
+  // Hässleholm's PDF embeds a font whose ToUnicode CMap maps digits 0-9 to
+  // U+0267..U+0270 (Latin IPA letters ɧ ɨ ɩ ɪ ɫ ɬ ɭ ɮ ɯ ɰ). Restore real digits.
+  const decoded = text.replace(/[ɧ-ɰ]/g, (c) =>
+    String(c.charCodeAt(0) - 0x0267)
+  );
+  const trimmed = decoded
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
+
+  // Norrköping (cell-per-line PDFs): the table layout puts each cell on its
+  // own line, with a date prefix like "må 2026-05-" (trailing dash) followed
+  // by lines holding the day, time, type, case, saken, and room. Detect this
+  // pattern and merge each row's lines into one canonical line so the rest of
+  // the parser sees a normal "<day> <date> <times> <type> <case> ..." line.
+  const NK_DATE_PREFIX = /^(?:m[åaö]|ti|on|to|fr|lö|sö)\s+\d{4}-\d{2}-\s*$/i;
+  let preMerged = trimmed;
+  if (trimmed.some((l) => NK_DATE_PREFIX.test(l))) {
+    const rows: string[] = [];
+    let buffer: string[] | null = null;
+    for (const line of trimmed) {
+      if (NK_DATE_PREFIX.test(line)) {
+        if (buffer) rows.push(buffer.join(" "));
+        buffer = [line];
+      } else if (buffer) {
+        buffer.push(line);
+      } else {
+        rows.push(line);
+      }
+    }
+    if (buffer) rows.push(buffer.join(" "));
+    preMerged = rows;
+  }
 
   // Merge split-date lines (Norrköping-style PDFs).
   // Some PDFs render dates across two rows:
@@ -128,10 +157,10 @@ export function preprocessLines(text: string): string[] {
   const SPLIT_DATE_LINE = /^(.*\b\d{4}\s*[-–—]\s*\d{2}\s*[-–—]\s*)(\d{1,2}:\d{2}\b.*)$/;
   const NEXT_LINE_DAY = /^(\d{1,2})\b(.*)/;
   const merged: string[] = [];
-  for (let i = 0; i < trimmed.length; i++) {
-    const splitMatch = trimmed[i].match(SPLIT_DATE_LINE);
-    if (splitMatch && i + 1 < trimmed.length) {
-      const nextDayMatch = trimmed[i + 1].match(NEXT_LINE_DAY);
+  for (let i = 0; i < preMerged.length; i++) {
+    const splitMatch = preMerged[i].match(SPLIT_DATE_LINE);
+    if (splitMatch && i + 1 < preMerged.length) {
+      const nextDayMatch = preMerged[i + 1].match(NEXT_LINE_DAY);
       if (nextDayMatch) {
         // Reconstruct: "må 2026 - 02 - 16 09:00 - 16:00 Huvudförhandling ..."
         const datePart = splitMatch[1]; // "må 2026 - 02 - "
@@ -158,7 +187,7 @@ export function preprocessLines(text: string): string[] {
         continue;
       }
     }
-    merged.push(trimmed[i]);
+    merged.push(preMerged[i]);
   }
 
   return merged
