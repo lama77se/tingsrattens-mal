@@ -64,6 +64,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Förmögenhetsbrott",
     primart_lagrum: ["BrB 9 kap. 6 §"],
   },
+  "häleriförseelse": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 9 kap. 7 §"],
+  },
   "djurplågeri": {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["BrB 16 kap. 13 §"],
@@ -127,6 +131,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot Sveriges säkerhet",
     primart_lagrum: ["Skyddslagen (2010:305) 30 a §"],
   },
+  // Skyddslagen 30 § — unauthorised entry to protected sites
+  "obehörigt tillträde till skyddsobjekt": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["Skyddslagen (2010:305) 30 §"],
+  },
   // Brott mot hundlagen
   "brott mot lagen om tillsyn över hundar och katter": {
     sakomrade: "Övrig speciallagstiftning",
@@ -135,6 +144,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "brott mot hundlagen": {
     sakomrade: "Övrig speciallagstiftning",
     primart_lagrum: ["Lag (2007:1150) om tillsyn över hundar och katter"],
+  },
+  // Kreditupplysningslagen (1973:1173) 19-21 § — straffbestämmelser
+  "brott mot kreditupplysningslagen": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Kreditupplysningslagen (1973:1173) 19 §"],
   },
   // Totalförsvarsplikten (Blekinge)
   "brott mot totalförsvarsplikten": {
@@ -183,6 +197,15 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "grov förgripelse mot tjänsteman": {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 2 §"],
+  },
+  // Angrepp mot tjänsteman — BrB 17 kap. 1 a § (infördes SFS 2023:786)
+  "angrepp mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 1 a §"],
+  },
+  "grovt angrepp mot tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 1 a § 2 st"],
   },
   // Muta — BrB 10 kap. 5a-5c § (mutbrottsreformen 2012). Generator has these
   // entries under BrB 17 kap. which is obsolete; override with correct refs.
@@ -240,6 +263,13 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "otillåten avfallstransport": {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 4 a §"],
+  },
+  // Otillåten miljöverksamhet — Miljöbalken 29 kap. 4 § (generator routes the
+  // long compound "miljöbalken, otillåten miljöverksamhet ..." keys to
+  // "Händelser (ej brott)" which is wrong; this bare-form override wins.)
+  "otillåten miljöverksamhet": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 4 §"],
   },
   "brott mot djurskyddslagen": {
     sakomrade: "Miljöbrott",
@@ -343,6 +373,16 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "brott mot ordningslagen": {
     sakomrade: "Brott mot allmän ordning",
     primart_lagrum: ["Ordningslagen (1993:1617)"],
+  },
+  // Maskeringsförbudet — Lag (2005:900) om förbud mot maskering i vissa fall 3 §
+  "brott mot lagen om förbud mot maskering i vissa fall": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["Lag (2005:900) om förbud mot maskering i vissa fall 3 §"],
+  },
+  // Missbruk av larmanordning — BrB 16 kap. 15 § (generator har felstavad "larmordning")
+  "missbruk av larmanordning": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["BrB 16 kap. 15 §"],
   },
   // Brott mot taxitrafikförordningen — Taxitrafikförordning (2012:238)
   "brott mot taxitrafikförordningen": {
@@ -515,6 +555,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
   },
+  "begäran om rättslig hjälp": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
+  },
   // Typo / compressed variants of näringspenningtvätts*
   "näringspenningsbrott": {
     sakomrade: "Ekonomisk brottslighet",
@@ -539,6 +583,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: ["Knivlagen (1988:254)"],
   },
   "brott mot lagen om förbud beträffande knivar och andra farliga föremål": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Knivlagen (1988:254)"],
+  },
+  "brott mot lagen beträffande knivar och andra farliga föremål": {
     sakomrade: "Vapenbrott",
     primart_lagrum: ["Knivlagen (1988:254)"],
   },

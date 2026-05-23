@@ -232,7 +232,13 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         status: "active",
         detail: urls.length > 1 ? `Testar ${triedUrls.length + 1}/${urls.length}...` : undefined,
       });
-      const attempt = await fetchCourtPdf(url, week, year, court.pdfYTolerance);
+      const attempt = await fetchCourtPdf(
+        url,
+        week,
+        year,
+        court.pdfYTolerance,
+        court.formatFamily === "positional" ? "positional" : undefined
+      );
       const reason = !attempt.success
         ? (attempt.errorCode === "direct_404" ? "404" : attempt.error?.substring(0, 50))
         : undefined;

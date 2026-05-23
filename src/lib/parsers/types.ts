@@ -1,4 +1,4 @@
-export type FormatFamily = "standard" | "tabular" | "gavle" | "schema" | "formatD" | "formatE";
+export type FormatFamily = "standard" | "tabular" | "gavle" | "schema" | "positional" | "formatD" | "formatE";
 
 export interface RawHearing {
   date: string;

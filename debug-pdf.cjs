@@ -8,11 +8,14 @@
  *   node debug-pdf.cjs <pdf-url-or-file> --lines        # show numbered lines
  *   node debug-pdf.cjs <pdf-url-or-file> --court solna   # override court detection
  *   node debug-pdf.cjs <pdf-url-or-file> --corpus       # emit JSON {saken, caseNumber} lines for lagrum coverage
+ *   node debug-pdf.cjs <pdf-url-or-file> --positional   # use Y-coordinate extraction
+ *                                                       # (one PDF visual row per output line, tabs between columns)
  *
  * Examples:
  *   node debug-pdf.cjs https://www.domstol.se/.../vecka-11.pdf
  *   node debug-pdf.cjs ./skaraborgs-w8.pdf
  *   node debug-pdf.cjs https://... --raw > extracted.txt
+ *   node debug-pdf.cjs https://... --positional --lines
  */
 
 const fs = require("fs");
@@ -20,6 +23,7 @@ const path = require("path");
 const https = require("https");
 const http = require("http");
 const pdfParse = require(path.join(__dirname, "node_modules", "pdf-parse"));
+const { renderPositional } = require(path.join(__dirname, "api", "_lib", "renderPositional.cjs"));
 
 // ---------------------------------------------------------------------------
 // Court config (id → name + formatFamily) extracted at build time is TS, so
@@ -36,7 +40,7 @@ const COURT_MAP = {
   eksjo: { name: "Eksjö tingsrätt", format: "tabular" },
   helsingborgs: { name: "Helsingborgs tingsrätt", format: "standard" },
   halsinglands: { name: "Hälsinglands tingsrätt", format: "standard" },
-  halmstads: { name: "Halmstads tingsrätt", format: "standard" },
+  halmstads: { name: "Halmstads tingsrätt", format: "positional" },
   goteborgs: { name: "Göteborgs tingsrätt", format: "standard" },
   gavle: { name: "Gävle tingsrätt", format: "gavle" },
   haparanda: { name: "Haparanda tingsrätt", format: "schema" },
@@ -46,10 +50,11 @@ const COURT_MAP = {
   linkopings: { name: "Linköpings tingsrätt", format: "tabular" },
   lunds: { name: "Lunds tingsrätt", format: "schema" },
   malmo: { name: "Malmö tingsrätt", format: "schema" },
-  mora: { name: "Mora tingsrätt", format: "tabular" },
+  mora: { name: "Mora tingsrätt", format: "positional" },
   norrkopings: { name: "Norrköpings tingsrätt", format: "tabular" },
   nykopings: { name: "Nyköpings tingsrätt", format: "tabular" },
   nacka: { name: "Nacka tingsrätt", format: "tabular" },
+  sodertalje: { name: "Södertälje tingsrätt", format: "positional" },
   sundsvalls: { name: "Sundsvalls tingsrätt", format: "tabular" },
   uddevalla: { name: "Uddevalla tingsrätt", format: "tabular" },
   varbergs: { name: "Varbergs tingsrätt", format: "tabular" },
@@ -103,8 +108,9 @@ async function main() {
   const positional = args.filter((a) => !a.startsWith("--"));
 
   if (positional.length === 0) {
-    console.log("Usage: node debug-pdf.cjs <pdf-url-or-file> [--raw] [--lines] [--court <name>] [--edge]");
-    console.log("  --edge   Use production edge function for text extraction (tests real pipeline)");
+    console.log("Usage: node debug-pdf.cjs <pdf-url-or-file> [--raw] [--lines] [--court <name>] [--edge] [--positional]");
+    console.log("  --edge        Use production edge function for text extraction (tests real pipeline)");
+    console.log("  --positional  Use Y-coordinate row grouping (one visual PDF row per line, tab-separated columns)");
     process.exit(1);
   }
 
@@ -113,6 +119,7 @@ async function main() {
   const showLines = flags.includes("--lines");
   const useEdge = flags.includes("--edge");
   const corpusMode = flags.includes("--corpus");
+  const positionalMode = flags.includes("--positional");
   const courtOverrideIdx = args.indexOf("--court");
   const courtOverride = courtOverrideIdx !== -1 ? args[courtOverrideIdx + 1] : null;
 
@@ -130,6 +137,7 @@ async function main() {
       edgeBody.yTolerance = Number(args[ytolIdx + 1]);
       console.error(`  yTolerance: ${edgeBody.yTolerance}`);
     }
+    if (positionalMode) edgeBody.mode = "positional";
     const body = JSON.stringify(edgeBody);
     const resp = await new Promise((resolve, reject) => {
       const req = https.request(edgeUrl, {
@@ -190,9 +198,13 @@ async function main() {
       process.exit(1);
     }
 
-    const data = await pdfParse(buffer);
+    const data = positionalMode
+      ? await pdfParse(buffer, { pagerender: renderPositional })
+      : await pdfParse(buffer);
     text = data.text;
-    console.error(`Pages: ${data.numpages}, Text length: ${text.length} chars`);
+    console.error(
+      `Pages: ${data.numpages}, Text length: ${text.length} chars${positionalMode ? " (positional mode)" : ""}`
+    );
   }
 
   // 3. Detect court
