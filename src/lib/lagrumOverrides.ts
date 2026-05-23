@@ -68,6 +68,17 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Förmögenhetsbrott",
     primart_lagrum: ["BrB 9 kap. 7 §"],
   },
+  // Tillgrepp av fortskaffningsmedel — BrB 8 kap. 7 § (8 § for grovt). Generator
+  // only has long compound keys (e.g. "tillgrepp av motordrivet
+  // fortskaffningsmedel, bil") mapped to "BrB 8 kap." with no §; pin specifics.
+  "tillgrepp av fortskaffningsmedel": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 7 §"],
+  },
+  "grovt tillgrepp av fortskaffningsmedel": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 8 §"],
+  },
   "djurplågeri": {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["BrB 16 kap. 13 §"],
@@ -136,6 +147,26 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot Sveriges säkerhet",
     primart_lagrum: ["Skyddslagen (2010:305) 30 §"],
   },
+  // Brott mot livsmedelslagen — Livsmedelslagen (2006:804) 28-29 §
+  "brott mot livsmedelslagen": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Livsmedelslagen (2006:804) 28 §"],
+  },
+  // Kvarstad i brottmål — säkringsåtgärd, RB 26 kap. 1 §
+  "kvarstad": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Rättegångsbalken 26 kap. 1 §"],
+  },
+  // Varumärkesintrång (criminal) — Varumärkeslagen 8 kap. 1 §
+  "varumärkesintrång": {
+    sakomrade: "Immaterialrättsbrott",
+    primart_lagrum: ["Varumärkeslagen (2010:1877) 8 kap. 1 §"],
+  },
+  // Olovligt förande av vattenskoter — Vattenskoterförordningen (1993:1053) 6 §
+  "olovligt förande av vattenskoter": {
+    sakomrade: "Sjöfartsbrott",
+    primart_lagrum: ["Vattenskoterförordningen (1993:1053) 6 §"],
+  },
   // Brott mot hundlagen
   "brott mot lagen om tillsyn över hundar och katter": {
     sakomrade: "Övrig speciallagstiftning",
@@ -152,6 +183,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   },
   // Totalförsvarsplikten (Blekinge)
   "brott mot totalförsvarsplikten": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
+  },
+  "brott mot lagen om totalförsvarsplikt": {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["Lag (1994:1809) om totalförsvarsplikt 10 kap."],
   },
@@ -337,6 +372,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
   },
+  "överprövning av kontaktförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Kontaktförbudslagen (1988:688) 14 §"],
+  },
   // Kränkande fotografering — BrB 4 kap. 6 a §
   "kränkande fotografering": {
     sakomrade: "Brott mot frihet och frid",
@@ -502,6 +541,15 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "grovt dopningsbrott": {
     sakomrade: "Narkotikabrott",
     primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 a §"],
+  },
+  // Alternative spelling "doping" (lacking the n) used by some courts.
+  "dopingbrott (ringa brott)": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 § 2 st"],
+  },
+  "dopingbrott": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lagen (1991:1969) om förbud mot vissa dopningsmedel 3 §"],
   },
   // Överträdelse av näringsförbud — Lag (2014:836) 47 §
   "överträdelse av näringsförbud": {
@@ -947,6 +995,26 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
   },
+  // Brott mot kollektivavtal — Medbestämmandelagen (1976:580) 54-55 §
+  "brott mot kollektivavtal": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Medbestämmandelagen (1976:580) 54 §"],
+  },
+  // Kvarstad i tvistemål — säkringsåtgärd, RB 15 kap. 1 §
+  "kvarstad": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 15 kap. 1 §"],
+  },
+  // Varumärkesintrång (civil) — Varumärkeslagen
+  "varumärkesintrång": {
+    sakomrade: "Immaterialrätt",
+    primart_lagrum: ["Varumärkeslagen (2010:1877)"],
+  },
+  // Överträdelse av diskrimineringslagen — Diskrimineringslagen 5 kap. (skadestånd)
+  "överträdelse av diskrimineringslagen": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Diskrimineringslagen (2008:567) 5 kap."],
+  },
   // Hyra / bostad
   "avflyttning": {
     sakomrade: "Hyresrätt",
@@ -1211,6 +1279,11 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "prövning av beslut om kontaktförbud": {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
+  },
+  // Kvarstad som ärende — RB 15 kap. 1 § (civil säkringsåtgärd)
+  "kvarstad": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 15 kap. 1 §"],
   },
 };
 
