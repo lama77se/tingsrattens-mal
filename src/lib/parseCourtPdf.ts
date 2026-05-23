@@ -3,6 +3,7 @@ import { formatStandard } from "./parsers/formatStandard";
 import { formatTabular } from "./parsers/formatTabular";
 import { formatGavle } from "./parsers/formatGavle";
 import { formatSchema } from "./parsers/formatSchema";
+import { formatPositional } from "./parsers/formatPositional";
 import type { ParserStrategy, FormatFamily } from "./parsers/types";
 
 // Re-export Hearing from types for backward compatibility
@@ -20,6 +21,7 @@ const strategyRegistry: Record<FormatFamily, ParserStrategy> = {
   tabular: formatTabular,
   gavle: formatGavle,
   schema: formatSchema,
+  positional: formatPositional,
   // Future formats:
   formatD: formatStandard, // placeholder — override when implemented
   formatE: formatStandard,

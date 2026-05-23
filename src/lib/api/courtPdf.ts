@@ -16,7 +16,8 @@ export async function fetchCourtPdf(
   pdfUrl: string,
   weekNumber?: number,
   year?: number,
-  yTolerance?: number
+  yTolerance?: number,
+  mode?: "default" | "positional"
 ): Promise<CourtPdfResult> {
   try {
     const resp = await fetch("/api/fetch-court-pdf", {
@@ -27,6 +28,7 @@ export async function fetchCourtPdf(
         weekNumber,
         year,
         ...(yTolerance && { yTolerance }),
+        ...(mode === "positional" && { mode }),
       }),
     });
 
