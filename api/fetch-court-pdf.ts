@@ -6,6 +6,7 @@ import { fetchDomstol, validatePdf } from "./_lib/fetch-domstol.js";
 // crashes in bundlers, so import the lib entry directly.
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse/lib/pdf-parse.js");
+const { renderPositional } = require("./_lib/renderPositional.cjs");
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -20,6 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const pdfUrl: string = body.pdfUrl;
     const weekNumber: number | undefined = body.weekNumber;
     const year: number | undefined = body.year;
+    const mode: "default" | "positional" =
+      body.mode === "positional" ? "positional" : "default";
 
     if (!pdfUrl) {
       return res
@@ -67,7 +70,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const buffer = Buffer.from(result.bytes);
-    const parsed = await pdfParse(buffer);
+    const parsed = mode === "positional"
+      ? await pdfParse(buffer, { pagerender: renderPositional })
+      : await pdfParse(buffer);
     const extractedText: string = parsed.text || "";
     const numPages: number = parsed.numpages || 0;
     const timePatterns = extractedText.match(/\d{2}[.:]\d{2}/g) || [];

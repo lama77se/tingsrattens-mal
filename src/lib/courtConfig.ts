@@ -177,8 +177,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "halmstads_tingsratt",
     name: "Halmstads tingsrätt",
-    formatFamily: "standard",
-    pdfYTolerance: 5,
+    formatFamily: "positional",
     buildUrl: (week, year) =>
       `${BASE}/halmstads_tingsratt/veckans-forhandlingar/${year}/vecka-${week}.pdf`,
   },
@@ -281,7 +280,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "mora_tingsratt",
     name: "Mora tingsrätt",
-    formatFamily: "tabular",
+    formatFamily: "positional",
     buildUrl: (week) => [
       `${BASE}/mora_tingsratt/block/vecka-${week}-${week + 1}.pdf`,
       `${BASE}/mora_tingsratt/block/vecka-${week - 1}-${week}.pdf`,
@@ -362,10 +361,23 @@ export const COURTS: CourtConfig[] = [
   {
     id: "sodertalje_tingsratt",
     name: "Södertälje tingsrätt",
-    formatFamily: "standard",
-    disabled: true,
-    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
-    buildUrl: () => "",
+    formatFamily: "positional",
+    buildUrl: (week, year) => {
+      const monday = getISOWeekMonday(week, year);
+      const friday = addDays(monday, 4);
+      const thursday = addDays(monday, 3);
+      const monStr = format(monday, "yyyy-MM-dd");
+      const candidates: string[] = [];
+      // Friday-end first, then Thursday-end (holiday-shortened weeks).
+      // Södertälje always uses MM-dd for the end date, including in same-month weeks.
+      for (const endDay of [friday, thursday]) {
+        const endStr = format(endDay, "MM-dd");
+        candidates.push(
+          `${BASE}/sodertalje_tingsratt/webb-forhandlingar-${monStr}--${endStr}.pdf`
+        );
+      }
+      return candidates;
+    },
   },
   {
     id: "skelleftea_tingsratt",
