@@ -231,6 +231,27 @@ describe("cleanSaken", () => {
   it("strips leading/trailing punctuation", () => {
     expect(cleanSaken("  , Stöld - ")).toBe("Stöld");
   });
+
+  it("does not eat 'sal' inside the compound word 'Högsäkerhetssal'", () => {
+    // Before the lookbehind fix, the room regex matched the trailing "sal"
+    // inside "Högsäkerhetssal" and left "Högsäkerhets" stuck in the saken
+    // (with the digits from a following street address also leaking through).
+    expect(
+      cleanSaken(
+        "försök till mord och anstiftan av grov allmänfarlig ödeläggelse, med mera Högsäkerhetssal 2"
+      )
+    ).toBe("försök till mord och anstiftan av grov allmänfarlig ödeläggelse, med mera");
+  });
+
+  it("strips a Högsäkerhetssal room glued to the saken with no separator", () => {
+    // PDF sometimes glues the room word onto the last saken word with no
+    // whitespace (e.g. "...meraHögsäkerhetssal 2, Bergsgatan 50"). The
+    // capital H is the word boundary signal — fix handles this even without
+    // a leading space.
+    expect(
+      cleanSaken("stämpling till mord, med meraHögsäkerhetssal 2, Bergsgatan 50")
+    ).toBe("stämpling till mord, med mera");
+  });
 });
 
 describe("cleanParties", () => {

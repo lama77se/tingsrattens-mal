@@ -40,12 +40,17 @@ export const TIME_RANGE_REGEX = /(\d{1,2}:\d{2})\s*[-\u2013\u2014]\s*(\d{1,2}:\d
 
 export const TIME_REGEX = /\b(\d{1,2}:\d{2})\b/;
 
-export const ROOM_REGEX = /(?:sessions|tings)?sal\s+(\S+)/i;
+// The lookbehind keeps "sal" from matching inside a longer word like
+// "Högsäkerhetssal" — without it, `sal\s+\d+` matched the trailing "sal"
+// inside "Högsäkerhetssal 2", leaving "Högsäkerhets" stuck in the saken.
+// The "högsäkerhets" alternative lets the full word match as a room prefix.
+export const ROOM_REGEX = /(?<![A-Za-zÅÄÖåäö])(?:sessions|tings|högsäkerhets)?sal\s+(\S+)/i;
 
 export function roomPrefix(matched: string): string {
   const lower = matched.toLowerCase();
   if (lower.startsWith("sessions")) return "Sessionssal";
   if (lower.startsWith("tings")) return "Tingssal";
+  if (lower.startsWith("högsäkerhets")) return "Högsäkerhetssal";
   return "Sal";
 }
 
@@ -310,8 +315,13 @@ export function cleanSaken(text: string): string {
     return "";
   }
   let saken = text
+    // Glued capitalised room (no separator before the room word — e.g.
+    // "...meraHögsäkerhetssal 2, Bergsgatan 50"). The capital letter is a
+    // strong word-boundary signal even without whitespace, so no lookbehind
+    // is needed here. Greedy enough to also eat the trailing street address.
+    .replace(/(?:Sessionssal|Tingssal|Högsäkerhetssal)\s+\d+\S*(?:,?\s+[A-ZÅÄÖ][a-zåäöé]+(?:\s+\d+\w*)?)?/g, "")
     .replace(ROOM_REGEX, "")
-    .replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "")
+    .replace(/\s*(?<![A-Za-zÅÄÖåäö])(?:sessions|tings|högsäkerhets)?sal\s+\S+\s*$/i, "")
     .replace(TIME_RANGE_REGEX, "")
     .replace(TIME_REGEX, "")
     .trim();
