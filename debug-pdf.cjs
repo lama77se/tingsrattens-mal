@@ -55,6 +55,7 @@ const COURT_MAP = {
   nykopings: { name: "Nyköpings tingsrätt", format: "tabular" },
   nacka: { name: "Nacka tingsrätt", format: "tabular" },
   sodertalje: { name: "Södertälje tingsrätt", format: "positional" },
+  sodertorns: { name: "Södertörns tingsrätt", format: "positional" },
   sundsvalls: { name: "Sundsvalls tingsrätt", format: "tabular" },
   uddevalla: { name: "Uddevalla tingsrätt", format: "tabular" },
   varbergs: { name: "Varbergs tingsrätt", format: "tabular" },
@@ -119,9 +120,15 @@ async function main() {
   const showLines = flags.includes("--lines");
   const useEdge = flags.includes("--edge");
   const corpusMode = flags.includes("--corpus");
-  const positionalMode = flags.includes("--positional");
   const courtOverrideIdx = args.indexOf("--court");
   const courtOverride = courtOverrideIdx !== -1 ? args[courtOverrideIdx + 1] : null;
+
+  // Auto-enable positional mode for courts whose format family requires it,
+  // unless the caller explicitly passed --positional themselves.
+  const explicitPositional = flags.includes("--positional");
+  const detectedCourt = detectCourt(courtOverride || input);
+  const positionalMode =
+    explicitPositional || (detectedCourt && detectedCourt.format === "positional");
 
   // 1. Get text from PDF
   let text;

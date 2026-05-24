@@ -359,6 +359,13 @@ export const COURTS: CourtConfig[] = [
       `${BASE}/uddevalla_tingsratt/veckans-mal/veckans-mal-v.${week}.pdf`,
   },
   {
+    id: "sodertorns_tingsratt",
+    name: "Södertörns tingsrätt",
+    formatFamily: "positional",
+    buildUrl: (week, year) =>
+      `${BASE}/sodertorns_tingsratt/veckans_forhandlingar/${year}/veckans-forhandlingar-vecka-${week}.pdf`,
+  },
+  {
     id: "sodertalje_tingsratt",
     name: "Södertälje tingsrätt",
     formatFamily: "positional",
