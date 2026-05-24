@@ -166,13 +166,19 @@ function extractRoomFromText(text: string): string {
   return extractRoomAndLocation(text).room;
 }
 
-// Room + optional trailing location pattern (case-sensitive city name to avoid stripping saken words)
-const ROOM_WITH_LOCATION_REGEX = /(?:[Tt]ingsrättens\s+)?(?:[Ss]essions|[Tt]ings)?[Ss]al\s+\d+\S*(?:,?\s+[A-ZÅÄÖ][a-zåäöé]+)?/;
+// Room + optional trailing location pattern (case-sensitive city name to avoid stripping saken words).
+// The lookbehind blocks matching "sal" inside longer words like "Högsäkerhetssal" so the saken's
+// trailing court-room text gets fully stripped — also added "Högsäkerhets" as a known prefix and
+// extended the location tail with an optional street-number (e.g. "Bergsgatan 50").
+const ROOM_WITH_LOCATION_REGEX = /(?<![A-Za-zÅÄÖåäö])(?:[Tt]ingsrättens\s+)?(?:[Ss]essions|[Tt]ings|[Hh]ögsäkerhets)?[Ss]al\s+\d+\S*(?:,?\s+[A-ZÅÄÖ][a-zåäöé]+(?:\s+\d+\w*)?)?/;
 
 function stripRoom(text: string): string {
   // Strip room and trailing location (e.g. "Sal 2, Härnösand" or "Tingsrättens sal 1, Örnsköldsvik")
   // Uses case-sensitive regex for the city name part to avoid matching lowercase saken words like "och"
   return text
+    // First pass: glued capitalised room (e.g. "meraHögsäkerhetssal 2, Bergsgatan 50") —
+    // the capital letter is the word boundary so we don't need the lookbehind here.
+    .replace(/(?:Sessionssal|Tingssal|Högsäkerhetssal)\s+\d+\S*(?:,?\s+[A-ZÅÄÖ][a-zåäöé]+(?:\s+\d+\w*)?)?/g, "")
     .replace(ROOM_WITH_LOCATION_REGEX, "")
     .replace(ROOM_REGEX, "")
     .replace(/\s*(?:sessions|tings)?sal\s+\S+\s*$/i, "")
