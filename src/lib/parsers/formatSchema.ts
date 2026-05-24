@@ -60,7 +60,7 @@ export const formatSchema: ParserStrategy = {
         const contMatch = nextLine.match(CONT_TIME_REGEX);
         if (contMatch) {
           const endTime = contMatch[1];
-          let caseFragment = klSplit[2].trim();
+          const caseFragment = klSplit[2].trim();
           let rest = contMatch[2];
           // Handle "B -" / "8400 25, ..." → merge into "B 8400-25, ..."
           if (/^[A-ZÄ]{1,3}$/.test(caseFragment)) {

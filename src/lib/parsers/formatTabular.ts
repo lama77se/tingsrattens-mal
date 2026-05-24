@@ -188,7 +188,6 @@ function extractTrailingCases(saken: string, cases: string[]): string {
   let s = saken;
   const trailingFound: string[] = [];
   // Iteratively strip case numbers from the end of the text
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const m = s.match(/\s+((?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i);
     if (!m) break;
