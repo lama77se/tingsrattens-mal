@@ -2,6 +2,8 @@
 
 Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, extracts hearing data, and presents them in a searchable/filterable UI.
 
+**Live:** https://rattegang.app
+
 ## Tech Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
