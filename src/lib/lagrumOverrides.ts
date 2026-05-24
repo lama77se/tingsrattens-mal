@@ -289,6 +289,29 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["Rättegångsbalken 47 kap."],
   },
+  // Talan om förverkande — BrB 36 kap.
+  "talan om förverkande": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 36 kap."],
+  },
+  // Förargelseväckande beteende — BrB 16 kap. 16 §
+  "förargelseväckande beteende": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["BrB 16 kap. 16 §"],
+  },
+  // Olovlig hantering av lustgas — Lag (1999:42) om förbud mot vissa
+  // hälsofarliga varor 4 § (lustgas tillkom genom Förordning 2023:535).
+  "olovlig hantering av lustgas": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lag (1999:42) om förbud mot vissa hälsofarliga varor 4 §"],
+  },
+  // Generisk fallback för "grovt brott" som ensamt saken — i praktiken
+  // sällsynt; finns oftast inom en längre sträng som matchar mer specifik
+  // nyckel. Övriga brott + tomt lagrum för att inte missleda.
+  "grovt brott": {
+    sakomrade: "Övriga brott",
+    primart_lagrum: [],
+  },
   // Verkställighet enligt 21 kap. föräldrabalken — tvångsverkställighet av
   // vårdnad-/boende-/umgängesdom
   "verkställighet enligt 21 kap. föräldrabalken": {
@@ -643,6 +666,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Vapenbrott",
     primart_lagrum: ["Knivlagen (1988:254)"],
   },
+  "brott mot knivförbudslagen": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Knivlagen (1988:254)"],
+  },
   "urkundsförfalskning": {
     sakomrade: "Förfalskningsbrott",
     primart_lagrum: ["BrB 14 kap. 1 §"],
@@ -898,6 +925,21 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Sakrätt",
     primart_lagrum: [],
   },
+  // Försäljning enligt samäganderättslagen — Lag (1904:48 s.1) 6 §
+  "försäljning enligt lagen om samäganderätt": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: ["Samäganderättslagen (1904:48 s.1) 6 §"],
+  },
+  // Arbete på annans egendom — generiskt tjänsteavtal
+  "arbete på annans egendom": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Avtalslagen (1915:218)"],
+  },
+  // Ogiltighet av fastighetsförvärv — Jordabalken 4 kap.
+  "ogiltighet av fastighetsförvärv": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 4 kap."],
+  },
   "arbetsrättsligt mål": {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
@@ -1001,11 +1043,20 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Semesterlagen (1977:480)"],
   },
+  "allmänt skadestånd enligt semesterlagen": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Semesterlagen (1977:480) 32 §"],
+  },
   "ogiltigförklaring av uppsägning": {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80) 34 §"],
   },
   "ogiltigförklaring av avskedande": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 35 §"],
+  },
+  // Trunkerad/förkortad variant ("Ogiltigförklaring av avske") som sett i PDF-saken
+  "ogiltigförklaring av avske": {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80) 35 §"],
   },
@@ -1355,6 +1406,11 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "kvarstad": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Rättegångsbalken 15 kap. 1 §"],
+  },
+  // Försäljning enligt samäganderättslagen — vanligt som ärende (ansökan)
+  "försäljning enligt lagen om samäganderätt": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: ["Samäganderättslagen (1904:48 s.1) 6 §"],
   },
 };
 
