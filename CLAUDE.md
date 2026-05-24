@@ -70,8 +70,4 @@ The tool auto-detects the court from the URL/filename and uses proxy fallback fo
 - 30+ courts configured (some disabled — no online schedules)
 - Case types: B=Brottmål, T=Tvistemål, FT=Förenklat tvistemål, etc.
 
-## Port Allocation (c:\dev projects)
-- 5173 — sverige-handelser
-- 5174 — tingsrattens-mal (this project)
-- 8080 — sweden-transit-wonderland-mapper
 
