@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scale, Database } from "lucide-react";
+import { Scale, Database, Github } from "lucide-react";
 import HearingsTab from "@/components/HearingsTab";
 import DataLoadingTab, { FetchAllProgress } from "@/components/DataLoadingTab";
 import { Hearing } from "@/lib/parseCourtPdf";
@@ -21,7 +21,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="px-6 py-5">
+        <div className="flex items-center justify-between px-6 py-5">
           <div className="flex items-center gap-3">
             <Scale className="h-6 w-6 text-primary" />
             <div>
@@ -29,6 +29,16 @@ const Index = () => {
               <p className="text-sm text-muted-foreground">Sammanställning av veckans förhandlingar</p>
             </div>
           </div>
+          <a
+            href="https://github.com/lama77se/tingsrattens-mal"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Källkod på GitHub"
+            title="Källkod på GitHub"
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <Github className="h-5 w-5" />
+          </a>
         </div>
       </header>
 
