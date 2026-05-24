@@ -1,7 +1,13 @@
 # Tingsrättens Mål - Project Guide
 
 ## What This Is
-Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, extracts hearing data, and presents them in a searchable/filterable UI.
+Swedish Court Hearings Aggregator — fetches PDF schedules from domstol.se, extracts hearing data, and presents them in a searchable/filterable UI. Public repo, live at https://rattegang.app (Vercel auto-deploys from `main`; the auto-URL https://tingsrattens-mal.vercel.app also serves the same deployment).
+
+## Repo Workflow
+- `main` is branch-protected: changes go through a PR, CI must pass, no direct pushes.
+- Standard flow: create a feature branch (`feat/...`, `fix/...`, `chore/...`), commit, push, `gh pr create`, then `gh pr merge <n> --merge --delete-branch` after CI is green. Pull main after.
+- CI runs install + typecheck + lint + tests on every PR and on pushes to `main` (`.github/workflows/ci.yml`).
+- External contributors fork the repo and PR from their fork — they can't push directly. See `README.md` for the contributor-facing version.
 
 ## Tech Stack
 - **Frontend**: React 18 + TypeScript + Vite (port 5174)
