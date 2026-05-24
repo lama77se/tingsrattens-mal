@@ -281,9 +281,12 @@ export const COURTS: CourtConfig[] = [
     id: "mora_tingsratt",
     name: "Mora tingsrätt",
     formatFamily: "positional",
+    // Mora bundles two-week blocks; the same week appears in either the
+    // {week}-{week+1} block or the {week-1}-{week} block. The PDF path
+    // dropped the "vecka-" prefix at some point (old form 404s now).
     buildUrl: (week) => [
-      `${BASE}/mora_tingsratt/block/vecka-${week}-${week + 1}.pdf`,
-      `${BASE}/mora_tingsratt/block/vecka-${week - 1}-${week}.pdf`,
+      `${BASE}/mora_tingsratt/block/${week}-${week + 1}.pdf`,
+      `${BASE}/mora_tingsratt/block/${week - 1}-${week}.pdf`,
     ],
   },
   {
