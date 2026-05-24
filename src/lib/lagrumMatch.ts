@@ -66,7 +66,7 @@ function levenshteinAtMost(a: string, b: string, max: number): number {
   if (m === 0) return n <= max ? n : max + 1;
   if (n === 0) return m <= max ? m : max + 1;
 
-  let prev = new Array(n + 1);
+  const prev = new Array(n + 1);
   for (let j = 0; j <= n; j++) prev[j] = j;
   const curr = new Array(n + 1);
 

@@ -27,7 +27,9 @@ const DEFAULT_PAGE_SIZE = 100;
 
 const normalizeType = (t: string) => t.trim().normalize("NFC");
 
-const typeBadgeVariant = (type: string) => {
+const typeBadgeVariant = (
+  type: string
+): "default" | "destructive" | "secondary" | "outline" => {
   switch (normalizeType(type)) {
     case "Huvudförhandling": return "default";
     case "Häktningsförhandling": return "destructive";
@@ -469,7 +471,7 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                     <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <span className="truncate">{h.court}</span>
                   </div>
-                  <Badge variant={typeBadgeVariant(h.type) as any} className="shrink-0 text-xs">
+                  <Badge variant={typeBadgeVariant(h.type)} className="shrink-0 text-xs">
                     {h.type}
                   </Badge>
                 </div>
@@ -587,7 +589,7 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
                   <TableCell className="whitespace-nowrap">{h.court}</TableCell>
                   <TableCell className="font-mono text-sm whitespace-nowrap">{h.caseNumber}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    <Badge variant={typeBadgeVariant(h.type) as any}>{h.type}</Badge>
+                    <Badge variant={typeBadgeVariant(h.type)}>{h.type}</Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">{h.maltyp || "–"}</TableCell>
                   <TableCell>{h.saken}</TableCell>
