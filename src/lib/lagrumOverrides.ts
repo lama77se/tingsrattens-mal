@@ -905,6 +905,11 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap."],
   },
+  // Förverkande av hyresrätt — JB 12 kap. 42 § (gör hyresgästen avhysningsbar)
+  "förverkande av hyresrätt": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap. 42 §"],
+  },
   "avhysning": {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap."],
@@ -944,6 +949,11 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: [],
   },
   "bättre rätt till hos länsstyrelsen deponerade medel": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: ["Lag (1927:56) om nedsättning av pengar hos myndighet"],
+  },
+  // Kortare variant av samma sak
+  "bättre rätt till deponerade medel": {
     sakomrade: "Sakrätt",
     primart_lagrum: ["Lag (1927:56) om nedsättning av pengar hos myndighet"],
   },
@@ -1048,6 +1058,15 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lönegarantilagen (1992:497)"],
   },
+  "lönegarantimål": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lönegarantilagen (1992:497)"],
+  },
+  // Diskriminering — Diskrimineringslagen (typically arbetsrättslig kontext)
+  "diskriminering": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Diskrimineringslagen (2008:567)"],
+  },
   // Hävning av köp / obefogad hävning — Köplagen
   "obefogad hävning": {
     sakomrade: "Avtalsrätt",
@@ -1061,6 +1080,15 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "försäkringsfall": {
     sakomrade: "Avtalsrätt",
     primart_lagrum: ["Försäkringsavtalslagen (2005:104)"],
+  },
+  "försäkringsersättning": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Försäkringsavtalslagen (2005:104)"],
+  },
+  // Patientskada — Patientskadelagen
+  "patientskadeersättning": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Patientskadelagen (1996:799)"],
   },
   "trafikförsäkring": {
     sakomrade: "Avtalsrätt",
@@ -1108,6 +1136,16 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "skadestånd enligt aktiebolagslagen": {
     sakomrade: "Skadeståndsrätt",
     primart_lagrum: ["Aktiebolagslagen (2005:551) 29 kap."],
+  },
+  // Klander av bolagsstämmobeslut — ABL 7 kap. 50 § (här: nyemission)
+  "klander av beslut om nyemission": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 7 kap. 50 §"],
+  },
+  // Entledigande av styrelseledamot — ABL 8 kap. 14 §
+  "entledigande av styrelseledamöter": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 8 kap. 14 §"],
   },
   // Generic civil topic labels used as saken
   "ersättningsrätt": {
