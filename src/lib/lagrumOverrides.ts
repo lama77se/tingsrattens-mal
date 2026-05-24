@@ -1127,6 +1127,10 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
   },
+  "utebliven lön": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
+  },
   // Brott mot MBL — Medbestämmandelagen, samma kategori som kollektivavtal
   "brott mot mbl": {
     sakomrade: "Arbetsrätt",
