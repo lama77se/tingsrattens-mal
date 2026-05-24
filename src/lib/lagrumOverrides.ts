@@ -284,6 +284,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["Rättegångsbalken 27 kap. 6 §"],
   },
+  // Enskilt åtal — privat åtal enligt RB 47 kap.
+  "enskilt åtal": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Rättegångsbalken 47 kap."],
+  },
   // Verkställighet enligt 21 kap. föräldrabalken — tvångsverkställighet av
   // vårdnad-/boende-/umgängesdom
   "verkställighet enligt 21 kap. föräldrabalken": {
@@ -967,6 +972,10 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
   },
+  "jämkning av gåva": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
   "förstärkt laglottsskydd": {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
@@ -1062,6 +1071,16 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lönegarantilagen (1992:497)"],
   },
+  // Lönefordran — generisk löneanspråk (LAS-baserat eller avtalsgrundad)
+  "lönefordran": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
+  },
+  // Brott mot MBL — Medbestämmandelagen, samma kategori som kollektivavtal
+  "brott mot mbl": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Medbestämmandelagen (1976:580) 54 §"],
+  },
   // Diskriminering — Diskrimineringslagen (typically arbetsrättslig kontext)
   "diskriminering": {
     sakomrade: "Arbetsrätt",
@@ -1137,10 +1156,19 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Skadeståndsrätt",
     primart_lagrum: ["Aktiebolagslagen (2005:551) 29 kap."],
   },
-  // Klander av bolagsstämmobeslut — ABL 7 kap. 50 § (här: nyemission)
+  // Klander av bolagsstämmobeslut — ABL 7 kap. 50 §
+  "klander av bolagsstämmobeslut": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 7 kap. 50 §"],
+  },
   "klander av beslut om nyemission": {
     sakomrade: "Avtalsrätt",
     primart_lagrum: ["Aktiebolagslagen (2005:551) 7 kap. 50 §"],
+  },
+  // Marknadsföringsrätt — Marknadsföringslagen (PMD-mål, broadly avtalsrätt)
+  "marknadsföringsrätt": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Marknadsföringslagen (2008:486)"],
   },
   // Entledigande av styrelseledamot — ABL 8 kap. 14 §
   "entledigande av styrelseledamöter": {
@@ -1236,6 +1264,11 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   "bodelning": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Äktenskapsbalken 9-11 kap."],
+  },
+  // Kvarboenderätt — interimistisk rätt att bo kvar i bostad, ÄktB 14 kap. 7 §
+  "kvarboenderätt": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 14 kap. 7 §"],
   },
 };
 
