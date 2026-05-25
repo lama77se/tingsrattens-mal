@@ -7,7 +7,10 @@ const tingsrattPrefixes: Record<string, string> = {
   B: "Brottmål",
   T: "Tvistemål",
   K: "Konkursmål",
-  Ä: "Äktenskapsmål",
+  // Ä = Ärende (general non-contested court matters: god man, förvaltarskap,
+  // boutredning, entledigande av styrelseledamot, etc.). NOT Äktenskapsmål —
+  // divorce is filed under F (Familjemål).
+  Ä: "Ärende",
   F: "Familjemål",
   Ö: "Övriga ärenden",
 };
