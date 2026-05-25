@@ -321,6 +321,22 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Narkotikabrott",
     primart_lagrum: ["Lag (1999:42) om förbud mot vissa hälsofarliga varor 4 §"],
   },
+  // Olovlig tobaksförsäljning — Lag (2018:2088) om tobak och liknande
+  // produkter 10 kap. 1 § (försäljning utan tillstånd)
+  "olovlig tobaksförsäljning": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Lag (2018:2088) om tobak och liknande produkter 10 kap. 1 §"],
+  },
+  // Försök till våldtäkt mot barn — BrB 6 kap. 4 § jfr 23 kap. 1 §
+  "försök till våldtäkt mot barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 4 §"],
+  },
+  // Felstavad variant ("våldäkt" utan 't') i vissa PDF:er
+  "försök till våldäkt mot barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 4 §"],
+  },
   // Generisk fallback för "grovt brott" som ensamt saken — i praktiken
   // sällsynt; finns oftast inom en längre sträng som matchar mer specifik
   // nyckel. Övriga brott + tomt lagrum för att inte missleda.
@@ -993,6 +1009,10 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap. 42 §"],
   },
+  "förverkande av nyttjanderätt": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 12 kap. 42 §"],
+  },
   "avhysning": {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap."],
@@ -1467,6 +1487,16 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "verkställighet enligt 21 kap. föräldrabalken": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 21 kap."],
+  },
+  // Generic "ansökan om verkställighet" — most commonly FB 21 kap. i tingsrätt
+  "ansökan om verkställighet": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 21 kap."],
+  },
+  // Jämkning av förvaltarskap — FB 11 kap. 23 § (förvaltaruppdragets omfattning)
+  "jämkning av förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 23 §"],
   },
   // Företagsrekonstruktion — filed as Ä by some courts
   "företagsrekonstruktion": {
