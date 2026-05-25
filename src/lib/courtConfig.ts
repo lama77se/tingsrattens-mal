@@ -255,7 +255,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "linkopings_tingsratt",
     name: "Linköpings tingsrätt",
-    formatFamily: "tabular",
+    formatFamily: "positional",
     buildUrl: (week) =>
       `${BASE}/linkopings_tingsratt/veckans-forhandlingar/v${week}.pdf`,
   },
