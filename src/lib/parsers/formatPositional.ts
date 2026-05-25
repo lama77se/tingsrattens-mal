@@ -48,6 +48,19 @@ function looksLikeHeader(line: string): boolean {
   return false;
 }
 
+/**
+ * Returns true when the accumulated raw saken signals that a continuation
+ * row is expected next: it ends with a comma (mid-list wrap) OR has an
+ * unbalanced opening paren (e.g. "...tvist (återvinning av" → the next
+ * physical row will carry the closing paren).
+ */
+function hasOpenContinuation(rawSaken: string): boolean {
+  if (rawSaken.endsWith(",")) return true;
+  const opens = (rawSaken.match(/\(/g) || []).length;
+  const closes = (rawSaken.match(/\)/g) || []).length;
+  return opens > closes;
+}
+
 function isContinuationCandidate(line: string): boolean {
   if (!line || line.length < 2) return false;
   if (CASE_NUMBER_REGEX.test(line)) return false;
@@ -101,8 +114,28 @@ export const formatPositional: ParserStrategy = {
         }
       }
 
-      const caseMatch = line.match(CASE_NUMBER_REGEX);
+      const rawCaseMatch = line.match(CASE_NUMBER_REGEX);
       const timeMatch = line.match(TIME_RANGE_RE);
+      const typeMatchEarly = line.match(HEARING_TYPE_RE);
+
+      // Filter out false-positive case-number matches:
+      // (a) Paren reference — "...återvinning av tredskodom i T 1234-25)"
+      //     The case# is part of an in-saken parenthesised reference, NOT a
+      //     new hearing. Signal: char immediately after the case# is ')'.
+      // (b) Bare alias — the line is JUST a case# with nothing else (e.g.
+      //     "B 2106-23" alone after a B 1287-23 row). Halmstad uses this for
+      //     co-defendants in joint trials; the previous hearing carries the
+      //     real time/saken/sal.
+      let caseMatch: RegExpMatchArray | null = rawCaseMatch;
+      if (rawCaseMatch) {
+        const afterCase = line.substring(
+          (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
+        );
+        const isParenRef = afterCase.startsWith(")");
+        const isBareAlias =
+          !timeMatch && !typeMatchEarly && afterCase.trim() === "";
+        if (isParenRef || isBareAlias) caseMatch = null;
+      }
 
       // A row is a "hearing row" if it has either a case# or a time range.
       // Without either it's continuation/noise.
@@ -114,9 +147,31 @@ export const formatPositional: ParserStrategy = {
           expectsContinuation[lastIdx]
         ) {
           const trimmed = line.replace(/\t+/g, " ").trim();
-          rawSakenAcc[lastIdx] = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
-          hearings[lastIdx].saken = cleanSaken(rawSakenAcc[lastIdx]);
-          expectsContinuation[lastIdx] = trimmed.endsWith(",");
+          const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
+          rawSakenAcc[lastIdx] = merged;
+          hearings[lastIdx].saken = cleanSaken(merged);
+          // Continue accumulating if the merged saken still ends with a comma
+          // OR has unbalanced opening parens (e.g. saken wraps across rows:
+          // "...tvist (återvinning av\ntredskodom i T 1234-25)" — the second
+          // line closes the paren and matches as a continuation too).
+          expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+        } else if (rawCaseMatch && lastIdx >= 0) {
+          // Paren-ref or bare-alias line — even if no comma signal is set,
+          // if the previous saken has an open paren, fold this line in so the
+          // closing paren + ref ends up in the saken text.
+          const afterCase = line.substring(
+            (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
+          );
+          if (
+            afterCase.startsWith(")") &&
+            hasOpenContinuation(rawSakenAcc[lastIdx])
+          ) {
+            const trimmed = line.replace(/\t+/g, " ").trim();
+            const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
+            rawSakenAcc[lastIdx] = merged;
+            hearings[lastIdx].saken = cleanSaken(merged);
+            expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+          }
         }
         continue;
       }
@@ -178,7 +233,7 @@ export const formatPositional: ParserStrategy = {
       if (externalCourt) hearing.externalCourt = externalCourt;
       hearings.push(hearing);
       rawSakenAcc.push(rawSaken);
-      expectsContinuation.push(rawSaken.endsWith(","));
+      expectsContinuation.push(hasOpenContinuation(rawSaken));
     }
 
     return hearings;
