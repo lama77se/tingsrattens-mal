@@ -41,6 +41,28 @@ interface DataLoadingTabProps {
   fetchAllProgress?: FetchAllProgress | null;
 }
 
+/**
+ * Collapse the multi-step fetch progress into a single user-facing status row.
+ * The full step list (URLs tried, byte counts, etc.) is logged to console and
+ * available via the row's `title` tooltip — the UI itself only shows the
+ * outcome the user cares about: "Klar — ~N förhandlingar", "PDF inte
+ * publicerad ännu", "Fel: ...", "Hämtar...", or "Ej hämtad".
+ */
+function deriveWeekStatus(steps: FetchStep[]): FetchStep {
+  const finalStep = steps[steps.length - 1]; // "Klar" step
+  if (finalStep && (finalStep.status === "done" || finalStep.status === "error")) {
+    const label =
+      finalStep.status === "done"
+        ? `Klar${finalStep.detail ? ` — ${finalStep.detail}` : ""}`
+        : finalStep.detail || "Fel";
+    return { label, status: finalStep.status };
+  }
+  if (steps.some((s) => s.status === "active")) {
+    return { label: "Hämtar…", status: "active" };
+  }
+  return { label: "Ej hämtad", status: "idle" };
+}
+
 function FetchAllProgressBar({ progress }: { progress: FetchAllProgress }) {
   const { total, success, failed, empty } = progress;
   const done = success + failed + empty;
@@ -222,6 +244,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       status: "done",
       detail: urls.join("\n"),
     });
+    console.log(`[${court.name}] v${week} URLs:`, urls);
 
     // Step 1: Hämtar PDF — try each candidate URL in order
     updateStep(court.id, weekIndex, 1, { status: "active" });
@@ -255,6 +278,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       .join("\n");
 
     if (!result || !result.success) {
+      console.warn(`[${court.name}] v${week} fetch failed:\n${urlSummary}`);
       updateStep(court.id, weekIndex, 1, { status: "error", detail: urlSummary });
       updateStep(court.id, weekIndex, 2, { status: "idle" });
       updateStep(court.id, weekIndex, 3, {
@@ -264,6 +288,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       if (result) setResult(court.id, weekIndex, result);
       return undefined;
     }
+    console.log(`[${court.name}] v${week} fetched: ${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB from`, triedUrls.find((t) => t.ok)?.url);
 
     updateStep(court.id, weekIndex, 1, {
       status: "done",
@@ -471,31 +496,33 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
                       {weeks.length === 1 && <Badge variant="secondary" className="text-xs">Aktuell vecka</Badge>}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
-                    {w.steps.map((step, si) => (
-                      <div key={si} className="flex items-start gap-3">
-                        <div className="mt-0.5">{stepIcon(step.status)}</div>
-                        <div className="flex-1 min-w-0">
+                  <CardContent className="pt-0">
+                    {(() => {
+                      const summary = deriveWeekStatus(w.steps);
+                      const isError = summary.status === "error";
+                      const titleParts = w.steps
+                        .filter((s) => s.detail && (s.status === "done" || s.status === "error"))
+                        .map((s) => `${s.label}: ${s.detail}`);
+                      return (
+                        <div
+                          className="flex items-center gap-2"
+                          title={titleParts.length > 0 ? titleParts.join("\n") : undefined}
+                        >
+                          {stepIcon(summary.status)}
                           <span
-                            className={`text-sm font-medium ${
-                              step.status === "error"
+                            className={`text-sm ${
+                              isError
                                 ? "text-destructive"
-                                : step.status === "done"
+                                : summary.status === "done"
                                 ? "text-foreground"
                                 : "text-muted-foreground"
                             }`}
                           >
-                            {step.label}
+                            {summary.label}
                           </span>
-                          {step.detail && (
-                            <p className="text-xs text-muted-foreground mt-0.5 break-all whitespace-pre-line">
-                              {step.detail}
-                            </p>
-                          )}
                         </div>
-                      </div>
-                    ))}
-
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               ))}
