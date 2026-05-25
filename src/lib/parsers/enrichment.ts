@@ -49,6 +49,7 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
   // or the matcher found distinct additional lagrum references.
   const fleraSakfragor = mmPresent || extras.length > 0;
 
+  // `raw.parties` intentionally dropped here — see Hearing type doc.
   return {
     id: `parsed-${index}`,
     date: raw.date || "Okänt datum",
@@ -59,7 +60,6 @@ export function enrichHearing(raw: RawHearing, courtName: string, index: number)
     maltyp: getMaltyp(raw.caseNumber),
     room: raw.room || "–",
     saken: saken || "–",
-    parties: raw.parties || "–",
     lagrum: allLagrum,
     sakomrade: lagrumMatch.sakomrade,
     fleraSakfragor,

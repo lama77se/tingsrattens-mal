@@ -104,7 +104,6 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
   const filtered = hearings.filter((h) => {
     const matchesSearch = search === "" ||
       h.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
-      h.parties.toLowerCase().includes(search.toLowerCase()) ||
       h.court.toLowerCase().includes(search.toLowerCase()) ||
       h.saken.toLowerCase().includes(search.toLowerCase());
     const matchesCourt = courtFilter === "Alla" || h.court === courtFilter;
@@ -324,7 +323,7 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Målnummer, parter, tingsrätt, saken..."
+              placeholder="Målnummer, tingsrätt, saken..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 h-11 md:h-10"
