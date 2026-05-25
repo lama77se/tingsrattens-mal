@@ -57,14 +57,14 @@ const COURT_MAP = {
   sodertalje: { name: "Södertälje tingsrätt", format: "positional" },
   sodertorns: { name: "Södertörns tingsrätt", format: "positional" },
   sundsvalls: { name: "Sundsvalls tingsrätt", format: "tabular" },
-  uddevalla: { name: "Uddevalla tingsrätt", format: "tabular" },
+  uddevalla: { name: "Uddevalla tingsrätt", format: "positional" },
   varbergs: { name: "Varbergs tingsrätt", format: "tabular" },
   uppsala: { name: "Uppsala tingsrätt", format: "tabular" },
   vanersborgs: { name: "Vänersborgs tingsrätt", format: "tabular" },
   varmlands: { name: "Värmlands tingsrätt", format: "positional" },
   vastmanlands: { name: "Västmanlands tingsrätt", format: "tabular" },
   vaxjo: { name: "Växjö tingsrätt", format: "tabular" },
-  angermanlands: { name: "Ångermanlands tingsrätt", format: "tabular" },
+  angermanlands: { name: "Ångermanlands tingsrätt", format: "positional" },
   orebro: { name: "Örebro tingsrätt", format: "tabular" },
 };
 

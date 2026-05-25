@@ -21,7 +21,10 @@ import {
 
 const ISO_DATE_RE = /\b(\d{4}-\d{2}-\d{2})\b/;
 const TIME_RANGE_RE = /\b(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})\b/;
-const SAL_RE = /\bSal\s+\S+/i;
+// Sal pattern — accepts an optional "Tingsrättens" / "Tingsrätt" / "Sessions"
+// / "Tings" / "Högsäkerhets" prefix and an optional ", City" suffix
+// (Ångermanlands writes "Tingsrättens sal 1, Örnsköldsvik" in the Sal column).
+const SAL_RE = /\b(?:Tingsrättens\s+|Tingsrätt\s+)?(?:Sessions|Tings|Högsäkerhets)?Sal\s+\S+(?:,\s*[A-ZÅÄÖ][a-zåäö]+)?/i;
 // Captures column-as-location values like "Attunda tingsrätt" or
 // "Stockholms tingsrätt" sitting in the Sal column when a court borrows
 // another court's facility (Södertälje uses Attunda's rooms for some cases).

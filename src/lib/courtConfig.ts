@@ -357,7 +357,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "uddevalla_tingsratt",
     name: "Uddevalla tingsrätt",
-    formatFamily: "tabular",
+    formatFamily: "positional",
     buildUrl: (week) =>
       `${BASE}/uddevalla_tingsratt/veckans-mal/veckans-mal-v.${week}.pdf`,
   },
@@ -473,7 +473,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "angermanlands_tingsratt",
     name: "Ångermanlands tingsrätt",
-    formatFamily: "tabular",
+    formatFamily: "positional",
     // Filenames are inconsistent (observed: "v.18-ny.pdf", "ny-v17.pdf"),
     // so we scrape the listing page and match by week number.
     listingUrl:
