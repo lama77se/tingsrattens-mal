@@ -594,8 +594,12 @@ export const formatTabular: ParserStrategy = {
       // Strip embedded court name fragments that leaked from the room/location column
       // These appear mid-text when PDF columns are merged, e.g.:
       // "förberedelse till Malmö mordbrand, anstiftan av förberedelse till tingsrätt mordbrand"
-      // We strip "CityName tingsrätt" as a pair, then standalone "tingsrätt" fragments
-      saken = saken.replace(/\b([A-ZÅÄÖ][a-zåäö]+)\s+tingsrätt\b/g, (match, city) => {
+      // We strip "CityName tingsrätt" as a pair, then standalone "tingsrätt" fragments.
+      // Note: no leading \b — the uppercase letter is itself the word-boundary signal,
+      // and \b fails to detect the transition between two letter chars (e.g. Uppsala
+      // PDFs glue the location to the saken with no space: "konkursUppsala tingsrätt").
+      saken = saken.replace(/[A-ZÅÄÖ][a-zåäö]+\s+tingsrätt\b/g, (match) => {
+        const city = match.split(/\s+/)[0];
         // Only strip if city looks like a location (not a legal term)
         const legalTerms = ["Huvudförhandling", "Muntlig", "Offentlig", "Enskilt"];
         if (legalTerms.includes(city)) return match;
