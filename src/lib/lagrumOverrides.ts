@@ -416,6 +416,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
   },
+  // Prövning av tillträdesförbud — Lag (2021:34) om tillträdesförbud till butiker m.m.
+  "prövning av tillträdesförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (2021:34) om tillträdesförbud till butiker m.m."],
+  },
   "överprövning av kontaktförbud": {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Kontaktförbudslagen (1988:688) 14 §"],
@@ -521,6 +526,16 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   "brukande av falsk urkund": {
     sakomrade: "Förfalskningsbrott",
     primart_lagrum: ["BrB 14 kap. 9 §"],
+  },
+  // Märkesförfalskning — BrB 14 kap. 4 § (gräns-/höjdmärken etc.)
+  "märkesförfalskning": {
+    sakomrade: "Förfalskningsbrott",
+    primart_lagrum: ["BrB 14 kap. 4 §"],
+  },
+  // Olovlig befattning med falska pengar — BrB 14 kap. 8 §
+  "olovlig befattning med falska pengar": {
+    sakomrade: "Förfalskningsbrott",
+    primart_lagrum: ["BrB 14 kap. 8 §"],
   },
   // Undanröjande av ungdomspåföljder — BrB 32:4
   "undanröjande av ungdomstjänst": {
@@ -1016,6 +1031,10 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Sakrätt",
     primart_lagrum: [],
   },
+  "bättre rätt till lös egendom": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
+  },
   "bättre rätt till hos länsstyrelsen deponerade medel": {
     sakomrade: "Sakrätt",
     primart_lagrum: ["Lag (1927:56) om nedsättning av pengar hos myndighet"],
@@ -1335,6 +1354,11 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   "vårdnadsöverflyttning": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 6 kap. 8 §"],
+  },
+  // Särskilt förordnad vårdnadshavare — FB 6 kap. 10 §
+  "särskilt förordnad vårdnadshavare": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
   },
   "umgänge": {
     sakomrade: "Familjerätt",
