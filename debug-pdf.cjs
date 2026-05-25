@@ -47,7 +47,7 @@ const COURT_MAP = {
   hassleholms: { name: "Hässleholms tingsrätt", format: "tabular" },
   jonkopings: { name: "Jönköpings tingsrätt", format: "tabular" },
   kristianstads: { name: "Kristianstads tingsrätt", format: "tabular" },
-  linkopings: { name: "Linköpings tingsrätt", format: "tabular" },
+  linkopings: { name: "Linköpings tingsrätt", format: "positional" },
   lunds: { name: "Lunds tingsrätt", format: "schema" },
   malmo: { name: "Malmö tingsrätt", format: "schema" },
   mora: { name: "Mora tingsrätt", format: "positional" },
