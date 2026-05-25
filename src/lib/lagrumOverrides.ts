@@ -294,6 +294,17 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 36 kap."],
   },
+  // Bevisupptagning åt utländsk domstol — Lag (1946:817). Bare "bevisupptagning"
+  // stripped by cleanSaken's hearing-type loop, so primarily targeting the
+  // longer compound form that survives the strip.
+  "bevisupptagning åt utländsk domstol": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1946:817) om bevisupptagning vid utländsk domstol"],
+  },
+  "bevisupptagning vid utländsk domstol": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1946:817) om bevisupptagning vid utländsk domstol"],
+  },
   // Förargelseväckande beteende — BrB 16 kap. 16 §
   "förargelseväckande beteende": {
     sakomrade: "Brott mot allmän ordning",
@@ -429,6 +440,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
   },
   // Vårdslöshet i trafik / grov vårdslöshet i trafik — Trafikbrottslagen 1 §
   "vårdslöshet i trafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 1 §"],
+  },
+  // Felstavad variant (saknar 's') förekommer i vissa PDF:er
+  "vårdlöshet i trafik": {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikbrottslagen (1951:649) 1 §"],
   },
@@ -1017,6 +1033,15 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "jämkning av gåva": {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
+  "jämkning av gåvor": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
+  // Ogiltighet av testamentariskt förordnande — ÄB 13 kap. (klanderfristerna i 14 kap.)
+  "ogiltighet av testamentesförordnande": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 13 kap."],
   },
   "förstärkt laglottsskydd": {
     sakomrade: "Arvsrätt",
