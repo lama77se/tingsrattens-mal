@@ -1416,6 +1416,11 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Sakrätt",
     primart_lagrum: ["Samäganderättslagen (1904:48 s.1) 6 §"],
   },
+  // Entledigande av styrelseledamot — ABL 8 kap. 14 §, ofta filad som Ä
+  "entledigande av styrelseledamöter": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 8 kap. 14 §"],
+  },
 };
 
 /**
