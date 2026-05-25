@@ -92,7 +92,7 @@ describe("parseCourtPdf dispatcher", () => {
     expect(result[0].time).toBe("–");
     expect(result[0].room).toBe("–");
     expect(result[0].saken).toBe("misshandel");
-    expect(result[0].parties).toBe("–");
+    // `parties` field intentionally removed from Hearing type (GDPR — see types.ts).
   });
 
   it("skips bare case-number rows with no time and no saken (continuation markers)", () => {

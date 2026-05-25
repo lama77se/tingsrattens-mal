@@ -14,6 +14,13 @@ export interface RawHearing {
   externalCourt?: string;
 }
 
+/**
+ * Note: there is no `parties` field. The PDFs sometimes contain party names
+ * (i.e. personal data under GDPR), so we intentionally drop them at the
+ * enrichment boundary — the public UI displays only the saken/case# columns
+ * that domstol.se itself publishes. `RawHearing.parties` is captured by some
+ * parsers but never propagates past `enrichHearing`.
+ */
 export interface Hearing {
   id: string;
   date: string;
@@ -24,7 +31,6 @@ export interface Hearing {
   maltyp: string;
   room: string;
   saken: string;
-  parties: string;
   lagrum: string;
   sakomrade: string;
   fleraSakfragor: boolean;
