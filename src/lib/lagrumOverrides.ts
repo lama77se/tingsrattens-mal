@@ -46,6 +46,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Kontaktförbudslagen (1988:688) 24 §"],
   },
+  // Bare "kontaktförbud" som saken — typiskt ansökan om / beslut om
+  "kontaktförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
+  },
 
   // --- Commonly used short labels not always in Brå's form ---
   "olaga intrång": {
@@ -1095,6 +1100,11 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Medbestämmandelagen (1976:580) 54 §"],
   },
+  // Förhandlingsvägran — MBL 10 § (förhandlingsrätt)
+  "förhandlingsvägran": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Medbestämmandelagen (1976:580) 10 §"],
+  },
   // Kvarstad i tvistemål — säkringsåtgärd, RB 15 kap. 1 §
   "kvarstad": {
     sakomrade: "Fordringsrätt",
@@ -1317,6 +1327,15 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 6 kap."],
   },
+  // Vårdnadsöverflyttning — FB 6 kap. 8 § (till annan vårdnadshavare)
+  "vårdnadsöverflytt": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 8 §"],
+  },
+  "vårdnadsöverflyttning": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 8 §"],
+  },
   "umgänge": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 6 kap. 15 §"],
@@ -1384,6 +1403,15 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "parkeringsanmärkning": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
+  "överklagande av parkeringsärende": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
+  // Utmätning — överklagande av Kronofogdens beslut, UB 18 kap.
+  "utmätning": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
   },
   "dödsbodelägare": {
     sakomrade: "Arvsrätt",
