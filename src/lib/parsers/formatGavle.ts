@@ -137,6 +137,19 @@ function parse(ctx: ParserContext): RawHearing[] {
     let caseNumber = "";
     if (k < lines.length && CASE_NUMBER_RE.test(lines[k])) {
       caseNumber = lines[k].replace(/\s+/g, " ").trim();
+      k++;
+    }
+
+    // Newer Gävle layout puts saken+Sal AFTER the case number instead of
+    // before the anchor. If saken still empty, look forward one non-blank,
+    // non-boundary line.
+    if (!saken) {
+      while (k < lines.length && !lines[k]) k++;
+      if (k < lines.length && !isBoundaryLine(lines[k])) {
+        const extracted = extractSakenAndRoom(lines[k]);
+        saken = extracted.saken;
+        if (!room) room = extracted.room;
+      }
     }
 
     hearings.push({
