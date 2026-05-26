@@ -122,8 +122,13 @@ export const COURTS: CourtConfig[] = [
     name: "Eksjö tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    // Eksjö moved the file into a "veckan" sub-folder; old path 404s now.
-    buildUrl: () => `${BASE}/eksjo_tingsratt/schema/veckan/veckan.pdf`,
+    // Eksjö moved the file into a "veckan" sub-folder; old flat path 404s as
+    // of w22/2026 but kept as a fallback in case the upstream flips back or
+    // archived weeks remain at the old location.
+    buildUrl: () => [
+      `${BASE}/eksjo_tingsratt/schema/veckan/veckan.pdf`,
+      `${BASE}/eksjo_tingsratt/schema/veckan.pdf`,
+    ],
   },
   {
     id: "eskilstuna_tingsratt",
