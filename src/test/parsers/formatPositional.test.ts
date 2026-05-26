@@ -115,9 +115,12 @@ describe("formatPositional", () => {
     expect(hearings[1].type).toBe("Edgångssammanträde");
   });
 
-  it("captures externalCourt when the Sal column holds a borrowed-facility name", () => {
+  it("captures location when the Sal column holds another court's name", () => {
     // Some Södertälje hearings are held at Attunda's facility — the Sal column
-    // then contains "Attunda tingsrätt" instead of a Sal number.
+    // then contains "Attunda tingsrätt" instead of a Sal number. That means
+    // "this Södertälje case is at Attunda" — so it goes into `location`
+    // (which enrichment renders as "Södertälje tingsrätt (plats: Attunda
+    // tingsrätt)"), NOT `externalCourt` (which would invert the direction).
     const text = build([
       `må${TAB}18-maj${TAB}09:00 - 16:30${TAB}Huvudförhandling${TAB}näringspenningtvätt, grovt brott${TAB}Attunda tingsrätt`,
     ]);
@@ -126,7 +129,8 @@ describe("formatPositional", () => {
     expect(hearings[0]).toMatchObject({
       saken: "näringspenningtvätt, grovt brott",
       room: "",
-      externalCourt: "Attunda tingsrätt",
+      location: "Attunda tingsrätt",
     });
+    expect(hearings[0].externalCourt).toBeUndefined();
   });
 });
