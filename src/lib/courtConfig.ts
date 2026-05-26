@@ -122,7 +122,8 @@ export const COURTS: CourtConfig[] = [
     name: "Eksjö tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    buildUrl: () => `${BASE}/eksjo_tingsratt/schema/veckan.pdf`,
+    // Eksjö moved the file into a "veckan" sub-folder; old path 404s now.
+    buildUrl: () => `${BASE}/eksjo_tingsratt/schema/veckan/veckan.pdf`,
   },
   {
     id: "eskilstuna_tingsratt",
@@ -429,7 +430,11 @@ export const COURTS: CourtConfig[] = [
     id: "uppsala_tingsratt",
     name: "Uppsala tingsrätt",
     formatFamily: "tabular",
+    // Filename style flipped from "forhandlingslista-v.-22.pdf" to
+    // "forhandlingslistav22.pdf" (no separators) around w22/2026. Try the
+    // new style first; keep the older variants as fallbacks for archived weeks.
     buildUrl: (week) => [
+      `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslistav${week}.pdf`,
       `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v.-${week}.pdf`,
       `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v-${week}.pdf`,
     ],
