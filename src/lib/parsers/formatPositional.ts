@@ -195,7 +195,7 @@ export const formatPositional: ParserStrategy = {
       // Right anchor: Sal column, else external-court suffix, else end of line.
       let segmentEnd = line.length;
       let room = "";
-      let externalCourt: string | undefined;
+      let location: string | undefined;
       const salMatch = line.match(SAL_RE);
       if (salMatch) {
         const salIdx = line.indexOf(salMatch[0], segmentStart);
@@ -204,9 +204,16 @@ export const formatPositional: ParserStrategy = {
           segmentEnd = salIdx;
         }
       } else {
+        // Trailing court name in the Sal column ("…Attunda tingsrätt") means
+        // this court's case is being heard at that other facility. Populate
+        // `location` (not `externalCourt`) so enrichment renders it as
+        // "<this court> (plats: <other court>)". The opposite pattern — a
+        // borrowed-facility case from a remote court — appears in the saken
+        // text (e.g. "Solna tingsrätt - mord m.m.") and is handled by
+        // COURT_IN_SAKEN_REGEX in enrichment.
         const tailMatch = line.substring(segmentStart).match(EXTERNAL_COURT_AT_END_RE);
         if (tailMatch && tailMatch.index !== undefined) {
-          externalCourt = tailMatch[1];
+          location = tailMatch[1];
           segmentEnd = segmentStart + tailMatch.index;
         }
       }
@@ -230,7 +237,7 @@ export const formatPositional: ParserStrategy = {
         saken,
         parties: "",
       };
-      if (externalCourt) hearing.externalCourt = externalCourt;
+      if (location) hearing.location = location;
       hearings.push(hearing);
       rawSakenAcc.push(rawSaken);
       expectsContinuation.push(hasOpenContinuation(rawSaken));
