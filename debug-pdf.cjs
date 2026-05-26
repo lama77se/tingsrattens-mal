@@ -60,7 +60,7 @@ const COURT_MAP = {
   uddevalla: { name: "Uddevalla tingsrätt", format: "positional" },
   varbergs: { name: "Varbergs tingsrätt", format: "tabular" },
   uppsala: { name: "Uppsala tingsrätt", format: "tabular" },
-  vanersborgs: { name: "Vänersborgs tingsrätt", format: "tabular" },
+  vanersborgs: { name: "Vänersborgs tingsrätt", format: "positional" },
   varmlands: { name: "Värmlands tingsrätt", format: "positional" },
   vastmanlands: { name: "Västmanlands tingsrätt", format: "tabular" },
   vaxjo: { name: "Växjö tingsrätt", format: "tabular" },

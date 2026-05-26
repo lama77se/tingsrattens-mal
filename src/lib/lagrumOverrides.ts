@@ -973,6 +973,11 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 14 kap."],
   },
+  // Jämkning av testamente — ÄB 12 kap. (förfoganden i testamente)
+  "jämkning av testamente": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 12 kap."],
+  },
   "äganderätt till lös egendom": {
     sakomrade: "Sakrätt",
     primart_lagrum: [],
@@ -1126,6 +1131,11 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   },
   // Trunkerad/förkortad variant ("Ogiltigförklaring av avske") som sett i PDF-saken
   "ogiltigförklaring av avske": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 35 §"],
+  },
+  // Variant: substantiv "avsked" istället för verbform "avskedande"
+  "ogiltigförklaring av avsked": {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80) 35 §"],
   },

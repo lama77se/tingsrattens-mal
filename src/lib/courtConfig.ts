@@ -447,7 +447,7 @@ export const COURTS: CourtConfig[] = [
   {
     id: "vanersborgs_tingsratt",
     name: "Vänersborgs tingsrätt",
-    formatFamily: "tabular",
+    formatFamily: "positional",
     buildUrl: (week) =>
       `${BASE}/vanersborgs_tingsratt/veckans_forhandlingar/v${week}.pdf`,
   },
