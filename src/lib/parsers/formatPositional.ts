@@ -33,6 +33,13 @@ const EXTERNAL_COURT_AT_END_RE = /([A-ZÅÄÖ][a-zåäö]+\s+tingsrätt)\s*$/;
 const HEARING_TYPE_RE =
   /(Huvudförhandling|Muntlig förberedelse|Konkursförhandling|Häktningsförhandling|Edgångssmtr|Edgångssammanträde|Sammanträde|Förhandling)/i;
 const WEEKDAY_RE = /^(må|ti|on|to|fr|lö|sö)\b/i;
+// "(dag X/Y)" — multi-day hearing annotation; never part of the saken cell.
+const DAG_ANNOTATION_RE = /^\(dag\s+\d+\/\d+\)$/i;
+// Standalone fragments that are wraps from the type column, not saken:
+// "Muntlig\nförberedelse", "Konkursförhandlin\ng". Värmland's PDF wraps the
+// type cell across two physical rows when it doesn't fit, leaving an orphan
+// segment on the continuation row that must NOT be appended to saken.
+const TYPE_WRAP_COMPLETION_RE = /^(förberedelse|g)$/i;
 
 function normalizeType(matched: string): string {
   if (/^Edgångssmtr$/i.test(matched)) return "Edgångssammanträde";
@@ -90,6 +97,13 @@ export const formatPositional: ParserStrategy = {
     // comma — indicates an expected wrap onto a continuation row. cleanSaken
     // strips trailing commas, so we have to track this signal separately.
     const expectsContinuation: boolean[] = [];
+    // Per-hearing flag: true when neither Sal nor location was found — meaning
+    // the saken cell consumed the entire line to EOL with no right anchor.
+    // In that case the next physical row likely continues the saken cell
+    // (Värmland's PDF lacks a Sal column entirely and wraps long sakens this
+    // way without any in-text marker). When true we merge continuation lines
+    // even without an explicit comma/paren signal.
+    const lacksRightAnchor: boolean[] = [];
     // Raw (uncleaned) saken accumulator — cleanSaken is applied once at the
     // end so continuation merges can use the pre-cleaned text.
     const rawSakenAcc: string[] = [];
@@ -141,24 +155,12 @@ export const formatPositional: ParserStrategy = {
       // Without either it's continuation/noise.
       if (!caseMatch && !timeMatch) {
         const lastIdx = hearings.length - 1;
-        if (
-          isContinuationCandidate(line) &&
-          lastIdx >= 0 &&
-          expectsContinuation[lastIdx]
-        ) {
-          const trimmed = line.replace(/\t+/g, " ").trim();
-          const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
-          rawSakenAcc[lastIdx] = merged;
-          hearings[lastIdx].saken = cleanSaken(merged);
-          // Continue accumulating if the merged saken still ends with a comma
-          // OR has unbalanced opening parens (e.g. saken wraps across rows:
-          // "...tvist (återvinning av\ntredskodom i T 1234-25)" — the second
-          // line closes the paren and matches as a continuation too).
-          expectsContinuation[lastIdx] = hasOpenContinuation(merged);
-        } else if (rawCaseMatch && lastIdx >= 0) {
-          // Paren-ref or bare-alias line — even if no comma signal is set,
-          // if the previous saken has an open paren, fold this line in so the
-          // closing paren + ref ends up in the saken text.
+        if (lastIdx < 0) continue;
+
+        if (rawCaseMatch) {
+          // Bare-alias or paren-ref line. Fold the closing-paren case into the
+          // previous saken when the saken has an open paren; otherwise drop
+          // (bare-alias case numbers aren't currently linked back as aliases).
           const afterCase = line.substring(
             (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
           );
@@ -172,6 +174,37 @@ export const formatPositional: ParserStrategy = {
             hearings[lastIdx].saken = cleanSaken(merged);
             expectsContinuation[lastIdx] = hasOpenContinuation(merged);
           }
+          continue;
+        }
+
+        // Pure continuation row (no case#, no time). Strip annotation and
+        // type-wrap-completion segments before deciding whether to merge into
+        // the previous saken.
+        const segments = line
+          .split(/\t+/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+        const kept: string[] = [];
+        for (const seg of segments) {
+          if (DAG_ANNOTATION_RE.test(seg)) continue;
+          if (TYPE_WRAP_COMPLETION_RE.test(seg)) continue;
+          kept.push(seg);
+        }
+        if (kept.length === 0) continue;
+
+        const filteredLine = kept.join(" ");
+        if (
+          isContinuationCandidate(filteredLine) &&
+          (expectsContinuation[lastIdx] || lacksRightAnchor[lastIdx])
+        ) {
+          const merged = (rawSakenAcc[lastIdx] + " " + filteredLine).trim();
+          rawSakenAcc[lastIdx] = merged;
+          hearings[lastIdx].saken = cleanSaken(merged);
+          // Continue accumulating if the merged saken still ends with a comma
+          // OR has unbalanced opening parens (e.g. saken wraps across rows:
+          // "...tvist (återvinning av\ntredskodom i T 1234-25)" — the second
+          // line closes the paren and matches as a continuation too).
+          expectsContinuation[lastIdx] = hasOpenContinuation(merged);
         }
         continue;
       }
@@ -241,6 +274,7 @@ export const formatPositional: ParserStrategy = {
       hearings.push(hearing);
       rawSakenAcc.push(rawSaken);
       expectsContinuation.push(hasOpenContinuation(rawSaken));
+      lacksRightAnchor.push(!room && !location);
     }
 
     return hearings;
