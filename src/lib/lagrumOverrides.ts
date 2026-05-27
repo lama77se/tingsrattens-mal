@@ -152,6 +152,29 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot Sveriges säkerhet",
     primart_lagrum: ["Skyddslagen (2010:305) 30 §"],
   },
+  // Obehörig befattning med hemlig uppgift — BrB 19 kap. 7 § (grov: 8 §)
+  "obehörig befattning med hemlig uppgift": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["BrB 19 kap. 7 §"],
+  },
+  "grov obehörig befattning med hemlig uppgift": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["BrB 19 kap. 8 §"],
+  },
+  "vårdslöshet med hemlig uppgift": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["BrB 19 kap. 9 §"],
+  },
+  // Brott mot luftfartsförordningen — straffbestämmelser i Luftfartslagen 13 kap.
+  // (Luftfartsförordningen 2010:770 kompletterar lagen)
+  "brott mot luftfartsförordningen": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Luftfartsförordningen (2010:770)"],
+  },
+  "brott mot luftfartslagen": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Luftfartslagen (2010:500) 13 kap."],
+  },
   // Brott mot livsmedelslagen — Livsmedelslagen (2006:804) 28-29 §
   "brott mot livsmedelslagen": {
     sakomrade: "Övrig speciallagstiftning",
@@ -1422,6 +1445,20 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   "kvarboenderätt": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Äktenskapsbalken 14 kap. 7 §"],
+  },
+  // Äktenskapsförord — ÄktB 7 kap. 3 § reglerar; jämkning vid oskälighet ÄktB 12 kap. 3 §.
+  // Täcker varianter som "Ogiltighet alt jämkning av äktenskapsförord".
+  "äktenskapsförord": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 7 kap. 3 §"],
+  },
+  "jämkning av äktenskapsförord": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 12 kap. 3 §"],
+  },
+  "ogiltighet av äktenskapsförord": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 7 kap. 3 §"],
   },
 };
 
