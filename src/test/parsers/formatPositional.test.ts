@@ -115,6 +115,57 @@ describe("formatPositional", () => {
     expect(hearings[1].type).toBe("Edgångssammanträde");
   });
 
+  it("Värmland: merges wrapped saken when there is no Sal column", () => {
+    // Värmland's PDF lacks a Sal column entirely. Long sakens wrap to the next
+    // physical row without any in-text signal (no trailing comma). The merge
+    // is triggered by the previous hearing having neither room nor location.
+    const text = build([
+      `må${TAB}2026-05-25${TAB}09:00 - 16:00${TAB}Huvudförhandling${TAB}B 1861-25${TAB}synnerligen grovt`,
+      "narkotikabrott m.m",
+      `må${TAB}2026-05-25${TAB}15:15 - 16:00${TAB}Muntlig förhandling${TAB}B 1340-26${TAB}undanröjande av`,
+      "villkorlig dom med",
+      "samhällstjänst",
+      `to${TAB}2026-05-28${TAB}13:45 - 14:15${TAB}Huvudförhandling${TAB}B 1955-26${TAB}brott mot lagen om`,
+      "förbud beträffande",
+      "knivar och andra",
+      "farliga föremål",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Värmlands tingsrätt", text });
+    expect(hearings).toHaveLength(3);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "B 1861-25",
+      saken: "synnerligen grovt narkotikabrott m.m",
+      room: "",
+    });
+    expect(hearings[1]).toMatchObject({
+      caseNumber: "B 1340-26",
+      saken: "undanröjande av villkorlig dom med samhällstjänst",
+    });
+    expect(hearings[2]).toMatchObject({
+      caseNumber: "B 1955-26",
+      saken: "brott mot lagen om förbud beträffande knivar och andra farliga föremål",
+    });
+  });
+
+  it("Värmland: skips (dag X/Y) annotations and type-column wraps", () => {
+    // "(dag 1/2)" is a multi-day annotation that must not be appended to
+    // saken. "förberedelse" / "g" alone are type-column wraps from
+    // "Muntlig\nförberedelse" / "Konkursförhandlin\ng" — also not saken.
+    const text = build([
+      `må${TAB}2026-05-25${TAB}09:30 - 16:00${TAB}Huvudförhandling${TAB}T 2102-25${TAB}skadestånd m m`,
+      "(dag 1/2)",
+      `må${TAB}2026-05-25${TAB}10:00 - 12:00${TAB}Muntlig${TAB}T 6858-25${TAB}arbetsrätt`,
+      "förberedelse",
+      `ti${TAB}2026-05-26${TAB}09:15 - 09:30${TAB}Konkursförhandlin${TAB}K 2557-26${TAB}ansökan om konkurs`,
+      "g",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Värmlands tingsrätt", text });
+    expect(hearings).toHaveLength(3);
+    expect(hearings[0].saken).toBe("skadestånd m m");
+    expect(hearings[1].saken).toBe("arbetsrätt");
+    expect(hearings[2].saken).toBe("ansökan om konkurs");
+  });
+
   it("captures location when the Sal column holds another court's name", () => {
     // Some Södertälje hearings are held at Attunda's facility — the Sal column
     // then contains "Attunda tingsrätt" instead of a Sal number. That means
