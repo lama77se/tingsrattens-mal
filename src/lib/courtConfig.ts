@@ -504,7 +504,7 @@ export const COURTS: CourtConfig[] = [
     formatFamily: "tabular",
     singleUrl: true,
     buildUrl: () =>
-      `${BASE}/orebro_tingsratt/schema/schema39.pdf`,
+      `${BASE}/orebro_tingsratt/schema/schema39/`,
   },
   {
     id: "norrtalje_tingsratt",
