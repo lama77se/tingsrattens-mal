@@ -248,4 +248,81 @@ describe("formatGavle", () => {
       expect(result[0].room).toBe("Sal 5");
     });
   });
+
+  describe("V3 pipe-separated format (2026-06+)", () => {
+    it("parses a header + Swedish date + pipe-separated hearings", () => {
+      const text = [
+        "Schema - Förhandlingar (Sal 5)",
+        "Torsdag 4 juni 2026",
+        "09:00–10:00 | B 1964-26 | Brott mot trafikförordningen",
+        "10:00–11:15 | B 2002-26 | Ringa stöld",
+      ].join("\n");
+      const result = formatGavle.parse({ courtName: "Gävle tingsrätt", text });
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        date: "2026-06-04",
+        time: "09:00 - 10:00",
+        caseNumber: "B 1964-26",
+        saken: "Brott mot trafikförordningen",
+        room: "Sal 5",
+        type: "Huvudförhandling",
+      });
+      expect(result[1].caseNumber).toBe("B 2002-26");
+      expect(result[1].room).toBe("Sal 5");
+    });
+
+    it("keeps the current date across blank lines and new date headers", () => {
+      const text = [
+        "Schema - Förhandlingar (Sal 5)",
+        "Torsdag 4 juni 2026",
+        "",
+        "09:00–10:00 | B 1964-26 | Brott mot trafikförordningen",
+        "Måndag 8 juni 2026",
+        "09:00–09:30 | B 533-26 | Urkundsförfalskning m.m.",
+      ].join("\n");
+      const result = formatGavle.parse({ courtName: "Test", text });
+      expect(result).toHaveLength(2);
+      expect(result[0].date).toBe("2026-06-04");
+      expect(result[1].date).toBe("2026-06-08");
+    });
+
+    it("supports all twelve Swedish months", () => {
+      const months: [string, string][] = [
+        ["januari", "01"], ["februari", "02"], ["mars", "03"], ["april", "04"],
+        ["maj", "05"], ["juni", "06"], ["juli", "07"], ["augusti", "08"],
+        ["september", "09"], ["oktober", "10"], ["november", "11"], ["december", "12"],
+      ];
+      for (const [name, num] of months) {
+        const text = [
+          `Måndag 15 ${name} 2026`,
+          "09:00–10:00 | B 1-26 | test",
+        ].join("\n");
+        const result = formatGavle.parse({ courtName: "Test", text });
+        expect(result).toHaveLength(1);
+        expect(result[0].date).toBe(`2026-${num}-15`);
+      }
+    });
+
+    it("keeps joined cases (e.g. 'B 1882-26 & B 2066-26') as one hearing", () => {
+      const text = [
+        "Schema - Förhandlingar (Sal 5)",
+        "Tisdag 18 augusti 2026",
+        "15:00–16:00 | B 1882-26 & B 2066-26 | Narkotikabrott",
+      ].join("\n");
+      const result = formatGavle.parse({ courtName: "Test", text });
+      expect(result).toHaveLength(1);
+      expect(result[0].caseNumber).toBe("B 1882-26 & B 2066-26");
+      expect(result[0].saken).toBe("Narkotikabrott");
+    });
+
+    it("leaves room empty when there is no Schema header", () => {
+      const text = [
+        "Torsdag 4 juni 2026",
+        "09:00–10:00 | B 1964-26 | Brott mot trafikförordningen",
+      ].join("\n");
+      const result = formatGavle.parse({ courtName: "Test", text });
+      expect(result).toHaveLength(1);
+      expect(result[0].room).toBe("");
+    });
+  });
 });
