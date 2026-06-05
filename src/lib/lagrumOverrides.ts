@@ -953,6 +953,33 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 36 kap."],
   },
+
+  // Bare key — generated mappings only have qualified variants ("annat olovligt
+  // förfogande", "över avbetalningsgods"). Court PDFs frequently use the bare form.
+  "olovligt förfogande": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 10 kap. 4 §"],
+  },
+
+  // Lag (2022:700) om särskild kontroll av vissa utlänningar — replaced the
+  // 1991 lagen om särskild utlänningskontroll. Straffbestämmelser i 39-40 §§.
+  "brott mot lagen om särskild kontroll av vissa utlänningar": {
+    sakomrade: "Brott mot utlänningslagen",
+    primart_lagrum: ["Lag (2022:700) om särskild kontroll av vissa utlänningar 39 §"],
+  },
+
+  // Undanröjande av ordningsbot — RB 59 kap. 6 §
+  "undanröjande av ordningsbot": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["Rättegångsbalken 59 kap. 6 §"],
+  },
+
+  // Variant utan obestämd artikel "en" — generated/override har bara
+  // "deltagande i en terroristorganisation"; PDF-saken saknar ofta "en".
+  "deltagande i terroristorganisation": {
+    sakomrade: "Terroristbrott",
+    primart_lagrum: ["Terroristbrottslagen (2022:666) 4 a §"],
+  },
 };
 
 /**
@@ -1380,6 +1407,20 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "handräckning": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Lag (1990:746) om betalningsföreläggande och handräckning"],
+  },
+
+  // Ogiltigförklaring av gåvobrev — Lag (1936:83) angående vissa utfästelser
+  // om gåva (gåvolagen). Avtalslagens ogiltighetsgrunder kan också åberopas.
+  "ogiltigförklaring av gåvobrev": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Lag (1936:83) angående vissa utfästelser om gåva"],
+  },
+
+  // Bättre rätt till hund — sakrättslig tvist om äganderätt till husdjur.
+  // Inget specifikt lagrum (jfr "bättre rätt till lös egendom").
+  "bättre rätt till hund": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
   },
 };
 
