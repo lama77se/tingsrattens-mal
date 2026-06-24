@@ -63,6 +63,16 @@ describe("pickFromListing — week-matched courts", () => {
     expect(pick("vanersborgs_tingsratt", pdfs, 28)).toEqual([]);
   });
 
+  it("Eskilstuna matches a bundled range from its -v filename", () => {
+    const href =
+      "https://www.domstol.se/globalassets/filer/domstol/eskilstuna_tingsratt/veckans-forhandlingar/veckansforhandlingar-v25-26.pdf";
+    const pdfs = [link(href, "Schema för förhandlingar vecka 25-26")];
+    expect(pick("eskilstuna_tingsratt", pdfs, 25)).toEqual([href]);
+    expect(pick("eskilstuna_tingsratt", pdfs, 26)).toEqual([href]);
+    expect(pick("eskilstuna_tingsratt", pdfs, 24)).toEqual([]);
+    expect(pick("eskilstuna_tingsratt", pdfs, 27)).toEqual([]);
+  });
+
   it("Södertälje matches by week number despite typo'd dates", () => {
     const base =
       "https://www.domstol.se/globalassets/filer/domstol/sodertalje_tingsratt";

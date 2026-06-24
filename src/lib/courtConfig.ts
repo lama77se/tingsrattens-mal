@@ -136,10 +136,25 @@ export const COURTS: CourtConfig[] = [
   {
     id: "eskilstuna_tingsratt",
     name: "Eskilstuna tingsrätt",
-    formatFamily: "standard",
-    disabled: true,
-    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
-    buildUrl: () => "",
+    formatFamily: "positional",
+    // Eskilstuna publishes a multi-week bundle with an arbitrary range in the
+    // filename (e.g. veckansforhandlingar-v25-26.pdf), so scrape the listing
+    // page and match the requested week against single weeks and ranges.
+    listingUrl:
+      "https://www.domstol.se/eskilstuna-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /-v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "falu_tingsratt",

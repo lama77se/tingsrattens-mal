@@ -184,4 +184,34 @@ describe("formatPositional", () => {
     });
     expect(hearings[0].externalCourt).toBeUndefined();
   });
+
+  it("Eskilstuna: completes a time range whose end wraps to the next row", () => {
+    // Eskilstuna stacks the time range vertically: the start ("09:00 -") sits
+    // on the hearing row and the end ("16:00") wraps to the next physical row,
+    // sometimes alongside a "(dag X/Y)" annotation, sometimes alone. The end
+    // time must be folded back into the range and never leak into saken.
+    const text = build([
+      `Datum${TAB}Tid${TAB}Mötestyp${TAB}Målnummer${TAB}Saken${TAB}Lokal`,
+      `må${TAB}2026-06-15${TAB}09:00 -${TAB}Huvudförhandling${TAB}B 2528-23${TAB}grov våldtäkt mot barn m.m.${TAB}Sal 5`,
+      `(dag 4/6)${TAB}16:00`,
+      `må${TAB}2026-06-15${TAB}09:00 -${TAB}Huvudförhandling${TAB}B 1860-26${TAB}misshandel mm${TAB}Sal 4`,
+      "16:00",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eskilstuna tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings[0]).toMatchObject({
+      date: "2026-06-15",
+      time: "09:00 - 16:00",
+      caseNumber: "B 2528-23",
+      type: "Huvudförhandling",
+      saken: "grov våldtäkt mot barn m.m.",
+      room: "Sal 5",
+    });
+    expect(hearings[1]).toMatchObject({
+      time: "09:00 - 16:00",
+      caseNumber: "B 1860-26",
+      saken: "misshandel mm",
+      room: "Sal 4",
+    });
+  });
 });
