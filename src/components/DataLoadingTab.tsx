@@ -193,10 +193,13 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     weekIndex: number,
     week: number,
     year: number
-  ): Promise<CourtPdfResult | undefined> => {
+  ): Promise<CourtPdfResult[]> => {
     // Step 0: Beräknar URL
     updateStep(court.id, weekIndex, 0, { status: "active" });
     let urls: string[];
+    // Listing URLs are distinct real PDFs — fetch all of them and merge.
+    // buildUrl URLs are alternative filename candidates — try until one works.
+    let fetchAll = false;
     if (court.listingUrl && court.pickFromListing) {
       updateStep(court.id, weekIndex, 0, {
         status: "active",
@@ -211,30 +214,30 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         updateStep(court.id, weekIndex, 1, { status: "idle" });
         updateStep(court.id, weekIndex, 2, { status: "idle" });
         updateStep(court.id, weekIndex, 3, { status: "error", detail: reason });
-        const failResult: CourtPdfResult = {
+        setResult(court.id, weekIndex, {
           success: false,
           error: reason,
           notFound: listing.notFound,
-        };
-        setResult(court.id, weekIndex, failResult);
-        return failResult;
+        });
+        return [];
       }
       const picked = court.pickFromListing(listing.pdfs, week, year);
-      if (!picked) {
+      const pickedUrls = picked == null ? [] : Array.isArray(picked) ? picked : [picked];
+      if (pickedUrls.length === 0) {
         const reason = `Hittade ${listing.pdfs.length} PDF-länk(ar) men ingen matchade vecka ${week}`;
         updateStep(court.id, weekIndex, 0, { status: "error", detail: reason });
         updateStep(court.id, weekIndex, 1, { status: "idle" });
         updateStep(court.id, weekIndex, 2, { status: "idle" });
         updateStep(court.id, weekIndex, 3, { status: "error", detail: reason });
-        const failResult: CourtPdfResult = {
+        setResult(court.id, weekIndex, {
           success: false,
           error: reason,
           notFound: true,
-        };
-        setResult(court.id, weekIndex, failResult);
-        return failResult;
+        });
+        return [];
       }
-      urls = [picked];
+      urls = pickedUrls;
+      fetchAll = true;
     } else {
       const urlOrUrls = court.buildUrl(week, year);
       urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
@@ -246,14 +249,17 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     });
     console.log(`[${court.name}] v${week} URLs:`, urls);
 
-    // Step 1: Hämtar PDF — try each candidate URL in order
+    // Step 1: Hämtar PDF
+    // - buildUrl candidates: try in order, stop at the first that works.
+    // - listing PDFs (fetchAll): fetch every one and keep all that succeed.
     updateStep(court.id, weekIndex, 1, { status: "active" });
-    let result: CourtPdfResult | undefined;
+    const successes: CourtPdfResult[] = [];
+    let lastFailure: CourtPdfResult | undefined;
     const triedUrls: { url: string; ok: boolean; reason?: string }[] = [];
     for (const url of urls) {
       updateStep(court.id, weekIndex, 1, {
         status: "active",
-        detail: urls.length > 1 ? `Testar ${triedUrls.length + 1}/${urls.length}...` : undefined,
+        detail: urls.length > 1 ? `${fetchAll ? "Hämtar" : "Testar"} ${triedUrls.length + 1}/${urls.length}...` : undefined,
       });
       const attempt = await fetchCourtPdf(
         url,
@@ -267,32 +273,38 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         : undefined;
       triedUrls.push({ url, ok: attempt.success, reason });
       if (attempt.success) {
-        result = attempt;
-        break;
+        successes.push(attempt);
+        if (!fetchAll) break;
+      } else {
+        lastFailure = attempt;
       }
-      result = attempt;
     }
 
     const urlSummary = triedUrls
       .map(({ url, ok, reason }) => `${ok ? "\u2713" : "\u2717"} ${url}${reason ? ` (${reason})` : ""}`)
       .join("\n");
 
-    if (!result || !result.success) {
+    if (successes.length === 0) {
       console.warn(`[${court.name}] v${week} fetch failed:\n${urlSummary}`);
       updateStep(court.id, weekIndex, 1, { status: "error", detail: urlSummary });
       updateStep(court.id, weekIndex, 2, { status: "idle" });
       updateStep(court.id, weekIndex, 3, {
         status: "error",
-        detail: result?.notFound ? "PDF inte publicerad ännu" : result?.error,
+        detail: lastFailure?.notFound ? "PDF inte publicerad ännu" : lastFailure?.error,
       });
-      if (result) setResult(court.id, weekIndex, result);
-      return undefined;
+      if (lastFailure) setResult(court.id, weekIndex, lastFailure);
+      return [];
     }
-    console.log(`[${court.name}] v${week} fetched: ${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB from`, triedUrls.find((t) => t.ok)?.url);
+
+    const bytesTotal = successes.reduce((n, r) => n + (r.pdfSizeBytes || 0), 0);
+    const charsTotal = successes.reduce((n, r) => n + (r.text?.length || 0), 0);
+    const hearingsTotal = successes.reduce((n, r) => n + (r.estimatedHearings || 0), 0);
+    const pdfLabel = successes.length > 1 ? ` (${successes.length} PDF:er)` : "";
+    console.log(`[${court.name}] v${week} fetched ${successes.length} PDF(s): ${(bytesTotal / 1024).toFixed(0)} KB`);
 
     updateStep(court.id, weekIndex, 1, {
       status: "done",
-      detail: `${((result.pdfSizeBytes || 0) / 1024).toFixed(0)} KB\n${urlSummary}`,
+      detail: `${(bytesTotal / 1024).toFixed(0)} KB${pdfLabel}\n${urlSummary}`,
     });
 
     // Step 2: Bearbetar
@@ -300,16 +312,16 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     await delay(200);
     updateStep(court.id, weekIndex, 2, {
       status: "done",
-      detail: `${result.text?.length || 0} tecken extraherade`,
+      detail: `${charsTotal} tecken extraherade${pdfLabel}`,
     });
 
     // Step 3: Klar
     updateStep(court.id, weekIndex, 3, {
       status: "done",
-      detail: `~${result.estimatedHearings || 0} förhandlingar`,
+      detail: `~${hearingsTotal} förhandlingar`,
     });
-    setResult(court.id, weekIndex, result);
-    return result;
+    setResult(court.id, weekIndex, successes[0]);
+    return successes;
   };
 
   const fetchCourt = async (court: CourtConfig): Promise<{ hearings: Hearing[]; anySuccess: boolean }> => {
@@ -325,8 +337,11 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     let anySuccess = false;
     for (let i = 0; i < weeks.length; i++) {
       const w = weeks[i];
-      const result = await fetchWeek(court, i, w.week, w.year);
-      if (result?.success && result.text) {
+      // A week may resolve to several PDFs (listing courts); parse each and
+      // merge, deduping hearings that overlap across PDFs.
+      const results = await fetchWeek(court, i, w.week, w.year);
+      for (const result of results) {
+        if (!result.success || !result.text) continue;
         anySuccess = true;
         const parsed = parseCourtPdf(result.text, court);
         for (const h of parsed) {
