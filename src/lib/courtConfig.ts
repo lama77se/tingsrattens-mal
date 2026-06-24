@@ -262,8 +262,25 @@ export const COURTS: CourtConfig[] = [
     id: "linkopings_tingsratt",
     name: "Linköpings tingsrätt",
     formatFamily: "positional",
-    buildUrl: (week) =>
-      `${BASE}/linkopings_tingsratt/veckans-forhandlingar/v${week}.pdf`,
+    // Most weeks are published as v{week}.pdf, but during summer the court
+    // bundles several weeks into one file (e.g. v25-30.pdf). Scrape the
+    // listing page and match the requested week against both single-week
+    // files and ranges.
+    listingUrl:
+      "https://www.domstol.se/linkopings-tingsratt/om-tingsratten/aktuellt/forhandlingar/",
+    pickFromListing: (pdfs, week) => {
+      const match = pdfs.find((p) => {
+        const m =
+          /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
+          /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+        if (!m) return false;
+        const lo = Number(m[1]);
+        const hi = m[2] ? Number(m[2]) : lo;
+        return week >= lo && week <= hi;
+      });
+      return match?.href ?? null;
+    },
+    buildUrl: () => [],
   },
   {
     id: "lunds_tingsratt",
@@ -289,10 +306,14 @@ export const COURTS: CourtConfig[] = [
     formatFamily: "positional",
     // Mora bundles two-week blocks; the same week appears in either the
     // {week}-{week+1} block or the {week-1}-{week} block. The PDF path
-    // dropped the "vecka-" prefix at some point (old form 404s now).
+    // dropped the "vecka-" prefix at some point (old form 404s now). The
+    // court sometimes republishes a block with a "-ny" suffix
+    // (e.g. block/26-27-ny.pdf), so try those variants too.
     buildUrl: (week) => [
       `${BASE}/mora_tingsratt/block/${week}-${week + 1}.pdf`,
+      `${BASE}/mora_tingsratt/block/${week}-${week + 1}-ny.pdf`,
       `${BASE}/mora_tingsratt/block/${week - 1}-${week}.pdf`,
+      `${BASE}/mora_tingsratt/block/${week - 1}-${week}-ny.pdf`,
     ],
   },
   {
@@ -378,22 +399,21 @@ export const COURTS: CourtConfig[] = [
     id: "sodertalje_tingsratt",
     name: "Södertälje tingsrätt",
     formatFamily: "positional",
-    buildUrl: (week, year) => {
-      const monday = getISOWeekMonday(week, year);
-      const friday = addDays(monday, 4);
-      const thursday = addDays(monday, 3);
-      const monStr = format(monday, "yyyy-MM-dd");
-      const candidates: string[] = [];
-      // Friday-end first, then Thursday-end (holiday-shortened weeks).
-      // Södertälje always uses MM-dd for the end date, including in same-month weeks.
-      for (const endDay of [friday, thursday]) {
-        const endStr = format(endDay, "MM-dd");
-        candidates.push(
-          `${BASE}/sodertalje_tingsratt/webb-forhandlingar-${monStr}--${endStr}.pdf`
-        );
-      }
-      return candidates;
+    // Filenames embed the week number plus a start/end date
+    // (e.g. webb-forhandlingar-v.-25-2026-06-15--2026-06-19.pdf), but the
+    // dates are frequently wrong (e.g. a Wednesday start on v.-26), so we
+    // scrape the listing page and match by week number rather than guess.
+    listingUrl:
+      "https://www.domstol.se/sodertalje-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) => {
+      const match = pdfs.find((p) => {
+        const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+        const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
+        return weekInText || weekInHref;
+      });
+      return match?.href ?? null;
     },
+    buildUrl: () => [],
   },
   {
     id: "skelleftea_tingsratt",
@@ -416,20 +436,14 @@ export const COURTS: CourtConfig[] = [
     name: "Varbergs tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    buildUrl: (week) => {
-      const base = `${BASE}/varbergs_tingsratt/scheman/webb-forhandlingar`;
-      return [
-        `${base}-v-${week}-${week + 3}.pdf`,
-        `${base}-v-${week - 1}-${week + 2}.pdf`,
-        `${base}-v-${week - 2}-${week + 1}.pdf`,
-        `${base}-v-${week - 3}-${week}.pdf`,
-        `${base}-v-${week}-${week + 2}.pdf`,
-        `${base}-v-${week - 1}-${week + 1}.pdf`,
-        `${base}-v-${week - 2}-${week}.pdf`,
-        `${base}-v-${week}-${week + 1}.pdf`,
-        `${base}-v-${week - 1}-${week}.pdf`,
-      ];
-    },
+    // Varberg publishes a single rolling multi-week file whose name and
+    // week range change over time (e.g. "webb-forhandlingar-v-23-26.pdf"
+    // became "forhandlingar-v-26-28.pdf"), so scrape the listing page and
+    // take the one PDF it links rather than guessing the range.
+    listingUrl:
+      "https://www.domstol.se/varbergs-tingsratt/om-tingsratten/aktuellt/forhandlingsschema/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "uppsala_tingsratt",
@@ -503,8 +517,13 @@ export const COURTS: CourtConfig[] = [
     name: "Örebro tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    buildUrl: () =>
-      `${BASE}/orebro_tingsratt/schema/schema39/`,
+    // Örebro publishes a single schedule under an arbitrary, non-week
+    // filename (e.g. schema/schema39.pdf, which doesn't track the current
+    // week), so scrape the listing page and take the one PDF it links.
+    listingUrl:
+      "https://www.domstol.se/orebro-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "norrtalje_tingsratt",
