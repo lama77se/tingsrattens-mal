@@ -436,20 +436,14 @@ export const COURTS: CourtConfig[] = [
     name: "Varbergs tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    buildUrl: (week) => {
-      const base = `${BASE}/varbergs_tingsratt/scheman/webb-forhandlingar`;
-      return [
-        `${base}-v-${week}-${week + 3}.pdf`,
-        `${base}-v-${week - 1}-${week + 2}.pdf`,
-        `${base}-v-${week - 2}-${week + 1}.pdf`,
-        `${base}-v-${week - 3}-${week}.pdf`,
-        `${base}-v-${week}-${week + 2}.pdf`,
-        `${base}-v-${week - 1}-${week + 1}.pdf`,
-        `${base}-v-${week - 2}-${week}.pdf`,
-        `${base}-v-${week}-${week + 1}.pdf`,
-        `${base}-v-${week - 1}-${week}.pdf`,
-      ];
-    },
+    // Varberg publishes a single rolling multi-week file whose name and
+    // week range change over time (e.g. "webb-forhandlingar-v-23-26.pdf"
+    // became "forhandlingar-v-26-28.pdf"), so scrape the listing page and
+    // take the one PDF it links rather than guessing the range.
+    listingUrl:
+      "https://www.domstol.se/varbergs-tingsratt/om-tingsratten/aktuellt/forhandlingsschema/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "uppsala_tingsratt",
@@ -523,8 +517,13 @@ export const COURTS: CourtConfig[] = [
     name: "Örebro tingsrätt",
     formatFamily: "tabular",
     singleUrl: true,
-    buildUrl: () =>
-      `${BASE}/orebro_tingsratt/schema/schema39/`,
+    // Örebro publishes a single schedule under an arbitrary, non-week
+    // filename (e.g. schema/schema39.pdf, which doesn't track the current
+    // week), so scrape the listing page and take the one PDF it links.
+    listingUrl:
+      "https://www.domstol.se/orebro-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "norrtalje_tingsratt",
