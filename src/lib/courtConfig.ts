@@ -462,8 +462,25 @@ export const COURTS: CourtConfig[] = [
     id: "vanersborgs_tingsratt",
     name: "Vänersborgs tingsrätt",
     formatFamily: "positional",
-    buildUrl: (week) =>
-      `${BASE}/vanersborgs_tingsratt/veckans_forhandlingar/v${week}.pdf`,
+    // Most weeks are published as v{week}.pdf, but the court also bundles
+    // several weeks into one file (e.g. v26-27.pdf), which the fixed
+    // pattern can't match. Scrape the listing page and match the requested
+    // week against both single-week files and ranges.
+    listingUrl:
+      "https://www.domstol.se/vanersborgs-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) => {
+      const match = pdfs.find((p) => {
+        const m =
+          /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
+          /\bv\.?\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+        if (!m) return false;
+        const lo = Number(m[1]);
+        const hi = m[2] ? Number(m[2]) : lo;
+        return week >= lo && week <= hi;
+      });
+      return match?.href ?? null;
+    },
+    buildUrl: () => [],
   },
   {
     id: "varmlands_tingsratt",
