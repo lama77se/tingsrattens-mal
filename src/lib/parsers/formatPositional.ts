@@ -21,6 +21,12 @@ import {
 
 const ISO_DATE_RE = /\b(\d{4}-\d{2}-\d{2})\b/;
 const TIME_RANGE_RE = /\b(\d{1,2}[:.]\d{2})\s*-\s*(\d{1,2}[:.]\d{2})\b/;
+// Eskilstuna stacks the time range vertically: the start ("09:00 -") sits on
+// the hearing row and the end ("16:00") wraps to the next physical row. Match
+// a half-open start (a time + dash NOT followed by another time) so the end
+// can be picked up from the continuation row.
+const TIME_OPEN_RE = /\b(\d{1,2}[:.]\d{2})\s*-\s*(?!\d)/;
+const BARE_TIME_RE = /^\d{1,2}[:.]\d{2}$/;
 // Sal pattern — accepts an optional "Tingsrättens" / "Tingsrätt" / "Sessions"
 // / "Tings" / "Högsäkerhets" prefix and an optional ", City" suffix
 // (Ångermanlands writes "Tingsrättens sal 1, Örnsköldsvik" in the Sal column).
@@ -104,6 +110,10 @@ export const formatPositional: ParserStrategy = {
     // way without any in-text marker). When true we merge continuation lines
     // even without an explicit comma/paren signal.
     const lacksRightAnchor: boolean[] = [];
+    // Per-hearing flag: true when the hearing row carried only a half-open
+    // time range ("09:00 -") and the end time still has to be picked up from
+    // the next physical row (Eskilstuna stacks the end time below the start).
+    const needsEndTime: boolean[] = [];
     // Raw (uncleaned) saken accumulator — cleanSaken is applied once at the
     // end so continuation merges can use the pre-cleaned text.
     const rawSakenAcc: string[] = [];
@@ -157,6 +167,18 @@ export const formatPositional: ParserStrategy = {
         const lastIdx = hearings.length - 1;
         if (lastIdx < 0) continue;
 
+        // Complete a half-open time range whose end time wrapped to this row.
+        if (needsEndTime[lastIdx]) {
+          const endMatch = line.match(/\b(\d{1,2}[:.]\d{2})\b/);
+          if (endMatch) {
+            hearings[lastIdx].time = hearings[lastIdx].time.replace(
+              /-\s*$/,
+              `- ${endMatch[1].replace(".", ":")}`
+            );
+            needsEndTime[lastIdx] = false;
+          }
+        }
+
         if (rawCaseMatch) {
           // Bare-alias or paren-ref line. Fold the closing-paren case into the
           // previous saken when the saken has an open paren; otherwise drop
@@ -188,6 +210,7 @@ export const formatPositional: ParserStrategy = {
         for (const seg of segments) {
           if (DAG_ANNOTATION_RE.test(seg)) continue;
           if (TYPE_WRAP_COMPLETION_RE.test(seg)) continue;
+          if (BARE_TIME_RE.test(seg)) continue; // wrapped end-time (Eskilstuna)
           kept.push(seg);
         }
         if (kept.length === 0) continue;
@@ -210,9 +233,19 @@ export const formatPositional: ParserStrategy = {
       }
 
       const caseNumber = caseMatch ? caseMatch[0].replace(/\s+/g, " ") : "";
-      const time = timeMatch
+      let time = timeMatch
         ? `${timeMatch[1].replace(".", ":")} - ${timeMatch[2].replace(".", ":")}`
         : "";
+      // No full range on this row — check for a half-open start ("09:00 -")
+      // whose end time wraps to the next physical row.
+      let openTime = false;
+      if (!timeMatch) {
+        const openMatch = line.match(TIME_OPEN_RE);
+        if (openMatch) {
+          time = `${openMatch[1].replace(".", ":")} -`;
+          openTime = true;
+        }
+      }
 
       const typeMatch = line.match(HEARING_TYPE_RE);
       const type = typeMatch ? normalizeType(typeMatch[1]) : "Förhandling";
@@ -275,6 +308,7 @@ export const formatPositional: ParserStrategy = {
       rawSakenAcc.push(rawSaken);
       expectsContinuation.push(hasOpenContinuation(rawSaken));
       lacksRightAnchor.push(!room && !location);
+      needsEndTime.push(openTime);
     }
 
     return hearings;

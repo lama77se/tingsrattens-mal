@@ -38,6 +38,7 @@ const COURT_MAP = {
   skaraborgs: { name: "Skaraborgs tingsrätt", format: "tabular" },
   boras: { name: "Borås tingsrätt", format: "standard" },
   eksjo: { name: "Eksjö tingsrätt", format: "tabular" },
+  eskilstuna: { name: "Eskilstuna tingsrätt", format: "positional" },
   helsingborgs: { name: "Helsingborgs tingsrätt", format: "standard" },
   halsinglands: { name: "Hälsinglands tingsrätt", format: "standard" },
   halmstads: { name: "Halmstads tingsrätt", format: "positional" },
