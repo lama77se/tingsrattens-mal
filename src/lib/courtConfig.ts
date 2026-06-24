@@ -20,12 +20,15 @@ export interface CourtConfig {
   note?: string;
   /** If set, scrape this HTML page to discover the PDF URL instead of using `buildUrl`. */
   listingUrl?: string;
-  /** Pick the target PDF from a scraped listing. Return null if no match. */
+  /**
+   * Pick the target PDF(s) from a scraped listing. Return a single URL, an
+   * array of URLs (all fetched and merged), or null/[] if nothing matched.
+   */
   pickFromListing?: (
     pdfs: ScrapedPdfLink[],
     week: number,
     year: number
-  ) => string | null;
+  ) => string | string[] | null;
 }
 
 const BASE = "https://www.domstol.se/globalassets/filer/domstol";
@@ -170,14 +173,14 @@ export const COURTS: CourtConfig[] = [
     // scrape the listing page and match by week number.
     listingUrl:
       "https://www.domstol.se/halsinglands-tingsratt/om-tingsratten/aktuellt/planerade-forhandlingar/",
-    pickFromListing: (pdfs, week) => {
-      const match = pdfs.find((p) => {
-        const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
-        const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
-        return weekInText || weekInHref;
-      });
-      return match?.href ?? null;
-    },
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+          const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
+          return weekInText || weekInHref;
+        })
+        .map((p) => p.href),
     buildUrl: () => [],
   },
   {
@@ -268,18 +271,18 @@ export const COURTS: CourtConfig[] = [
     // files and ranges.
     listingUrl:
       "https://www.domstol.se/linkopings-tingsratt/om-tingsratten/aktuellt/forhandlingar/",
-    pickFromListing: (pdfs, week) => {
-      const match = pdfs.find((p) => {
-        const m =
-          /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
-          /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
-        if (!m) return false;
-        const lo = Number(m[1]);
-        const hi = m[2] ? Number(m[2]) : lo;
-        return week >= lo && week <= hi;
-      });
-      return match?.href ?? null;
-    },
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
     buildUrl: () => [],
   },
   {
@@ -405,14 +408,14 @@ export const COURTS: CourtConfig[] = [
     // scrape the listing page and match by week number rather than guess.
     listingUrl:
       "https://www.domstol.se/sodertalje-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs, week) => {
-      const match = pdfs.find((p) => {
-        const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
-        const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
-        return weekInText || weekInHref;
-      });
-      return match?.href ?? null;
-    },
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+          const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
+          return weekInText || weekInHref;
+        })
+        .map((p) => p.href),
     buildUrl: () => [],
   },
   {
@@ -468,18 +471,18 @@ export const COURTS: CourtConfig[] = [
     // week against both single-week files and ranges.
     listingUrl:
       "https://www.domstol.se/vanersborgs-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs, week) => {
-      const match = pdfs.find((p) => {
-        const m =
-          /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
-          /\bv\.?\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
-        if (!m) return false;
-        const lo = Number(m[1]);
-        const hi = m[2] ? Number(m[2]) : lo;
-        return week >= lo && week <= hi;
-      });
-      return match?.href ?? null;
-    },
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bv\.?\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
     buildUrl: () => [],
   },
   {
@@ -519,14 +522,14 @@ export const COURTS: CourtConfig[] = [
     // so we scrape the listing page and match by week number.
     listingUrl:
       "https://www.domstol.se/angermanlands-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs, week) => {
-      const match = pdfs.find((p) => {
-        const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
-        const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
-        return weekInText || weekInHref;
-      });
-      return match?.href ?? null;
-    },
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+          const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
+          return weekInText || weekInHref;
+        })
+        .map((p) => p.href),
     buildUrl: () => [],
   },
   {
