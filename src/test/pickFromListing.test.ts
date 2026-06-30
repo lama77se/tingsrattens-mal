@@ -73,6 +73,41 @@ describe("pickFromListing — week-matched courts", () => {
     expect(pick("eskilstuna_tingsratt", pdfs, 27)).toEqual([]);
   });
 
+  it("Blekinge matches the requested week despite the 'veckka' typo", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/blekinge_tingsratt/block/veckans-forhandlingar-2026";
+    const pdfs = [
+      link(`${base}/veckans-forhandlingar-vecka-25.pdf`, "Vecka 25"),
+      link(`${base}/veckans-forhandlingar-veckka-26.pdf`, "Vecka 26"),
+    ];
+    expect(pick("blekinge_tingsratt", pdfs, 25)).toEqual([
+      `${base}/veckans-forhandlingar-vecka-25.pdf`,
+    ]);
+    expect(pick("blekinge_tingsratt", pdfs, 26)).toEqual([
+      `${base}/veckans-forhandlingar-veckka-26.pdf`,
+    ]);
+    expect(pick("blekinge_tingsratt", pdfs, 24)).toEqual([]);
+  });
+
+  it("Skaraborg matches a bundled multi-week range", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/skaraborgs_tingsratt/veckans-forhandlingar";
+    const pdfs = [link(`${base}/vecka-26-28.pdf`, "Vecka 26-28")];
+    for (const w of [26, 27, 28]) {
+      expect(pick("skaraborgs_tingsratt", pdfs, w)).toEqual([`${base}/vecka-26-28.pdf`]);
+    }
+    expect(pick("skaraborgs_tingsratt", pdfs, 25)).toEqual([]);
+    expect(pick("skaraborgs_tingsratt", pdfs, 29)).toEqual([]);
+  });
+
+  it("Skaraborg matches a single-week file", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/skaraborgs_tingsratt/veckans-forhandlingar";
+    const pdfs = [link(`${base}/vecka-30.pdf`, "Vecka 30")];
+    expect(pick("skaraborgs_tingsratt", pdfs, 30)).toEqual([`${base}/vecka-30.pdf`]);
+    expect(pick("skaraborgs_tingsratt", pdfs, 31)).toEqual([]);
+  });
+
   it("Södertälje matches by week number despite typo'd dates", () => {
     const base =
       "https://www.domstol.se/globalassets/filer/domstol/sodertalje_tingsratt";
