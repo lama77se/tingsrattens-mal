@@ -71,8 +71,20 @@ export const COURTS: CourtConfig[] = [
     id: "blekinge_tingsratt",
     name: "Blekinge tingsrätt",
     formatFamily: "standard",
-    buildUrl: (week, year) =>
-      `${BASE}/blekinge_tingsratt/block/veckans-forhandlingar-${year}/veckans-forhandlingar-vecka-${week}.pdf`,
+    // Filenames are inconsistent — most weeks use "vecka", but some PDFs are
+    // published with the typo "veckka" (double k) — so we scrape the listing
+    // page and match by week number rather than guessing the spelling.
+    listingUrl:
+      "https://www.domstol.se/blekinge-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const weekInHref = new RegExp(`veckka?-0*${week}(?![\\d])`, "i").test(p.href);
+          const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+          return weekInHref || weekInText;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "solna_tingsratt",
@@ -104,11 +116,24 @@ export const COURTS: CourtConfig[] = [
     id: "skaraborgs_tingsratt",
     name: "Skaraborgs tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week) => [
-      `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week}.pdf`,
-      `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week}-${week + 1}.pdf`,
-      `${BASE}/skaraborgs_tingsratt/veckans-forhandlingar/vecka-${week - 1}-${week}.pdf`,
-    ],
+    // Skaraborg publishes a single PDF covering an arbitrary week range
+    // (e.g. vecka-26-28.pdf), so scrape the listing page and match the
+    // requested week against single weeks and ranges.
+    listingUrl:
+      "https://www.domstol.se/skaraborgs-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /vecka-0*(\d+)(?:-0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "boras_tingsratt",
