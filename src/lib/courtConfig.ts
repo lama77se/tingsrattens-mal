@@ -428,8 +428,24 @@ export const COURTS: CourtConfig[] = [
     id: "uddevalla_tingsratt",
     name: "Uddevalla tingsrätt",
     formatFamily: "positional",
-    buildUrl: (week) =>
-      `${BASE}/uddevalla_tingsratt/veckans-mal/veckans-mal-v.${week}.pdf`,
+    // Uddevalla publishes a single PDF covering an arbitrary week range
+    // (e.g. veckans-mal-v26-34.pdf), so scrape the listing page and match
+    // the requested week against single weeks and ranges.
+    listingUrl:
+      "https://www.domstol.se/uddevalla-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /-v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "sodertorns_tingsratt",

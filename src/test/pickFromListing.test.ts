@@ -108,6 +108,17 @@ describe("pickFromListing — week-matched courts", () => {
     expect(pick("skaraborgs_tingsratt", pdfs, 31)).toEqual([]);
   });
 
+  it("Uddevalla matches a wide bundled range from its -v filename", () => {
+    const href =
+      "https://www.domstol.se/globalassets/filer/domstol/uddevalla_tingsratt/veckans-mal/veckans-mal-v26-34.pdf";
+    const pdfs = [link(href, "Veckans mål v26-34")];
+    for (const w of [26, 30, 34]) {
+      expect(pick("uddevalla_tingsratt", pdfs, w)).toEqual([href]);
+    }
+    expect(pick("uddevalla_tingsratt", pdfs, 25)).toEqual([]);
+    expect(pick("uddevalla_tingsratt", pdfs, 35)).toEqual([]);
+  });
+
   it("Södertälje matches by week number despite typo'd dates", () => {
     const base =
       "https://www.domstol.se/globalassets/filer/domstol/sodertalje_tingsratt";
