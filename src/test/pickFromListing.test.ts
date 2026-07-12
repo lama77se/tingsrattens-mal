@@ -108,6 +108,26 @@ describe("pickFromListing — week-matched courts", () => {
     expect(pick("skaraborgs_tingsratt", pdfs, 31)).toEqual([]);
   });
 
+  it("Attunda matches by week despite irregular dashes and date digits", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/attunda_tingsratt/veckans-forhandlingar";
+    const pdfs = [
+      link(`${base}/webb-forhandlingar-v.29-2026-07-13---17.pdf`, "Vecka 29"),
+      link(`${base}/webb-forhandlingar-v.28-2026-07-06---10.pdf`, "Vecka 28"),
+      link(`${base}/webb-forhandlingar-v.27-2026-06-29--30----07-02.pdf`, "Vecka 27"),
+    ];
+    expect(pick("attunda_tingsratt", pdfs, 29)).toEqual([
+      `${base}/webb-forhandlingar-v.29-2026-07-13---17.pdf`,
+    ]);
+    expect(pick("attunda_tingsratt", pdfs, 27)).toEqual([
+      `${base}/webb-forhandlingar-v.27-2026-06-29--30----07-02.pdf`,
+    ]);
+    // Date digits (13, 17, 2026, 06, 07) must not be read as week numbers.
+    expect(pick("attunda_tingsratt", pdfs, 13)).toEqual([]);
+    expect(pick("attunda_tingsratt", pdfs, 17)).toEqual([]);
+    expect(pick("attunda_tingsratt", pdfs, 26)).toEqual([]);
+  });
+
   it("Uddevalla matches a wide bundled range from its -v filename", () => {
     const href =
       "https://www.domstol.se/globalassets/filer/domstol/uddevalla_tingsratt/veckans-mal/veckans-mal-v26-34.pdf";
