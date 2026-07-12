@@ -51,21 +51,21 @@ export const COURTS: CourtConfig[] = [
     id: "attunda_tingsratt",
     name: "Attunda tingsrätt",
     formatFamily: "standard",
-    buildUrl: (week, year) => {
-      const monday = getISOWeekMonday(week, year);
-      const friday = addDays(monday, 4);
-      const thursday = addDays(monday, 3);
-      const monStr = format(monday, "yyyy-MM-dd");
-      const base = `${BASE}/attunda_tingsratt/veckans-forhandlingar/webb-forhandlingar-v.${week}-${monStr}`;
-      const candidates: string[] = [];
-      // Generate URL variants for both Friday and Thursday (holidays shorten the week)
-      for (const endDay of [friday, thursday]) {
-        const crossMonth = monday.getMonth() !== endDay.getMonth();
-        const endStr = crossMonth ? format(endDay, "MM-dd") : format(endDay, "dd");
-        candidates.push(`${base}--${endStr}.pdf`);
-      }
-      return candidates;
-    },
+    // Filenames embed an unpredictable date range with irregular dashes
+    // (webb-forhandlingar-v.29-2026-07-13---17.pdf, and even messier for
+    // cross-month weeks), so we scrape the listing page and match by week
+    // number rather than reconstructing the filename.
+    listingUrl:
+      "https://www.domstol.se/attunda-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar2/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const weekInHref = new RegExp(`v\\.?-?0*${week}(?![\\d])`, "i").test(p.href);
+          const weekInText = new RegExp(`\\bvecka\\s*0*${week}\\b`, "i").test(p.text);
+          return weekInHref || weekInText;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "blekinge_tingsratt",
