@@ -980,6 +980,70 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Terroristbrott",
     primart_lagrum: ["Terroristbrottslagen (2022:666) 4 a §"],
   },
+
+  // --- Batch (2026-07): additional court saken ---
+  // Olovlig energiavledning — BrB 8 kap. 10 § (olovlig avledning av elektrisk
+  // kraft/värme/kyla; el- och värmeavledning slogs ihop till ett brott genom
+  // SFS 2017:442). Generatorn har bara den långa compound-nyckeln
+  // "...självtäkt, olovlig energiavledning" som aldrig substring-matchar bara
+  // formen.
+  "olovlig energiavledning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 10 §"],
+  },
+  "grov olovlig energiavledning": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 8 kap. 10 §"],
+  },
+  // Försök till spioneri — spioneri BrB 19 kap. 5 §, försök enligt 19 kap. 14 §.
+  "försök till spioneri": {
+    sakomrade: "Brott mot Sveriges säkerhet",
+    primart_lagrum: ["BrB 19 kap. 5 §"],
+  },
+  // Falsk angivelse — BrB 15 kap. 6 § (sanningslöst tillvita annan brott).
+  "falsk angivelse": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 6 §"],
+  },
+  // Olovlig identitetsanvändning — BrB 4 kap. 6 b § (infört 2016). Generatorn
+  // har bara compound "hemfridsbrott, olovlig identitetsanvändning m. m.".
+  "olovlig identitetsanvändning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 6 b §"],
+  },
+  // Brott mot vilotidsförordningen — Förordning (1994:1297) om vilotider vid
+  // vissa vägtransporter inom landet.
+  "brott mot förordningen om vilotider vid vissa vägtransporter": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: [
+      "Förordning (1994:1297) om vilotider vid vissa vägtransporter inom landet",
+    ],
+  },
+  // Brott mot lagen om transport av farligt gods — Lag (2006:263); straff-
+  // bestämmelser för uppsåtligt/oaktsamt åsidosättande av 2 §.
+  "brott mot lagen om transport av farligt gods": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Lag (2006:263) om transport av farligt gods"],
+  },
+  // Parser-artefakt: dubblerat "för" i "olaga förföljelse" (BrB 4 kap. 4 b §),
+  // jfr "våld mot mot tjänsteman"-dubbleringen.
+  "olaga förförföljelse": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 4 b §"],
+  },
+  // Undanröjande av ungdomsövervakning — BrB 32 kap. 4 § (rätten undanröjer
+  // påföljden vid misskötsel och bestämmer ny påföljd), jfr undanröjande av
+  // ungdomstjänst/ungdomsvård.
+  "undanröjande av ungdomsövervakning": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 32 kap. 4 §"],
+  },
+  // Trunkerad variant av "näringspenningtvättsbrott" (Lagen (2014:307) 7 §),
+  // jfr typo-varianten "näringspenningsbrott".
+  "närpenningtvättsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 7 §"],
+  },
 };
 
 /**

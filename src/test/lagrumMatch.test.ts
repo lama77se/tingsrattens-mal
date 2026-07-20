@@ -256,4 +256,43 @@ describe("matchLagrum", () => {
       expect(sakomraden).toContain("Vapenbrott");
     });
   });
+
+  // ─── Batch (2026-07): additional court saken ─────────────────────────────
+  describe("2026-07 saken batch", () => {
+    const cases: [string, string, RegExp][] = [
+      ["olovlig energiavledning", "Förmögenhetsbrott", /BrB 8 kap\. 10 §/],
+      ["grov olovlig energiavledning", "Förmögenhetsbrott", /BrB 8 kap\. 10 §/],
+      ["försök till spioneri", "Brott mot Sveriges säkerhet", /BrB 19 kap\. 5 §/],
+      ["falsk angivelse", "Brott mot rättskipningen", /BrB 15 kap\. 6 §/],
+      ["olovlig identitetsanvändning", "Brott mot frihet och frid", /BrB 4 kap\. 6 b §/],
+      [
+        "brott mot förordningen om vilotider vid vissa vägtransporter",
+        "Trafikbrott",
+        /1994:1297/,
+      ],
+      [
+        "brott mot lagen om transport av farligt gods",
+        "Övrig speciallagstiftning",
+        /2006:263/,
+      ],
+      ["olaga förförföljelse", "Brott mot frihet och frid", /BrB 4 kap\. 4 b §/],
+      ["undanröjande av ungdomsövervakning", "Brott mot rättskipningen", /BrB 32 kap\. 4 §/],
+      ["närpenningtvättsbrott", "Ekonomisk brottslighet", /2014:307/],
+    ];
+
+    for (const [saken, sakomrade, lagrumRe] of cases) {
+      it(`maps "${saken}"`, () => {
+        const r = matchLagrum(saken, "B 1234-26");
+        expect(r.sakomrade).toBe(sakomrade);
+        expect(r.lagrum).toMatch(lagrumRe);
+      });
+    }
+
+    it("does not classify these as T (civil) cases", () => {
+      expect(matchLagrum("falsk angivelse", "T 10-26")).toEqual({
+        lagrum: "",
+        sakomrade: "",
+      });
+    });
+  });
 });
