@@ -1,4 +1,3 @@
-import { startOfISOWeek, addDays, format } from "date-fns";
 import type { FormatFamily } from "./parsers/types";
 import type { ScrapedPdfLink } from "./scrapePdfLinks";
 
@@ -32,12 +31,6 @@ export interface CourtConfig {
 }
 
 const BASE = "https://www.domstol.se/globalassets/filer/domstol";
-
-function getISOWeekMonday(week: number, year: number): Date {
-  const jan4 = new Date(year, 0, 4);
-  const startOfWeek1 = startOfISOWeek(jan4);
-  return addDays(startOfWeek1, (week - 1) * 7);
-}
 
 export const COURTS: CourtConfig[] = [
   {
@@ -97,20 +90,30 @@ export const COURTS: CourtConfig[] = [
     id: "stockholms_tingsratt",
     name: "Stockholms tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week, year) => {
-      const monday = getISOWeekMonday(week, year);
-      const friday = addDays(monday, 4);
-      const thursday = addDays(monday, 3);
-      const monStr = format(monday, "yyyy-MM-dd");
-      const friStr = format(friday, "yyyy-MM-dd");
-      const thuStr = format(thursday, "yyyy-MM-dd");
-      const base = `${BASE}/stockholms_tingsratt/forhandlingar-${year}/forhandlingar-i-stockholms-tingsratt-vecka-${week}-${monStr}-till-och-med-`;
-      // Try Friday first, then Thursday (holidays like Långfredagen shorten the week)
-      return [
-        `${base}${friStr}.pdf`,
-        `${base}${thuStr}.pdf`,
-      ];
-    },
+    // Filenames embed the week (or a week range) plus a date range, e.g.
+    //   ...vecka-27-2026-06-29-till-och-med-2026-07-03.pdf    (single week)
+    //   ...vecka-28-34-2026-07-03-till-och-med-2026-08-21.pdf (weeks 28-34)
+    // and the court switches to a multi-week bundle over the summer, so
+    // reconstructing a single-week date-based filename 404s. Scrape the listing
+    // and match the requested week against single weeks and ranges. The href
+    // regex requires a 4-digit year immediately after the week/range token so
+    // the year is never read as the range's high end (vecka-27-2026 -> week 27,
+    // not weeks 27-2026).
+    listingUrl:
+      "https://www.domstol.se/stockholms-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /vecka-0*(\d{1,2})(?:-0*(\d{1,2}))?-\d{4}-/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "skaraborgs_tingsratt",
@@ -545,8 +548,25 @@ export const COURTS: CourtConfig[] = [
     id: "varmlands_tingsratt",
     name: "Värmlands tingsrätt",
     formatFamily: "positional",
-    buildUrl: (week) =>
-      `${BASE}/varmlands_tingsratt/veckans-forhandlingar/vecka-${week}.pdf`,
+    // The court now publishes a single PDF covering an arbitrary week range
+    // (e.g. vecka-29-34.pdf) instead of one file per week, so the fixed
+    // vecka-<week>.pdf 404s. Scrape the listing and match the requested week
+    // against single weeks and ranges, like Skaraborg.
+    listingUrl:
+      "https://www.domstol.se/varmlands-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /vecka-0*(\d+)(?:-0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "vastmanlands_tingsratt",

@@ -139,6 +139,45 @@ describe("pickFromListing — week-matched courts", () => {
     expect(pick("uddevalla_tingsratt", pdfs, 35)).toEqual([]);
   });
 
+  it("Värmland matches a bundled multi-week range", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/varmlands_tingsratt/veckans-forhandlingar";
+    const pdfs = [link(`${base}/vecka-29-34.pdf`, "Veckans förhandlingar")];
+    for (const w of [29, 30, 34]) {
+      expect(pick("varmlands_tingsratt", pdfs, w)).toEqual([`${base}/vecka-29-34.pdf`]);
+    }
+    expect(pick("varmlands_tingsratt", pdfs, 28)).toEqual([]);
+    expect(pick("varmlands_tingsratt", pdfs, 35)).toEqual([]);
+  });
+
+  it("Värmland still matches a single-week file", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/varmlands_tingsratt/veckans-forhandlingar";
+    const pdfs = [link(`${base}/vecka-30.pdf`, "Veckans förhandlingar")];
+    expect(pick("varmlands_tingsratt", pdfs, 30)).toEqual([`${base}/vecka-30.pdf`]);
+    expect(pick("varmlands_tingsratt", pdfs, 31)).toEqual([]);
+  });
+
+  it("Stockholm matches single weeks and ranges without reading the year as a range end", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/stockholms_tingsratt/forhandlingar-2026";
+    const single = `${base}/forhandlingar-i-stockholms-tingsratt-vecka-27-2026-06-29-till-och-med-2026-07-03.pdf`;
+    const bundle = `${base}/forhandlingar-i-stockholms-tingsratt-vecka-28-34-2026-07-03-till-och-med-2026-08-21.pdf`;
+    const pdfs = [
+      link(single, "vecka 27, 2026-06-29 till och med 2026-07-03"),
+      link(bundle, "vecka 28 - 34, 2026-07-06 till och med 2026-08-21"),
+    ];
+    // The single-week file must cover only week 27 — the trailing 2026 is a
+    // year, not a range end, so it must not swallow weeks 28-2026.
+    expect(pick("stockholms_tingsratt", pdfs, 27)).toEqual([single]);
+    expect(pick("stockholms_tingsratt", pdfs, 26)).toEqual([]);
+    // The bundle covers weeks 28-34.
+    for (const w of [28, 30, 34]) {
+      expect(pick("stockholms_tingsratt", pdfs, w)).toEqual([bundle]);
+    }
+    expect(pick("stockholms_tingsratt", pdfs, 35)).toEqual([]);
+  });
+
   it("Södertälje matches by week number despite typo'd dates", () => {
     const base =
       "https://www.domstol.se/globalassets/filer/domstol/sodertalje_tingsratt";
