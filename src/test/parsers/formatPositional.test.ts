@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatPositional } from "../../lib/parsers/formatPositional";
+import { enrichHearing } from "../../lib/parsers/enrichment";
 
 const TAB = "\t";
 
@@ -145,6 +146,38 @@ describe("formatPositional", () => {
       caseNumber: "B 1955-26",
       saken: "brott mot lagen om förbud beträffande knivar och andra farliga föremål",
     });
+  });
+
+  it("Ångermanland: splits room + ort, and de-glues a welded Sal column", () => {
+    // Ångermanland sits in both Härnösand and Örnsköldsvik and names the ort
+    // after the room ("Sal 3, Härnösand"). The ort must land in `location`
+    // (room stays "Sal 3") so enrichment renders "(plats: Härnösand)".
+    // B 1884-26 is a real row where pdf-parse dropped the separator between
+    // the saken and Sal cells, welding "...farliga föremålSal 3, Härnösand" —
+    // SAL_RE's \b can't fire between the lowercase "l" and "Sal", so without
+    // the glued fallback the whole string lands in saken.
+    const text = build([
+      `to${TAB}30-jul${TAB}09:00 - 09:30${TAB}Huvudförhandling${TAB}B 1819-26${TAB}grov olovlig körning${TAB}Sal 3, Härnösand`,
+      `to${TAB}30-jul${TAB}09:30 - 10:15${TAB}Huvudförhandling${TAB}B 1884-26${TAB}brott mot lagen om förbud beträffande knivar och andra farliga föremålSal 3, Härnösand`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Ångermanlands tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "B 1819-26",
+      saken: "grov olovlig körning",
+      room: "Sal 3",
+      location: "Härnösand",
+    });
+    expect(hearings[1]).toMatchObject({
+      caseNumber: "B 1884-26",
+      saken: "brott mot lagen om förbud beträffande knivar och andra farliga föremål",
+      room: "Sal 3",
+      location: "Härnösand",
+    });
+    // Enrichment surfaces the ort as "(plats: …)" like other multi-site courts.
+    const enriched = enrichHearing(hearings[1], "Ångermanlands tingsrätt", 0);
+    expect(enriched.court).toBe("Ångermanlands tingsrätt (plats: Härnösand)");
+    expect(enriched.room).toBe("Sal 3");
   });
 
   it("Värmland: skips (dag X/Y) annotations and type-column wraps", () => {
