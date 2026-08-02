@@ -350,17 +350,27 @@ export const COURTS: CourtConfig[] = [
     id: "mora_tingsratt",
     name: "Mora tingsrätt",
     formatFamily: "positional",
-    // Mora bundles two-week blocks; the same week appears in either the
-    // {week}-{week+1} block or the {week-1}-{week} block. The PDF path
-    // dropped the "vecka-" prefix at some point (old form 404s now). The
-    // court sometimes republishes a block with a "-ny" suffix
-    // (e.g. block/26-27-ny.pdf), so try those variants too.
-    buildUrl: (week) => [
-      `${BASE}/mora_tingsratt/block/${week}-${week + 1}.pdf`,
-      `${BASE}/mora_tingsratt/block/${week}-${week + 1}-ny.pdf`,
-      `${BASE}/mora_tingsratt/block/${week - 1}-${week}.pdf`,
-      `${BASE}/mora_tingsratt/block/${week - 1}-${week}-ny.pdf`,
-    ],
+    // Mora bundles two-week blocks under /block/, but the filename is
+    // inconsistent: sometimes bare (block/34-35.pdf), sometimes with a
+    // "vecka-" prefix (block/vecka-32-33.pdf), and occasionally with a "-ny"
+    // suffix for republished blocks (block/26-27-ny.pdf). Rather than guess
+    // the spelling, scrape the listing page and match the requested week
+    // against the block range in each filename.
+    listingUrl:
+      "https://www.domstol.se/mora-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /block\/(?:vecka-)?0*(\d+)(?:-0*(\d+))?(?:-ny)?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "norrkopings_tingsratt",
