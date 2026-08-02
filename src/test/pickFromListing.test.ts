@@ -190,6 +190,32 @@ describe("pickFromListing — week-matched courts", () => {
     ]);
     expect(pick("sodertalje_tingsratt", pdfs, 24)).toEqual([]);
   });
+
+  it("Mora matches two-week blocks with or without the 'vecka-' prefix", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/mora_tingsratt/block";
+    const bare = `${base}/34-35.pdf`;
+    const prefixed = `${base}/vecka-32-33.pdf`;
+    const pdfs = [link(prefixed, "Vecka 32-33"), link(bare, "Vecka 34-35")];
+    for (const w of [32, 33]) {
+      expect(pick("mora_tingsratt", pdfs, w)).toEqual([prefixed]);
+    }
+    for (const w of [34, 35]) {
+      expect(pick("mora_tingsratt", pdfs, w)).toEqual([bare]);
+    }
+    // No block covers week 31 (blocks start on even weeks).
+    expect(pick("mora_tingsratt", pdfs, 31)).toEqual([]);
+    expect(pick("mora_tingsratt", pdfs, 36)).toEqual([]);
+  });
+
+  it("Mora matches a republished block with the '-ny' suffix", () => {
+    const href =
+      "https://www.domstol.se/globalassets/filer/domstol/mora_tingsratt/block/26-27-ny.pdf";
+    const pdfs = [link(href, "Vecka 26-27")];
+    expect(pick("mora_tingsratt", pdfs, 26)).toEqual([href]);
+    expect(pick("mora_tingsratt", pdfs, 27)).toEqual([href]);
+    expect(pick("mora_tingsratt", pdfs, 28)).toEqual([]);
+  });
 });
 
 describe("pickFromListing — pick-first courts", () => {
