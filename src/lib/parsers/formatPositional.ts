@@ -30,17 +30,20 @@ const BARE_TIME_RE = /^\d{1,2}[:.]\d{2}$/;
 // Sal pattern — accepts an optional "Tingsrättens" / "Tingsrätt" / "Sessions"
 // / "Tings" / "Högsäkerhets" prefix and an optional ", City" suffix
 // (Ångermanlands writes "Tingsrättens sal 1, Örnsköldsvik" in the Sal column).
-// The room token is matched with [^\s,]+ (not \S+) so a trailing ", City"
-// suffix survives: for "Sal 3, Härnösand" a greedy \S+ would swallow the comma
-// ("3,") and the ", City" branch would never fire, dropping the ort.
-const SAL_RE = /\b(?:Tingsrättens\s+|Tingsrätt\s+)?(?:Sessions|Tings|Högsäkerhets)?Sal\s+[^\s,]+(?:,\s*[A-ZÅÄÖ][a-zåäö]+)?/i;
+// Group 1 = the room itself ("Sal 3"), group 2 = an optional trailing ", City"
+// (a tingsställe/ort). Ångermanlands tingsrätt sits in both Härnösand and
+// Örnsköldsvik and names the ort after the room ("Sal 3, Härnösand"); it is
+// split out into `location` so enrichment renders "<court> (plats: <ort>)".
+// The room token is matched with [^\s,]+ (not \S+) so a greedy match can't
+// swallow the comma ("3,") and starve the ort group.
+const SAL_RE = /\b((?:Tingsrättens\s+|Tingsrätt\s+)?(?:Sessions|Tings|Högsäkerhets)?Sal\s+[^\s,]+)(?:,\s*([A-ZÅÄÖ][a-zåäö]+))?/i;
 // Fallback for when a long saken swallows the Sal column because pdf-parse
 // glued them with no separator ("...farliga föremålSal 3, Härnösand"). The
 // \b in SAL_RE can't fire between a lowercase letter and "Sal", so match a
 // capital-S "Sal" welded directly onto a preceding lowercase letter. Kept
 // case-sensitive on "Sal" so it won't fire on ordinary saken words that end
 // in "sal" (e.g. "kausal samband") — real room cells always capitalise "Sal".
-const SAL_GLUED_RE = /(?<=[a-zåäöé])Sal\s+[^\s,]+(?:,\s*[A-ZÅÄÖ][a-zåäö]+)?/;
+const SAL_GLUED_RE = /(?<=[a-zåäöé])(Sal\s+[^\s,]+)(?:,\s*([A-ZÅÄÖ][a-zåäö]+))?/;
 // Captures column-as-location values like "Attunda tingsrätt" or
 // "Stockholms tingsrätt" sitting in the Sal column when a court borrows
 // another court's facility (Södertälje uses Attunda's rooms for some cases).
@@ -276,7 +279,8 @@ export const formatPositional: ParserStrategy = {
       if (salMatch) {
         const salIdx = line.indexOf(salMatch[0], segmentStart);
         if (salIdx > segmentStart) {
-          room = salMatch[0].replace(/\s+/g, " ");
+          room = salMatch[1].replace(/\s+/g, " ").trim();
+          if (salMatch[2]) location = salMatch[2];
           segmentEnd = salIdx;
         }
       } else {
