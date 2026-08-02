@@ -147,6 +147,30 @@ describe("formatPositional", () => {
     });
   });
 
+  it("Ångermanland: splits room when a long saken is glued to the Sal column", () => {
+    // Real row from Ångermanland v.31/2026 (B 1884-26): pdf-parse dropped the
+    // separator between the saken and Sal cells, welding them into
+    // "...farliga föremålSal 3, Härnösand". SAL_RE's \b can't fire between the
+    // lowercase "l" and "Sal", so without the glued fallback the whole string
+    // lands in saken. A normal (separated) sibling row must stay unaffected.
+    const text = build([
+      `to${TAB}30-jul${TAB}09:00 - 09:30${TAB}Huvudförhandling${TAB}B 1819-26${TAB}grov olovlig körning${TAB}Sal 3, Härnösand`,
+      `to${TAB}30-jul${TAB}09:30 - 10:15${TAB}Huvudförhandling${TAB}B 1884-26${TAB}brott mot lagen om förbud beträffande knivar och andra farliga föremålSal 3, Härnösand`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Ångermanlands tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "B 1819-26",
+      saken: "grov olovlig körning",
+      room: "Sal 3, Härnösand",
+    });
+    expect(hearings[1]).toMatchObject({
+      caseNumber: "B 1884-26",
+      saken: "brott mot lagen om förbud beträffande knivar och andra farliga föremål",
+      room: "Sal 3, Härnösand",
+    });
+  });
+
   it("Värmland: skips (dag X/Y) annotations and type-column wraps", () => {
     // "(dag 1/2)" is a multi-day annotation that must not be appended to
     // saken. "förberedelse" / "g" alone are type-column wraps from
