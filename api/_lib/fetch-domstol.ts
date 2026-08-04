@@ -104,7 +104,12 @@ export async function fetchDomstol(
       errors: ["invalid: URL must be https://www.domstol.se/"],
     };
   }
-  const safeUrl = target.href;
+  // Rebuild with a HARD-CODED origin so the fetched host is a string literal,
+  // not a value derived from user input — only the (already validated) path and
+  // query come from the request. This is the documented remediation for
+  // CodeQL js/request-forgery: the request authority is provably not attacker
+  // controlled, so it can't be pointed at an internal host.
+  const safeUrl = `https://www.domstol.se${target.pathname}${target.search}`;
 
   // 1) Try direct fetch first. The fetch is inlined here (rather than via the
   // shared fetchWithTimeout) so the hostname barrier above dominates the sink
@@ -116,7 +121,7 @@ export async function fetchDomstol(
     const timer = setTimeout(() => controller.abort(), DIRECT_TIMEOUT_MS);
     let resp: Response;
     try {
-      resp = await fetch(target.href, { signal: controller.signal });
+      resp = await fetch(safeUrl, { signal: controller.signal });
     } finally {
       clearTimeout(timer);
     }
