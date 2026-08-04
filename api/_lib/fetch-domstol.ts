@@ -87,20 +87,29 @@ export async function fetchDomstol(
 ): Promise<FetchResult> {
   const errors: string[] = [];
 
-  // Barrier for the fetch sinks below — never issue a request to a
-  // non-domstol.se URL even if an upstream validation is bypassed.
-  if (!isDomstolUrl(url)) {
+  // Barrier for the request-forgery sinks below (CodeQL js/request-forgery):
+  // parse the input and only ever fetch a URL DERIVED from a validated
+  // www.domstol.se origin. Passing `target.href` (not the raw input) is what
+  // breaks the taint flow — the fetched value provably comes from a checked URL.
+  let target: URL;
+  try {
+    target = new URL(url);
+  } catch {
+    return { ok: false, notFound: false, errors: ["invalid: unparseable URL"] };
+  }
+  if (target.protocol !== "https:" || target.hostname !== "www.domstol.se") {
     return {
       ok: false,
       notFound: false,
       errors: ["invalid: URL must be https://www.domstol.se/"],
     };
   }
+  const safeUrl = target.href;
 
   // 1) Try direct fetch first
   try {
     console.log(`${logPrefix} Trying direct...`);
-    const resp = await fetchWithTimeout(url, DIRECT_TIMEOUT_MS);
+    const resp = await fetchWithTimeout(safeUrl, DIRECT_TIMEOUT_MS);
 
     if (resp.status === 404) {
       await resp.text();
@@ -136,11 +145,11 @@ export async function fetchDomstol(
   const proxies = [
     {
       name: "allorigins",
-      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(safeUrl)}`,
     },
     {
       name: "codetabs",
-      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(safeUrl)}`,
     },
   ];
 
