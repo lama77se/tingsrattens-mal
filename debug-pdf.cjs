@@ -307,11 +307,17 @@ async function main() {
     }
   `;
 
-  const tmpTs = path.join(__dirname, ".debug-pdf-runner.ts");
+  // Use a fixed literal filename in the command and let `cwd` locate it, so the
+  // shell command contains no environment-derived value (e.g. __dirname). This
+  // keeps CodeQL's js/shell-command-injection-from-environment quiet while still
+  // running through a shell (needed for `npx` on Windows). File I/O below uses
+  // the absolute path.
+  const tmpTsName = ".debug-pdf-runner.ts";
+  const tmpTs = path.join(__dirname, tmpTsName);
   fs.writeFileSync(tmpTs, tsCode);
 
   try {
-    const result = execSync(`npx tsx ${tmpTs}`, {
+    const result = execSync(`npx tsx ${tmpTsName}`, {
       cwd: __dirname,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "inherit"],
