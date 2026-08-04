@@ -45,7 +45,10 @@ const DAG_REGEX = /^\(dag\s+\d+\/\d+\)/i;
 /**
  * Regex matching page headers to skip.
  */
-const HEADER_REGEX = /^(uppropslista|datum\s+tid|förhandlingar\b|listan\s|dagdatum|dag\s+datum)/i;
+// "för?handlingar" tolerates a common extraction typo where the 'r' is dropped
+// ("Föhandlingar Västmanlands tingsrätt, listan skapade" — a page footer that
+// otherwise bleeds into the last hearing's saken).
+const HEADER_REGEX = /^(uppropslista|datum\s+tid|för?handlingar\b|listan\s|dagdatum|dag\s+datum)/i;
 
 /**
  * Day abbreviations (Swedish) — standalone lines to skip.

@@ -107,6 +107,23 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("misshandel");
   });
 
+  it("does not bleed the 'Föhandlingar … listan skapade' footer typo into saken", () => {
+    // Västmanland's page footer is extracted with a dropped 'r'
+    // ("Föhandlingar"), so the header/footer guard must tolerate the typo or it
+    // gets appended to the last hearing's saken.
+    const text = [
+      "2026-08-13 13:00 - 15:00 Muntlig förberedelse T 3086-26 Vårdnad m.m.",
+      "Föhandlingar Västmanlands tingsrätt, listan skapade",
+      "s 2026-07-31",
+      "Listan är preliminär. Förhandlingar kan ställas in",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Västmanlands tingsrätt", text });
+    expect(result).toHaveLength(1);
+    // Trailing "." is normalized away by the saken cleaner; the point is that
+    // the footer line is not appended.
+    expect(result[0].saken).toBe("Vårdnad m.m");
+  });
+
   it("Västmanland: re-joins wrapped sakens using the PDF's own space signal", () => {
     // Real v33/2026 rows. pdf-parse encodes where a wrap falls: a word-boundary
     // wrap parks the inter-word space at the END of line A ("Våld ") or the
