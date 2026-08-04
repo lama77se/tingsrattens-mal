@@ -1698,6 +1698,30 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Avtalsrätt",
     primart_lagrum: ["Aktiebolagslagen (2005:551) 8 kap. 14 §"],
   },
+  // Kontaktförbud som Ä-ärende (prövning av åklagarens beslut). B-kartan har
+  // samma nyckel men Ä-mål når inte den — därför även här.
+  "kontaktförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Kontaktförbudslagen (1988:688)"],
+  },
+  // Prövning av övervakningsnämnds beslut (skyddstillsyn/villkorlig frigivning)
+  // — verkställighetsärende, samma sakområde som övriga sådana (BrB 37 kap.).
+  "övervakningsnämnd": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 37 kap. 11 §"],
+  },
+  // Hinder mot verkställighet — typiskt hinder mot verkställighet av vårdnad/
+  // umgänge enligt FB 21 kap.
+  "hinder mot verkställighet": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 21 kap."],
+  },
+  // Erkännande och verkställighet av utländsk dom/beslut — internationell
+  // verkställighet (oftast civilrättsliga anspråk), Bryssel Ia-förordningen.
+  "verkställighet av utländska": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Bryssel Ia-förordningen (EU) nr 1215/2012"],
+  },
 };
 
 /**
@@ -1715,6 +1739,12 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
   "företagsrekonstruktion": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Lag (2022:964) om företagsrekonstruktion"],
+  },
+  // Edgångssammanträde i konkurs — gäldenären bekräftar bouppteckningen under
+  // ed. "Ansökan om edgång" filas som K. KonkL 6 kap.
+  "edgång": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
   },
 };
 
