@@ -6,7 +6,7 @@ import { RefreshCw, CheckCircle2, AlertCircle, Circle, FileText, Ban } from "luc
 import { getPreviousWeek, getCurrentWeek, getNextWeek } from "@/lib/weekUtils";
 import { COURTS, CourtConfig } from "@/lib/courtConfig";
 import { fetchCourtPdf, CourtPdfResult } from "@/lib/api/courtPdf";
-import { fetchCourtListing } from "@/lib/api/courtListing";
+import { fetchCourtListing, CourtListingResult } from "@/lib/api/courtListing";
 import { parseCourtPdf, Hearing } from "@/lib/parseCourtPdf";
 
 type StepStatus = "idle" | "active" | "done" | "error";
@@ -196,7 +196,11 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     court: CourtConfig,
     weekIndex: number,
     week: number,
-    year: number
+    year: number,
+    // Pre-scraped listing (scraped once per court, reused for every week) so
+    // parallel week fetches don't each re-scrape the same page. Null for
+    // buildUrl courts.
+    listing: CourtListingResult | null
   ): Promise<CourtPdfResult[]> => {
     // Step 0: Beräknar URL
     updateStep(court.id, weekIndex, 0, { status: "active" });
@@ -209,11 +213,10 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
         status: "active",
         detail: `Söker PDF-länk på\n${court.listingUrl}`,
       });
-      const listing = await fetchCourtListing(court.listingUrl);
-      if (!listing.success || !listing.pdfs) {
-        const reason = listing.notFound
+      if (!listing || !listing.success || !listing.pdfs) {
+        const reason = listing?.notFound
           ? "Listsida kunde inte hittas"
-          : listing.error || "Kunde inte hämta listsida";
+          : listing?.error || "Kunde inte hämta listsida";
         updateStep(court.id, weekIndex, 0, { status: "error", detail: reason });
         updateStep(court.id, weekIndex, 1, { status: "idle" });
         updateStep(court.id, weekIndex, 2, { status: "idle" });
@@ -245,7 +248,6 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     } else {
       const urlOrUrls = court.buildUrl(week, year);
       urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
-      await delay(300);
     }
     updateStep(court.id, weekIndex, 0, {
       status: "done",
@@ -313,7 +315,6 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
 
     // Step 2: Bearbetar
     updateStep(court.id, weekIndex, 2, { status: "active" });
-    await delay(200);
     updateStep(court.id, weekIndex, 2, {
       status: "done",
       detail: `${charsTotal} tecken extraherade${pdfLabel}`,
@@ -334,16 +335,25 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       ? [{ week: current.week, year: current.year, steps: createInitialSteps() }]
       : createWeeksForCourt();
     setCourtWeeks((prev) => ({ ...prev, [court.id]: weeks }));
-    await delay(50);
 
+    // Scrape the listing page once per court (not once per week) — the same page
+    // serves all weeks; pickFromListing then selects per week.
+    const listing: CourtListingResult | null =
+      court.listingUrl && court.pickFromListing
+        ? await fetchCourtListing(court.listingUrl)
+        : null;
+
+    // Fetch every week in parallel (each is an independent round-trip).
+    const perWeek = await Promise.all(
+      weeks.map((w, i) => fetchWeek(court, i, w.week, w.year, listing))
+    );
+
+    // Merge across weeks in order for deterministic ids, deduping hearings that
+    // overlap across weeks/PDFs.
     const hearings: Hearing[] = [];
     const seen = new Set<string>();
     let anySuccess = false;
-    for (let i = 0; i < weeks.length; i++) {
-      const w = weeks[i];
-      // A week may resolve to several PDFs (listing courts); parse each and
-      // merge, deduping hearings that overlap across PDFs.
-      const results = await fetchWeek(court, i, w.week, w.year);
+    perWeek.forEach((results, i) => {
       for (const result of results) {
         if (!result.success || !result.text) continue;
         anySuccess = true;
@@ -357,7 +367,7 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
           hearings.push(h);
         }
       }
-    }
+    });
     return { hearings, anySuccess };
   };
 
@@ -378,11 +388,13 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
   };
 
   const handleFetchAll = async () => {
-    const BATCH_SIZE = 5;
+    // 8 courts in flight at once; with weeks now fetched in parallel this is up
+    // to ~24 concurrent requests, which HTTP/2 multiplexes fine. Most are CDN
+    // hits after the first visitor within the cache TTL.
+    const BATCH_SIZE = 8;
     setIsFetchingAll(true);
     setCourtWeeks(initAllCourts());
     hearingsRef.current = {};
-    await delay(50);
 
     const fetchable = COURTS.filter((c) => !c.disabled);
     const progress: FetchAllProgress = { total: fetchable.length, success: 0, failed: 0, empty: 0, failedNames: [], emptyNames: [] };
@@ -562,8 +574,4 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
       })}
     </div>
   );
-}
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
