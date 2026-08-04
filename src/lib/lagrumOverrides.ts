@@ -185,6 +185,24 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["Rättegångsbalken 26 kap. 1 §"],
   },
+  // Beslag — tvångsmedel, RB 27 kap. 1 §. Mirrors the kvarstad precedent.
+  // NOTE: excluded from the fragment-matching loop in lagrumMatch.ts
+  // (FULL_MATCH_ONLY) so a trailing "…samt beslag" in a compound charge does
+  // not hijack the primary crime — it only classifies a standalone "beslag".
+  "beslag": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Rättegångsbalken 27 kap. 1 §"],
+  },
+  // Omvandling av böter (bötesförvandling) — Bötesverkställighetslagen 15 §
+  "omvandling av böter": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Bötesverkställighetslagen (1979:189) 15 §"],
+  },
+  // Fornminnesbrott — brott mot fornminnen, Kulturmiljölagen (1988:950) 2 kap.
+  "fornminnesbrott": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Kulturmiljölagen (1988:950) 2 kap."],
+  },
   // Varumärkesintrång (criminal) — Varumärkeslagen 8 kap. 1 §
   "varumärkesintrång": {
     sakomrade: "Immaterialrättsbrott",
