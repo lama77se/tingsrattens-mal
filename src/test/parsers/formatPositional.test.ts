@@ -116,6 +116,24 @@ describe("formatPositional", () => {
     expect(hearings[1].type).toBe("Edgångssammanträde");
   });
 
+  it("Linköping: merges a wrapped saken even when the row has a Sal column", () => {
+    // Real v31-33/2026 row (B 3508-26): the saken cell ends with a trailing
+    // space before the Sal tab and wraps "föremål" onto the next row. The Sal
+    // anchor makes lacksRightAnchor false, so the trailing-space wrap signal is
+    // what must trigger the merge.
+    const text = build([
+      `fr${TAB}2026-08-07${TAB}13:45 - 14:15${TAB}Huvudförhandling${TAB}B 3508-26${TAB}beträffande knivar och andra farliga ${TAB}Sal 7`,
+      "föremål",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "B 3508-26",
+      saken: "beträffande knivar och andra farliga föremål",
+      room: "Sal 7",
+    });
+  });
+
   it("Värmland: merges wrapped saken when there is no Sal column", () => {
     // Värmland's PDF lacks a Sal column entirely. Long sakens wrap to the next
     // physical row without any in-text signal (no trailing comma). The merge
