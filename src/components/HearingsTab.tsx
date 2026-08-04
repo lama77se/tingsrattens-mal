@@ -174,16 +174,28 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
   if (hearings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Info className="h-10 w-10 text-muted-foreground mb-4" />
-        <h2 className="font-semibold text-lg">Ingen data hämtad</h2>
-        <p className="text-sm text-muted-foreground mt-1 max-w-md">
-          Klicka på "Hämta alla" för att ladda förhandlingar från domstol.se, eller gå till fliken "Laddning av data" för att hämta enskilda tingsrätter.
-        </p>
-        {onFetchAll && (
-          <Button onClick={onFetchAll} disabled={isLoadingAll} className="mt-4">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAll ? "animate-spin" : ""}`} />
-            {isLoadingAll ? "Hämtar..." : "Hämta alla"}
-          </Button>
+        {isLoadingAll ? (
+          <>
+            <RefreshCw className="h-10 w-10 text-primary mb-4 animate-spin" />
+            <h2 className="font-semibold text-lg">Hämtar veckans förhandlingar…</h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Laddar från domstol.se — förhandlingarna dyker upp här allt eftersom.
+            </p>
+          </>
+        ) : (
+          <>
+            <Info className="h-10 w-10 text-muted-foreground mb-4" />
+            <h2 className="font-semibold text-lg">Ingen data hämtad</h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Inga förhandlingar kunde hämtas just nu. Försök igen, eller gå till fliken "Laddning av data" för att hämta enskilda tingsrätter.
+            </p>
+            {onFetchAll && (
+              <Button onClick={onFetchAll} className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Hämta alla
+              </Button>
+            )}
+          </>
         )}
         {fetchAllProgress && fetchAllProgress.total > 0 && (
           <div className="mt-4 w-full max-w-md space-y-1.5">
