@@ -22,6 +22,22 @@ export interface FetchResult {
   errors: string[];
 }
 
+/**
+ * Strict allowlist guard for the request-forgery sink below: the fetched URL
+ * must be an https://www.domstol.se/ address. Parsing with `new URL` and
+ * comparing the hostname is robust against prefix tricks
+ * ("https://www.domstol.se.evil.com/") that a string `startsWith` check misses.
+ */
+export function isDomstolUrl(raw: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    return false;
+  }
+  return u.protocol === "https:" && u.hostname === "www.domstol.se";
+}
+
 async function fetchWithTimeout(
   url: string,
   timeoutMs: number
@@ -70,6 +86,16 @@ export async function fetchDomstol(
   logPrefix: string
 ): Promise<FetchResult> {
   const errors: string[] = [];
+
+  // Barrier for the fetch sinks below — never issue a request to a
+  // non-domstol.se URL even if an upstream validation is bypassed.
+  if (!isDomstolUrl(url)) {
+    return {
+      ok: false,
+      notFound: false,
+      errors: ["invalid: URL must be https://www.domstol.se/"],
+    };
+  }
 
   // 1) Try direct fetch first
   try {

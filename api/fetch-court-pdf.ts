@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
-import { fetchDomstol, validatePdf } from "./_lib/fetch-domstol.js";
+import { fetchDomstol, validatePdf, isDomstolUrl } from "./_lib/fetch-domstol.js";
 
 // pdf-parse is CJS-only; its index.js has a test-mode check that
 // crashes in bundlers, so import the lib entry directly.
@@ -45,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ success: false, error: "Saknar pdfUrl" });
     }
 
-    if (!pdfUrl.startsWith("https://www.domstol.se/")) {
+    if (!isDomstolUrl(pdfUrl)) {
       return res
         .status(400)
         .json({
