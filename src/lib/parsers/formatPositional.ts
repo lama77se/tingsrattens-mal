@@ -130,6 +130,11 @@ export const formatPositional: ParserStrategy = {
     // Raw (uncleaned) saken accumulator — cleanSaken is applied once at the
     // end so continuation merges can use the pre-cleaned text.
     const rawSakenAcc: string[] = [];
+    // Per-hearing flag: true when the saken cell ended with whitespace right
+    // before the (Sal) column break — the cell wrapped and its tail is on the
+    // next physical row, even though this row HAS a right anchor (Linköping:
+    // "…farliga \tSal 7" + "föremål"). Lets that continuation merge.
+    const sakenWrapped: boolean[] = [];
     let currentDate = "";
 
     for (let i = 0; i < lines.length; i++) {
@@ -231,7 +236,7 @@ export const formatPositional: ParserStrategy = {
         const filteredLine = kept.join(" ");
         if (
           isContinuationCandidate(filteredLine) &&
-          (expectsContinuation[lastIdx] || lacksRightAnchor[lastIdx])
+          (expectsContinuation[lastIdx] || lacksRightAnchor[lastIdx] || sakenWrapped[lastIdx])
         ) {
           const merged = (rawSakenAcc[lastIdx] + " " + filteredLine).trim();
           rawSakenAcc[lastIdx] = merged;
@@ -241,6 +246,9 @@ export const formatPositional: ParserStrategy = {
           // "...tvist (återvinning av\ntredskodom i T 1234-25)" — the second
           // line closes the paren and matches as a continuation too).
           expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+          // The wrap tail has been consumed; don't keep merging further rows on
+          // the strength of the trailing-space signal alone.
+          sakenWrapped[lastIdx] = false;
         }
         continue;
       }
@@ -298,10 +306,11 @@ export const formatPositional: ParserStrategy = {
         }
       }
 
-      const rawSaken = line
-        .substring(segmentStart, segmentEnd)
-        .replace(/\t+/g, " ")
-        .trim();
+      const sakenCell = line.substring(segmentStart, segmentEnd);
+      // Did the cell end with whitespace before the column break (Sal)? That
+      // signals a wrapped cell whose tail is on the next physical row.
+      const cellWrapped = /\s$/.test(sakenCell.replace(/\t+$/, ""));
+      const rawSaken = sakenCell.replace(/\t+/g, " ").trim();
       const saken = cleanSaken(rawSaken);
 
       // Drop rows that yielded no meaningful content (e.g. stray time-only
@@ -322,6 +331,9 @@ export const formatPositional: ParserStrategy = {
       rawSakenAcc.push(rawSaken);
       expectsContinuation.push(hasOpenContinuation(rawSaken));
       lacksRightAnchor.push(!room && !location);
+      // Only meaningful when a right anchor WAS found (otherwise lacksRightAnchor
+      // already handles the merge); a trailing-space cell with a Sal means wrap.
+      sakenWrapped.push(cellWrapped && (!!room || !!location));
       needsEndTime.push(openTime);
     }
 
