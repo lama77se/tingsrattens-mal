@@ -1,12 +1,22 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createRequire } from "module";
-import { fetchDomstol, validatePdf } from "./_lib/fetch-domstol.js";
+import { fetchDomstol, validatePdf, isDomstolUrl } from "./_lib/fetch-domstol.js";
 
 // pdf-parse is CJS-only; its index.js has a test-mode check that
 // crashes in bundlers, so import the lib entry directly.
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 const { renderPositional } = require("./_lib/renderPositional.cjs");
+
+// CDN cache TTLs (GET only — POST responses are never cached by Vercel).
+// A parsed schedule is a pure function of (pdfUrl, mode), so it's safe to share
+// one CDN entry across all visitors instead of re-fetching domstol.se per user.
+// Court PDFs are "preliminära" (hearings can be added/cancelled), so freshness
+// is 1h; stale-while-revalidate serves instantly while refreshing in the
+// background. A "not published yet" result gets a short TTL so a newly
+// published schedule appears within minutes rather than being pinned for an hour.
+const CACHE_SUCCESS = "public, s-maxage=3600, stale-while-revalidate=86400";
+const CACHE_MISS = "public, s-maxage=300, stale-while-revalidate=600";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -17,12 +27,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const body = req.body;
-    const pdfUrl: string = body.pdfUrl;
-    const weekNumber: number | undefined = body.weekNumber;
-    const year: number | undefined = body.year;
+    // Accept params from the query string (GET — cacheable on Vercel's CDN) or
+    // the JSON body (POST — kept so debug-pdf --edge and other callers work).
+    // Only GET responses are eligible for CDN caching; POST is never cached.
+    const src: Record<string, unknown> =
+      req.method === "GET" ? (req.query ?? {}) : (req.body ?? {});
+    const pdfUrl = src.pdfUrl as string;
+    const weekNumber =
+      src.weekNumber != null ? Number(src.weekNumber) : undefined;
+    const year = src.year != null ? Number(src.year) : undefined;
     const mode: "default" | "positional" =
-      body.mode === "positional" ? "positional" : "default";
+      src.mode === "positional" ? "positional" : "default";
 
     if (!pdfUrl) {
       return res
@@ -30,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .json({ success: false, error: "Saknar pdfUrl" });
     }
 
-    if (!pdfUrl.startsWith("https://www.domstol.se/")) {
+    if (!isDomstolUrl(pdfUrl)) {
       return res
         .status(400)
         .json({
@@ -44,6 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!result.ok) {
       if (result.notFound && result.errors[0] === "direct: 404") {
+        res.setHeader("Cache-Control", CACHE_MISS);
         return res.status(200).json({
           success: false,
           error: "404 på källan",
@@ -58,6 +74,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           e.includes("HTML") || e.includes("non-PDF") || e.includes("404")
       );
       console.log(`[fetch-court-pdf] All methods failed: ${allErrors}`);
+      res.setHeader("Cache-Control", CACHE_MISS);
       return res.status(200).json({
         success: false,
         error: notFoundLikely
@@ -77,6 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const numPages: number = parsed.numpages || 0;
     const timePatterns = extractedText.match(/\d{2}[.:]\d{2}/g) || [];
 
+    res.setHeader("Cache-Control", CACHE_SUCCESS);
     return res.status(200).json({
       success: true,
       text: extractedText || "(Tom PDF)",

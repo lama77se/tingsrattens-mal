@@ -22,6 +22,22 @@ export interface FetchResult {
   errors: string[];
 }
 
+/**
+ * Strict allowlist guard for the request-forgery sink below: the fetched URL
+ * must be an https://www.domstol.se/ address. Parsing with `new URL` and
+ * comparing the hostname is robust against prefix tricks
+ * ("https://www.domstol.se.evil.com/") that a string `startsWith` check misses.
+ */
+export function isDomstolUrl(raw: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    return false;
+  }
+  return u.protocol === "https:" && u.hostname === "www.domstol.se";
+}
+
 async function fetchWithTimeout(
   url: string,
   timeoutMs: number
@@ -71,10 +87,44 @@ export async function fetchDomstol(
 ): Promise<FetchResult> {
   const errors: string[] = [];
 
-  // 1) Try direct fetch first
+  // Barrier for the request-forgery sinks below (CodeQL js/request-forgery):
+  // parse the input and only ever fetch a URL DERIVED from a validated
+  // www.domstol.se origin. Passing `target.href` (not the raw input) is what
+  // breaks the taint flow — the fetched value provably comes from a checked URL.
+  let target: URL;
+  try {
+    target = new URL(url);
+  } catch {
+    return { ok: false, notFound: false, errors: ["invalid: unparseable URL"] };
+  }
+  if (target.protocol !== "https:" || target.hostname !== "www.domstol.se") {
+    return {
+      ok: false,
+      notFound: false,
+      errors: ["invalid: URL must be https://www.domstol.se/"],
+    };
+  }
+  // Rebuild with a HARD-CODED origin so the fetched host is a string literal,
+  // not a value derived from user input — only the (already validated) path and
+  // query come from the request. This is the documented remediation for
+  // CodeQL js/request-forgery: the request authority is provably not attacker
+  // controlled, so it can't be pointed at an internal host.
+  const safeUrl = `https://www.domstol.se${target.pathname}${target.search}`;
+
+  // 1) Try direct fetch first. The fetch is inlined here (rather than via the
+  // shared fetchWithTimeout) so the hostname barrier above dominates the sink
+  // in the same function — this is what CodeQL's js/request-forgery recognises
+  // as a sanitizer. We fetch `target.href`, derived from the validated URL.
   try {
     console.log(`${logPrefix} Trying direct...`);
-    const resp = await fetchWithTimeout(url, DIRECT_TIMEOUT_MS);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DIRECT_TIMEOUT_MS);
+    let resp: Response;
+    try {
+      resp = await fetch(safeUrl, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (resp.status === 404) {
       await resp.text();
@@ -110,11 +160,11 @@ export async function fetchDomstol(
   const proxies = [
     {
       name: "allorigins",
-      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(safeUrl)}`,
     },
     {
       name: "codetabs",
-      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(safeUrl)}`,
     },
   ];
 

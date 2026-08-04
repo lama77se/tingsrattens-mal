@@ -20,17 +20,16 @@ export async function fetchCourtPdf(
   mode?: "default" | "positional"
 ): Promise<CourtPdfResult> {
   try {
-    const resp = await fetch("/api/fetch-court-pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pdfUrl,
-        weekNumber,
-        year,
-        ...(yTolerance && { yTolerance }),
-        ...(mode === "positional" && { mode }),
-      }),
-    });
+    // GET (not POST) so the parsed response is cacheable on Vercel's CDN and
+    // shared across all visitors — the query string is the cache key. yTolerance
+    // is intentionally omitted: it is not read server-side, and keeping it out
+    // of the key avoids fragmenting the cache. See api/fetch-court-pdf.ts.
+    const params = new URLSearchParams({ pdfUrl });
+    if (weekNumber != null) params.set("weekNumber", String(weekNumber));
+    if (year != null) params.set("year", String(year));
+    if (mode === "positional") params.set("mode", mode);
+
+    const resp = await fetch(`/api/fetch-court-pdf?${params.toString()}`);
 
     if (!resp.ok) {
       return { success: false, error: `HTTP ${resp.status}` };
