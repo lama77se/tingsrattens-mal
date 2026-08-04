@@ -116,6 +116,29 @@ describe("formatPositional", () => {
     expect(hearings[1].type).toBe("Edgångssammanträde");
   });
 
+  it("Eksjö: parses glued date+time and wrapped saken into distinct hearings", () => {
+    // Real Eksjö rows via the positional renderer. Row 1's date is welded onto
+    // the time ("2026-08-0510:45") — without a deglue the date/time regexes miss
+    // and the whole hearing is dropped (it previously merged into a neighbour).
+    // Each saken cell also wraps ("ringa " + "narkotikabrott").
+    const text = build([
+      `Dag${TAB}Datum${TAB}Tid${TAB}Mötestyp${TAB}Saken${TAB}Sal`,
+      `on${TAB}2026-08-0510:45 - 11:30${TAB}Huvudförhandling${TAB}ringa ${TAB}Sal 2`,
+      "narkotikabrott",
+      `on${TAB}2026-08-05 11:30 - 12:00${TAB}Huvudförhandling${TAB}ringa ${TAB}Sal 2`,
+      "narkotikabrott",
+      `on${TAB}2026-08-05 13:00 - 15:00${TAB}Huvudförhandling${TAB}misshandel${TAB}Sal 2`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(hearings).toHaveLength(3);
+    expect(hearings.map((h) => `${h.time} ${h.saken}`)).toEqual([
+      "10:45 - 11:30 ringa narkotikabrott",
+      "11:30 - 12:00 ringa narkotikabrott",
+      "13:00 - 15:00 misshandel",
+    ]);
+    expect(hearings.every((h) => h.date === "2026-08-05" && h.room === "Sal 2")).toBe(true);
+  });
+
   it("Linköping: merges a wrapped saken even when the row has a Sal column", () => {
     // Real v31-33/2026 row (B 3508-26): the saken cell ends with a trailing
     // space before the Sal tab and wraps "föremål" onto the next row. The Sal

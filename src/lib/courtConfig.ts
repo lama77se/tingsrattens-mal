@@ -151,7 +151,11 @@ export const COURTS: CourtConfig[] = [
   {
     id: "eksjo_tingsratt",
     name: "Eksjö tingsrätt",
-    formatFamily: "tabular",
+    // pdf-parse's default linearization scrambles Eksjö's table (columns come
+    // out glued and out of order: "2026-08-05on10:45", "Huvudförhandlingringa"),
+    // merging adjacent hearings. The Y-grouped positional renderer reconstructs
+    // proper tab-separated rows, so parse it as positional.
+    formatFamily: "positional",
     singleUrl: true,
     // Eksjö moved the file into a "veckan" sub-folder; old flat path 404s as
     // of w22/2026 but kept as a fallback in case the upstream flips back or

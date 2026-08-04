@@ -109,6 +109,11 @@ export const formatPositional: ParserStrategy = {
     const lines = text
       .split("\n")
       .map((l) => l.replace(/[ \t]+$/g, ""))
+      // Deglue an ISO date welded onto the following time ("2026-08-0510:45"),
+      // which the Y-grouped renderer can emit when the two columns round to the
+      // same x-gap. Without the space the date/time regexes miss and the whole
+      // hearing row is dropped (Eksjö).
+      .map((l) => l.replace(/(\d{4}-\d{2}-\d{2})(\d{1,2}[:.]\d{2})/g, "$1 $2"))
       .filter((l) => l.length > 0);
 
     const hearings: RawHearing[] = [];
