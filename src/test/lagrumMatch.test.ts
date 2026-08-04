@@ -326,4 +326,31 @@ describe("matchLagrum", () => {
       expect(r.sakomrade).toBe("Narkotikabrott");
     });
   });
+
+  describe("ärende (Ä) and konkurs (K) mappings", () => {
+    const cases: [string, string, string, RegExp][] = [
+      ["ansökan om edgång", "K 100-26", "Konkursrätt", /1987:672/],
+      [
+        "erkännande och verkställighet av utländska dom/beslut",
+        "Ä 100-26",
+        "Fordringsrätt",
+        /1215\/2012/,
+      ],
+      ["Hinder mot verkställighet", "Ä 100-26", "Familjerätt", /21 kap/],
+      [
+        "prövning av övervakningsnämnds beslut",
+        "Ä 100-26",
+        "Brott mot rättskipningen",
+        /37 kap/,
+      ],
+      ["kontaktförbud", "Ä 100-26", "Brott mot frihet och frid", /1988:688/],
+    ];
+    for (const [saken, caseNumber, sakomrade, lagrumRe] of cases) {
+      it(`maps "${saken}" (${caseNumber[0]})`, () => {
+        const r = matchLagrum(saken, caseNumber);
+        expect(r.sakomrade).toBe(sakomrade);
+        expect(r.lagrum).toMatch(lagrumRe);
+      });
+    }
+  });
 });
