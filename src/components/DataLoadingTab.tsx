@@ -161,8 +161,12 @@ function initAllCourts(): CourtWeeksState {
 export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onLoadingChange, onProgressChange, fetchAllProgress }: DataLoadingTabProps) {
   const [courtWeeks, setCourtWeeks] = useState<CourtWeeksState>(initAllCourts);
   const [fetchingCourts, setFetchingCourts] = useState<Set<string>>(new Set());
-  const [isFetchingAll, setIsFetchingAll] = useState(false);
+  // Start true so the very first render already reports "loading" (this tab
+  // auto-fetches on mount), avoiding a flash of the empty state on the hearings
+  // tab before the fetch effect runs.
+  const [isFetchingAll, setIsFetchingAll] = useState(true);
   const hearingsRef = useRef<Record<string, Hearing[]>>({});
+  const autoStartedRef = useRef(false);
 
   const updateStep = useCallback(
     (courtId: string, weekIndex: number, stepIndex: number, update: Partial<FetchStep>) => {
@@ -426,7 +430,18 @@ export default function DataLoadingTab({ onHearingsFetched, fetchAllTrigger, onL
     onLoadingChange?.(anyFetching);
   }, [anyFetching, onLoadingChange]);
 
-  // Allow external trigger (e.g. from HearingsTab empty state)
+  // Auto-fetch all courts once on mount so the hearings tab fills in without the
+  // user having to click "Hämta alla". This tab is always mounted (forceMount),
+  // so the fetch runs in the background regardless of which tab is active.
+  // Repeat page loads are cheap: identical requests are served from the CDN edge
+  // cache. The ref guard keeps it to a single run (incl. React StrictMode).
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    handleFetchAll();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Allow external trigger (e.g. manual "Hämta alla" from the hearings tab)
   useEffect(() => {
     if (fetchAllTrigger && fetchAllTrigger > 0 && !anyFetching) {
       handleFetchAll();

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scale, Database, Github } from "lucide-react";
+import { Scale, Database, Github, RefreshCw, CheckCircle2 } from "lucide-react";
 import HearingsTab from "@/components/HearingsTab";
 import DataLoadingTab, { FetchAllProgress } from "@/components/DataLoadingTab";
 import { Hearing } from "@/lib/parseCourtPdf";
@@ -9,12 +9,17 @@ const Index = () => {
   const [hearings, setHearings] = useState<Hearing[]>([]);
   const [activeTab, setActiveTab] = useState("hearings");
   const [fetchAllTrigger, setFetchAllTrigger] = useState(0);
-  const [isLoadingAll, setIsLoadingAll] = useState(false);
+  // Start in the loading state: DataLoadingTab auto-fetches on mount, so the
+  // hearings tab should show "Hämtar…" from the first paint rather than a flash
+  // of the empty "Ingen data hämtad" state.
+  const [isLoadingAll, setIsLoadingAll] = useState(true);
   const [fetchAllProgress, setFetchAllProgress] = useState<FetchAllProgress | null>(null);
 
+  // Manual re-fetch (from the hearings tab). We intentionally do NOT switch to
+  // the loading tab — the fetch runs in the background there while the user
+  // stays on the hearings list, which populates progressively.
   const handleFetchAll = useCallback(() => {
     setFetchAllTrigger((n) => n + 1);
-    setActiveTab("loading");
   }, []);
 
   return (
@@ -53,6 +58,19 @@ const Index = () => {
             <TabsTrigger value="loading" className="gap-2">
               <Database className="h-4 w-4" />
               Laddning av data
+              {/* At-a-glance fetch status, visible from the hearings tab too. */}
+              {isLoadingAll ? (
+                <span className="ml-1 inline-flex items-center gap-1 text-primary">
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  {fetchAllProgress && fetchAllProgress.total > 0 && (
+                    <span className="text-xs tabular-nums">
+                      {fetchAllProgress.success + fetchAllProgress.failed + fetchAllProgress.empty}/{fetchAllProgress.total}
+                    </span>
+                  )}
+                </span>
+              ) : fetchAllProgress && fetchAllProgress.total > 0 ? (
+                <CheckCircle2 className="ml-1 h-3.5 w-3.5 text-emerald-500" />
+              ) : null}
             </TabsTrigger>
           </TabsList>
 
