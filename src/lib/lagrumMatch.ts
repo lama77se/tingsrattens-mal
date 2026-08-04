@@ -30,6 +30,17 @@ const LEVENSHTEIN_MIN_TOKEN_LENGTH = 6;
 const FRAGMENT_SEPARATORS_RE = /\s*[;,/]\s*|\s+och\s+|\s+samt\s+|\s+jämte\s+/i;
 
 /**
+ * Cleaned fragments that must NOT classify on their own inside a compound
+ * saken. "beslag" is a coercive measure that trails real charges
+ * ("…knivar och andra farliga föremål samt beslag"); as a standalone fragment
+ * it would short-circuit the fragment loop and hijack the primary crime. It is
+ * skipped here so such sakens fall through to the whole-saken match, while a
+ * standalone "beslag" saken (no separators, so the fragment loop never runs)
+ * still classifies via the fullMatch path.
+ */
+const FRAGMENT_EXCLUDED = new Set(["beslag"]);
+
+/**
  * Fuzzy normalization: lowercase, strip diacritics, collapse duplicated letters.
  */
 function fuzzyNormalize(s: string): string {
@@ -338,6 +349,7 @@ export function matchLagrum(saken: string, caseNumber: string): LagrumMatch {
     const seen = new Set<string>();
 
     for (const fragment of fragments) {
+      if (FRAGMENT_EXCLUDED.has(fragment)) continue;
       const resolved = matchFragment(fragment, caseType);
       if (!resolved) continue;
       const k = `${resolved.sakomrade}|${resolved.lagrum}`;

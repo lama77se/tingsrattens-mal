@@ -295,4 +295,35 @@ describe("matchLagrum", () => {
       });
     });
   });
+
+  describe("fornminne / böter / beslag mappings", () => {
+    const cases: [string, string, RegExp][] = [
+      ["fornminnesbrott", "Övrig speciallagstiftning", /1988:950/],
+      ["omvandling av böter", "Övrig speciallagstiftning", /1979:189/],
+      ["beslag", "Brott mot allmän verksamhet", /27 kap\. 1 §/],
+    ];
+    for (const [saken, sakomrade, lagrumRe] of cases) {
+      it(`maps "${saken}"`, () => {
+        const r = matchLagrum(saken, "B 1234-26");
+        expect(r.sakomrade).toBe(sakomrade);
+        expect(r.lagrum).toMatch(lagrumRe);
+      });
+    }
+
+    // Regression: "beslag" is excluded from the fragment loop so a trailing
+    // "…samt beslag" in a compound charge cannot hijack the primary crime.
+    it("does not let a trailing 'beslag' hijack a knife-law charge", () => {
+      const r = matchLagrum(
+        "brott mot lagen om förbud beträffande knivar och andra farliga föremål samt beslag",
+        "B 1884-26"
+      );
+      expect(r.sakomrade).toBe("Vapenbrott");
+      expect(r.lagrum).toMatch(/1988:254/);
+    });
+
+    it("classifies the primary crime, not beslag, in 'narkotikabrott, beslag'", () => {
+      const r = matchLagrum("narkotikabrott, beslag", "B 42-26");
+      expect(r.sakomrade).toBe("Narkotikabrott");
+    });
+  });
 });
