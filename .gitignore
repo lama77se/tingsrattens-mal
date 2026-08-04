@@ -23,6 +23,8 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+# Claude Code local config (settings.local.json, scheduled task locks, etc.)
+.claude/
 .idea
 .DS_Store
 *.suo
