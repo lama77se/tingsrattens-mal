@@ -1,7 +1,7 @@
 import type { ParserStrategy, ParserContext, RawHearing } from "./types";
 import {
   normalize,
-  preprocessLines,
+  preprocessLinesWithMeta,
   extractShortDate,
   NORMALIZED_TYPES,
   ROOM_REGEX,
@@ -303,7 +303,18 @@ export const formatTabular: ParserStrategy = {
       merged.push(preprocessed[i]);
     }
 
-    const rawLines = preprocessLines(merged.join("\n"));
+    const rawMeta = preprocessLinesWithMeta(merged.join("\n"));
+    const rawLines = rawMeta.map((m) => m.line);
+    // Per-line wrap-space flags, aligned 1:1 with `lines` (short-date map is 1:1).
+    const indented = rawMeta.map((m) => m.indented);
+    const trailingSpace = rawMeta.map((m) => m.trailingSpace);
+    // Self-calibrating: only trust "no leading space = mid-word wrap" when this
+    // document encodes word-boundary wraps WITH a leading space somewhere (e.g.
+    // Västmanland renders "Ringa" then " narkotikabrott"). Extractions that
+    // never emit a leading space carry no signal, so absence means nothing and
+    // we must not de-glue — otherwise a word-boundary wrap ("undanröjande av" +
+    // "ungdomsvård") would be welded into one word.
+    const usesIndentSignal = indented.some(Boolean);
     // Convert short dates (e.g., "10-feb") to ISO dates for regex matching
     const lines = rawLines.map(line => {
       if (!/\d{4}-\d{2}-\d{2}/.test(line)) {
@@ -581,7 +592,27 @@ export const formatTabular: ParserStrategy = {
 
           const cleaned = stripRoom(lineText);
           if (cleaned && !DAY_ABBREV_REGEX.test(cleaned)) {
-            saken = saken ? `${saken} ${cleaned}` : cleaned;
+            if (!saken) {
+              saken = cleaned;
+            } else {
+              // Respect the PDF's own wrap signal. A mid-word break carries no
+              // inter-word space on either side ("Undanröjan" + "de av
+              // ungdomstjänst"), so join without a space. A word-boundary wrap
+              // parks the space at the end of the previous line ("Våld " +
+              // "mot tjänsteman") OR the start of this one ("Ringa" +
+              // " narkotikabrott") — either flag means keep the space.
+              // Guarded by lowercase-on-both-sides so nothing else is welded.
+              const midWord =
+                usesIndentSignal &&
+                !indented[j] &&
+                !trailingSpace[j - 1] &&
+                // prev ends in a letter (any case — a mid-word split can leave a
+                // lone capital, "Vårdnad" → "V" + "årdnad"), continuation starts
+                // lowercase (a word-continuation never starts with a capital).
+                /[a-zåäöéA-ZÅÄÖ]$/.test(saken) &&
+                /^[a-zåäöé]/.test(cleaned);
+              saken = midWord ? `${saken}${cleaned}` : `${saken} ${cleaned}`;
+            }
           }
         }
       }

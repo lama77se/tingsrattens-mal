@@ -117,16 +117,45 @@ export function extractSwedishDate(line: string): string | null {
  * with correct field spacing. Some PDFs (e.g., Blekinge) store text without
  * inter-field spaces, requiring targeted degluing patterns.
  */
+export interface PreprocessedLine {
+  line: string;
+  /**
+   * True when the original PDF line began with leading whitespace — a soft
+   * wrap where the inter-word space landed at the start of the continuation
+   * ("Ringa" + " narkotikabrott").
+   */
+  indented: boolean;
+  /**
+   * True when the original PDF line ended with trailing whitespace — a soft
+   * wrap where the inter-word space landed at the end of the first line
+   * ("Våld " + "mot tjänsteman"). A mid-word wrap ("Undanröjan" + "de") has
+   * neither flag set. The tabular parser re-joins two lines WITHOUT a space
+   * only when the first has no trailing space and the second no leading space.
+   */
+  trailingSpace: boolean;
+}
+
+/** Trimmed, non-empty lines (drops the indent metadata — see {@link preprocessLinesWithMeta}). */
 export function preprocessLines(text: string): string[] {
+  return preprocessLinesWithMeta(text).map((l) => l.line);
+}
+
+export function preprocessLinesWithMeta(text: string): PreprocessedLine[] {
   // Hässleholm's PDF embeds a font whose ToUnicode CMap maps digits 0-9 to
   // U+0267..U+0270 (Latin IPA letters ɧ ɨ ɩ ɪ ɫ ɬ ɭ ɮ ɯ ɰ). Restore real digits.
   const decoded = text.replace(/[ɧ-ɰ]/g, (c) =>
     String(c.charCodeAt(0) - 0x0267)
   );
-  const trimmed = decoded
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
+  const trimmed: string[] = [];
+  const trimmedIdt: boolean[] = [];
+  const trimmedTrail: boolean[] = [];
+  for (const raw of decoded.split("\n")) {
+    const t = raw.trim();
+    if (!t) continue;
+    trimmed.push(t);
+    trimmedIdt.push(/^\s/.test(raw));
+    trimmedTrail.push(/\s$/.test(raw));
+  }
 
   // Norrköping (cell-per-line PDFs): the table layout puts each cell on its
   // own line, with a date prefix like "må 2026-05-" (trailing dash) followed
@@ -135,21 +164,34 @@ export function preprocessLines(text: string): string[] {
   // the parser sees a normal "<day> <date> <times> <type> <case> ..." line.
   const NK_DATE_PREFIX = /^(?:m[åaö]|ti|on|to|fr|lö|sö)\s+\d{4}-\d{2}-\s*$/i;
   let preMerged = trimmed;
+  let preMergedIdt = trimmedIdt;
+  let preMergedTrail = trimmedTrail;
   if (trimmed.some((l) => NK_DATE_PREFIX.test(l))) {
     const rows: string[] = [];
+    const rowsIdt: boolean[] = [];
+    const rowsTrail: boolean[] = [];
     let buffer: string[] | null = null;
-    for (const line of trimmed) {
+    let bufferIdt = false;
+    for (let t = 0; t < trimmed.length; t++) {
+      const line = trimmed[t];
       if (NK_DATE_PREFIX.test(line)) {
-        if (buffer) rows.push(buffer.join(" "));
+        // A merged multi-cell row: force trailingSpace=true so a following
+        // continuation is space-joined (its cells were already space-joined).
+        if (buffer) { rows.push(buffer.join(" ")); rowsIdt.push(bufferIdt); rowsTrail.push(true); }
         buffer = [line];
+        bufferIdt = trimmedIdt[t];
       } else if (buffer) {
         buffer.push(line);
       } else {
         rows.push(line);
+        rowsIdt.push(trimmedIdt[t]);
+        rowsTrail.push(trimmedTrail[t]);
       }
     }
-    if (buffer) rows.push(buffer.join(" "));
+    if (buffer) { rows.push(buffer.join(" ")); rowsIdt.push(bufferIdt); rowsTrail.push(true); }
     preMerged = rows;
+    preMergedIdt = rowsIdt;
+    preMergedTrail = rowsTrail;
   }
 
   // Merge split-date lines (Norrköping-style PDFs).
@@ -162,6 +204,8 @@ export function preprocessLines(text: string): string[] {
   const SPLIT_DATE_LINE = /^(.*\b\d{4}\s*[-–—]\s*\d{2}\s*[-–—]\s*)(\d{1,2}:\d{2}\b.*)$/;
   const NEXT_LINE_DAY = /^(\d{1,2})\b(.*)/;
   const merged: string[] = [];
+  const mergedIdt: boolean[] = [];
+  const mergedTrail: boolean[] = [];
   for (let i = 0; i < preMerged.length; i++) {
     const splitMatch = preMerged[i].match(SPLIT_DATE_LINE);
     if (splitMatch && i + 1 < preMerged.length) {
@@ -188,16 +232,23 @@ export function preprocessLines(text: string): string[] {
           }
         }
         merged.push(reconstructed);
+        mergedIdt.push(preMergedIdt[i]);
+        // Reconstructed hearing line: force trailingSpace=true so a saken
+        // continuation after it is space-joined (current behaviour).
+        mergedTrail.push(true);
         i++; // skip the next line since we merged it
         continue;
       }
     }
     merged.push(preMerged[i]);
+    mergedIdt.push(preMergedIdt[i]);
+    mergedTrail.push(preMergedTrail[i]);
   }
 
-  return merged
-    .map((line) =>
-      line
+  const out: PreprocessedLine[] = [];
+  for (let i = 0; i < merged.length; i++) {
+    const processed =
+      merged[i]
         // Normalize ISO dates: collapse spaces around dashes and convert en/em-dashes
         // Handles "2026 - 02 - 23" → "2026-02-23"
         .replace(/(\d{4})\s*[-–—]\s*(\d{2})\s*[-–—]\s*(\d{2})/g, "$1-$2-$3")
@@ -229,9 +280,11 @@ export function preprocessLines(text: string): string[] {
         // Lowercase before case prefix: "HuvudförhandlingB 14" → "Huvudförhandling B 14"
         .replace(/([a-zåäö.])(?=(?:PMT|FT|[TBKÄ])\s?\d)/g, "$1 ")
         // "Hf i förenklad form" glued to saken: "formöverflyttande" → "form överflyttande"
-        .replace(/\bform([a-zåäö])/g, "form $1")
-    )
-    .filter(Boolean);
+        .replace(/\bform([a-zåäö])/g, "form $1");
+    if (!processed) continue;
+    out.push({ line: processed, indented: mergedIdt[i], trailingSpace: mergedTrail[i] });
+  }
+  return out;
 }
 
 export function extractTime(line: string, prevLine?: string): string {

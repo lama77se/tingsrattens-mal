@@ -107,6 +107,34 @@ describe("formatTabular", () => {
     expect(result[1].saken).toBe("misshandel");
   });
 
+  it("Västmanland: re-joins wrapped sakens using the PDF's own space signal", () => {
+    // Real v33/2026 rows. pdf-parse encodes where a wrap falls: a word-boundary
+    // wrap parks the inter-word space at the END of line A ("Våld ") or the
+    // START of line B (" narkotikabrott"); a mid-word wrap has neither
+    // ("Undanröjan"+"de", "V"+"årdnad"). The " narkotikabrott" leading space is
+    // what tells the parser this document actually uses the signal.
+    const text = [
+      "2026-08-12 09:00 - 09:30 Huvudförhandling B 4915-26 Ringa",
+      " narkotikabrott",
+      "Sal 1",
+      "2026-08-12 10:00 - 10:45 Sammanträde B 5399-26 Undanröjan",
+      "de av ungdomsvård",
+      "Sal 2",
+      "2026-08-12 11:00 - 11:30 Huvudförhandling B 1270-26 Våld ",
+      "mot tjänsteman",
+      "Sal 3",
+      "2026-08-12 13:00 - 15:00 Muntlig förberedelse T 5098-26 V",
+      "årdnad",
+      "Sal 4",
+    ].join("\n");
+    const r = formatTabular.parse({ courtName: "Västmanlands tingsrätt", text });
+    const byCase = Object.fromEntries(r.map((h) => [h.caseNumber, h.saken]));
+    expect(byCase["B 4915-26"]).toBe("Ringa narkotikabrott"); // leading-space boundary
+    expect(byCase["B 5399-26"]).toBe("Undanröjande av ungdomsvård"); // mid-word, no space
+    expect(byCase["B 1270-26"]).toBe("Våld mot tjänsteman"); // trailing-space boundary
+    expect(byCase["T 5098-26"]).toBe("Vårdnad"); // mid-word after a lone capital
+  });
+
   it("handles multi-line saken", () => {
     const text = [
       "2026-02-18 14:00 - 14:45 Sammanträde",
