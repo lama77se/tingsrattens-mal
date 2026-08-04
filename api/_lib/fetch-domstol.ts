@@ -106,10 +106,20 @@ export async function fetchDomstol(
   }
   const safeUrl = target.href;
 
-  // 1) Try direct fetch first
+  // 1) Try direct fetch first. The fetch is inlined here (rather than via the
+  // shared fetchWithTimeout) so the hostname barrier above dominates the sink
+  // in the same function — this is what CodeQL's js/request-forgery recognises
+  // as a sanitizer. We fetch `target.href`, derived from the validated URL.
   try {
     console.log(`${logPrefix} Trying direct...`);
-    const resp = await fetchWithTimeout(safeUrl, DIRECT_TIMEOUT_MS);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DIRECT_TIMEOUT_MS);
+    let resp: Response;
+    try {
+      resp = await fetch(target.href, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (resp.status === 404) {
       await resp.text();
