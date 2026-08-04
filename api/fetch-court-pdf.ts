@@ -15,7 +15,7 @@ const { renderPositional } = require("./_lib/renderPositional.cjs");
 // is 1h; stale-while-revalidate serves instantly while refreshing in the
 // background. A "not published yet" result gets a short TTL so a newly
 // published schedule appears within minutes rather than being pinned for an hour.
-const CACHE_SUCCESS = "public, s-maxage=3600, stale-while-revalidate=86400";
+const CACHE_SUCCESS = "public, s-maxage=10800, stale-while-revalidate=86400";
 const CACHE_MISS = "public, s-maxage=300, stale-while-revalidate=600";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

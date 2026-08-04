@@ -12,11 +12,10 @@ export async function fetchCourtListing(
   listingUrl: string
 ): Promise<CourtListingResult> {
   try {
-    const resp = await fetch("/api/list-court-pdfs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingUrl }),
-    });
+    // GET so the response is cacheable on the CDN edge (shared across visitors).
+    const resp = await fetch(
+      `/api/list-court-pdfs?listingUrl=${encodeURIComponent(listingUrl)}`
+    );
 
     if (!resp.ok) {
       return { success: false, error: `HTTP ${resp.status}` };
