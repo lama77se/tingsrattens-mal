@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, MapPin, ExternalLink } from "lucide-react";
+import { Search, Filter, Info, CalendarDays, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clock, MapPin, ExternalLink, X } from "lucide-react";
 import { Hearing } from "@/lib/parseCourtPdf";
 import { FetchAllProgress } from "@/components/DataLoadingTab";
 
@@ -74,6 +74,23 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
     if (fleraSakfragorFilter) count++;
     return count;
   }, [courtFilter, typeFilter, dateFilter, sakomradeFilter, maltypFilter, fleraSakfragorFilter]);
+
+  // True when anything narrows the list (search, any select, the checkbox, or a
+  // sort). Drives the "Rensa"/reset shortcut.
+  const hasActiveFilters =
+    activeFilterCount > 0 || search !== "" || sortKey !== null;
+
+  const resetAllFilters = () => {
+    setSearch("");
+    setCourtFilter("Alla");
+    setTypeFilter("Alla");
+    setDateFilter("Alla");
+    setSakomradeFilter("Alla");
+    setMaltypFilter("Alla");
+    setFleraSakfragorFilter(false);
+    setSortKey(null);
+    setSortDir("asc");
+  };
 
   const courts = useMemo(() => {
     const unique = Array.from(new Set(hearings.map((h) => h.court)));
@@ -369,21 +386,15 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
         {filtersOpen && (
           <div className="rounded-lg border bg-card p-4 space-y-4">
             {filtersContent}
-            {activeFilterCount > 0 && (
+            {hasActiveFilters && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="w-full"
-                onClick={() => {
-                  setCourtFilter("Alla");
-                  setTypeFilter("Alla");
-                  setDateFilter("Alla");
-                  setSakomradeFilter("Alla");
-                  setMaltypFilter("Alla");
-                  setFleraSakfragorFilter(false);
-                }}
+                onClick={resetAllFilters}
               >
-                Rensa filter
+                <X className="h-4 w-4 mr-1.5" />
+                Rensa alla filter
               </Button>
             )}
           </div>
@@ -395,13 +406,28 @@ export default function HearingsTab({ hearings, onFetchAll, isLoadingAll = false
 
       {/* Results count + pagination + mobile sort controls */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <p className="text-sm text-muted-foreground">
-          {sorted.length === 0
-            ? "Inga förhandlingar matchar filtren"
-            : `Visar ${startIdx + 1}–${endIdx} av ${sorted.length} förhandlingar${
-                sorted.length !== hearings.length ? ` (filtrerade från ${hearings.length})` : ""
-              }`}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            {sorted.length === 0
+              ? "Inga förhandlingar matchar filtren"
+              : `Visar ${startIdx + 1}–${endIdx} av ${sorted.length} förhandlingar${
+                  sorted.length !== hearings.length ? ` (filtrerade från ${hearings.length})` : ""
+                }`}
+          </p>
+          {/* Quick reset — appears whenever a filter/search/sort is active. */}
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 shrink-0"
+              onClick={resetAllFilters}
+              title="Rensa alla filter, sökning och sortering"
+            >
+              <X className="h-3.5 w-3.5 mr-1.5" />
+              Rensa filter
+            </Button>
+          )}
+        </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <PaginationBar
