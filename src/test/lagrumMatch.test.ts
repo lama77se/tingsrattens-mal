@@ -353,4 +353,23 @@ describe("matchLagrum", () => {
       });
     }
   });
+
+  describe("T / Ä / B batch mappings", () => {
+    const cases: [string, string, string, RegExp][] = [
+      ["fullgörelsetalan", "T 100-26", "Fordringsrätt", /13 kap\. 1 §/],
+      ["hyres-/bostadsrättstvist, övrigt", "T 100-26", "Hyresrätt", /1991:614/],
+      ["rättslig hjälp åt utländsk domstol", "T 100-26", "Brott mot allmän verksamhet", /1946:816/],
+      ["kvarboenderätt", "Ä 100-26", "Familjerätt", /14 kap\. 7 §/],
+      ["vårdnad", "Ä 100-26", "Familjerätt", /6 kap/],
+      ["begäran om prövning av beslut om tillträdesförbud", "Ä 100-26", "Brott mot frihet och frid", /2021:34/],
+      ["falsk beskyllning", "B 100-26", "Brott mot rättskipningen", /15 kap\. 7 §/],
+    ];
+    for (const [saken, caseNumber, sakomrade, lagrumRe] of cases) {
+      it(`maps "${saken}" (${caseNumber[0]})`, () => {
+        const r = matchLagrum(saken, caseNumber);
+        expect(r.sakomrade).toBe(sakomrade);
+        expect(r.lagrum).toMatch(lagrumRe);
+      });
+    }
+  });
 });

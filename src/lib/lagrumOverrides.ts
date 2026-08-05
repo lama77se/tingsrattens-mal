@@ -1023,6 +1023,11 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["BrB 15 kap. 6 §"],
   },
+  // Falsk beskyllning ≈ falsk tillvitelse — BrB 15 kap. 7 §.
+  "falsk beskyllning": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 7 §"],
+  },
   // Olovlig identitetsanvändning — BrB 4 kap. 6 b § (infört 2016). Generatorn
   // har bara compound "hemfridsbrott, olovlig identitetsanvändning m. m.".
   "olovlig identitetsanvändning": {
@@ -1140,6 +1145,25 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "hyrestvist": {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  // Bostadsrättstvist ("hyres-/bostadsrättstvist, övrigt") — Bostadsrättslagen.
+  "bostadsrättstvist": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Bostadsrättslagen (1991:614)"],
+  },
+  // Fullgörelsetalan — processuell taleform (RB 13 kap. 1 §). Bakomliggande
+  // anspråk varierar; defaultar till Fordringsrätt (vanligast betalnings-/
+  // prestationsanspråk).
+  "fullgörelsetalan": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 13 kap. 1 §"],
+  },
+  // Rättslig hjälp åt utländsk domstol i tvistemål (T) — handräckning/
+  // bevisupptagning, Lag (1946:816). (B-kartan har samma nyckel för brottmåls-
+  // rättshjälp; T-mål når inte den.)
+  "rättslig hjälp åt utländsk domstol": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1946:816) om handräckning åt utländsk domstol"],
   },
   // Förverkande av hyresrätt — JB 12 kap. 42 § (gör hyresgästen avhysningsbar)
   "förverkande av hyresrätt": {
@@ -1721,6 +1745,20 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "verkställighet av utländska": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Bryssel Ia-förordningen (EU) nr 1215/2012"],
+  },
+  // Family matters occasionally filed as Ä (the family map isn't reached for Ä).
+  "kvarboenderätt": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 14 kap. 7 §"],
+  },
+  "vårdnad": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap."],
+  },
+  // Prövning av beslut om tillträdesförbud — preventiv åtgärd likt kontaktförbud.
+  "tillträdesförbud": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["Lag (2021:34) om tillträdesförbud till butiker m.fl."],
   },
 };
 
