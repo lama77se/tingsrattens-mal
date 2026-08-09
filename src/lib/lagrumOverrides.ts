@@ -1779,8 +1779,14 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: ["Lag (2022:964) om företagsrekonstruktion"],
   },
   // Edgångssammanträde i konkurs — gäldenären bekräftar bouppteckningen under
-  // ed. "Ansökan om edgång" filas som K. KonkL 6 kap.
+  // ed. "Ansökan om edgång(ssammanträde)" filas som K. KonkL 6 kap. Both the
+  // bare and compound forms are keyed — "edgång" won't match "edgångssammanträde"
+  // (no word boundary before "ssammanträde").
   "edgång": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
+  },
+  "edgångssammanträde": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
   },

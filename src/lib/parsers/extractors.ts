@@ -379,16 +379,14 @@ export function cleanSaken(text: string): string {
     .replace(TIME_REGEX, "")
     .trim();
   for (const ht of HEARING_TYPES) {
-    // Word-boundary-aware: don't strip "Förhandling" when it's actually
-    // "Förhandlingar" (e.g. in header lines).
+    // Strip a hearing type only when it LEADS the saken (a leaked type column,
+    // e.g. "Huvudförhandling Stöld" -> "Stöld"). The same word can be a
+    // substantive part of the saken phrase — "ansökan om edgångssammanträde",
+    // "ansökan om sammanträde" — and must NOT be removed there.
+    // Word-boundary-aware lookahead: don't strip "Förhandling" when it's
+    // actually "Förhandlingar" (e.g. header lines).
     saken = saken
-      .replace(
-        new RegExp(
-          `(?<![a-zåäöA-ZÅÄÖ])${ht}(?![a-zåäöA-ZÅÄÖ])`,
-          "gi"
-        ),
-        ""
-      )
+      .replace(new RegExp(`^${ht}(?![a-zåäöA-ZÅÄÖ])`, "i"), "")
       .trim();
   }
   // Strip trailing court name used as location (e.g., "... Attunda tingsrätt"
