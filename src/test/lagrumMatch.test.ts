@@ -330,6 +330,7 @@ describe("matchLagrum", () => {
   describe("ärende (Ä) and konkurs (K) mappings", () => {
     const cases: [string, string, string, RegExp][] = [
       ["ansökan om edgång", "K 100-26", "Konkursrätt", /1987:672/],
+      ["ansökan om edgångssammanträde", "K 9743-26", "Konkursrätt", /6 kap/],
       [
         "erkännande och verkställighet av utländska dom/beslut",
         "Ä 100-26",

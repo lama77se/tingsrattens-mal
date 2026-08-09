@@ -228,6 +228,19 @@ describe("cleanSaken", () => {
     expect(cleanSaken("Huvudförhandling Stöld")).toBe("Stöld");
   });
 
+  it("keeps a hearing-type word when it is part of the saken, not a leading leak", () => {
+    // Attunda K 9743-26: the type column ("Edgångssmtr") is separate; the saken
+    // legitimately reads "ansökan om edgångssammanträde". The type word must not
+    // be stripped just because it also names a hearing type.
+    expect(cleanSaken("ansökan om edgångssammanträdeTingssal 9")).toBe(
+      "ansökan om edgångssammanträde"
+    );
+    // ...but a type that LEADS the saken (a leaked type column) is still removed.
+    expect(cleanSaken("Edgångssammanträde ansökan om konkurs")).toBe(
+      "ansökan om konkurs"
+    );
+  });
+
   it("strips leading/trailing punctuation", () => {
     expect(cleanSaken("  , Stöld - ")).toBe("Stöld");
   });
