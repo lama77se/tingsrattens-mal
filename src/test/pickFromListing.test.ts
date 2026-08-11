@@ -150,6 +150,18 @@ describe("pickFromListing — week-matched courts", () => {
     expect(pick("varmlands_tingsratt", pdfs, 35)).toEqual([]);
   });
 
+  it("Malmö matches a 'vecka-X-och-Y' bundle and a single week", () => {
+    const base =
+      "https://www.domstol.se/globalassets/filer/domstol/malmo_tingsratt/veckans_forhandlingar";
+    const bundle = `${base}/forhandlingar-vecka-32-och-33.pdf`;
+    expect(pick("malmo_tingsratt", [link(bundle)], 32)).toEqual([bundle]);
+    expect(pick("malmo_tingsratt", [link(bundle)], 33)).toEqual([bundle]);
+    expect(pick("malmo_tingsratt", [link(bundle)], 34)).toEqual([]);
+    const single = `${base}/forhandlingar-vecka-34.pdf`;
+    expect(pick("malmo_tingsratt", [link(single)], 34)).toEqual([single]);
+    expect(pick("malmo_tingsratt", [link(single)], 33)).toEqual([]);
+  });
+
   it("Värmland still matches a single-week file", () => {
     const base =
       "https://www.domstol.se/globalassets/filer/domstol/varmlands_tingsratt/veckans-forhandlingar";

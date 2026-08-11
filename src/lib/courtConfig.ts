@@ -347,8 +347,25 @@ export const COURTS: CourtConfig[] = [
     id: "malmo_tingsratt",
     name: "Malmö tingsrätt",
     formatFamily: "schema",
-    buildUrl: (week) =>
-      `${BASE}/malmo_tingsratt/veckans_forhandlingar/forhandlingar-vecka-${week}.pdf`,
+    // Malmö now bundles weeks into one PDF with an arbitrary range in the
+    // filename ("forhandlingar-vecka-32-och-33.pdf"), so the fixed single-week
+    // path 404s. Scrape the listing and match the requested week against single
+    // weeks and "X-och-Y" ranges.
+    listingUrl:
+      "https://www.domstol.se/malmo-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs, week) =>
+      pdfs
+        .filter((p) => {
+          const m =
+            /vecka-0*(\d+)(?:-och-0*(\d+))?\.pdf/i.exec(p.href) ||
+            /\bvecka\s*0*(\d+)(?:\s*(?:-|och)\s*0*(\d+))?/i.exec(p.text);
+          if (!m) return false;
+          const lo = Number(m[1]);
+          const hi = m[2] ? Number(m[2]) : lo;
+          return week >= lo && week <= hi;
+        })
+        .map((p) => p.href),
+    buildUrl: () => [],
   },
   {
     id: "mora_tingsratt",
