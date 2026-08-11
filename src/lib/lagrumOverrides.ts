@@ -407,6 +407,22 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 4 §"],
   },
+  // Nedskräpning(sförseelse) — Miljöbalken 29 kap. 7 / 7 a §. Keyed both bare
+  // and compound ("nedskräpning" won't match "nedskräpningsförseelse").
+  "nedskräpningsförseelse": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 7 a §"],
+  },
+  "nedskräpning": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Miljöbalken (1998:808) 29 kap. 7 §"],
+  },
+  // Olaga yrkesmässig trafik — Yrkestrafiklagen (2012:210) (tillståndspliktig
+  // person-/godstransport utan tillstånd).
+  "yrkesmässig trafik": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Yrkestrafiklagen (2012:210) 5 kap."],
+  },
   "brott mot djurskyddslagen": {
     sakomrade: "Miljöbrott",
     primart_lagrum: ["Djurskyddslagen (2018:1192) 10 kap. 1 §"],
@@ -1106,6 +1122,23 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Äktenskapsbalken 17 kap."],
   },
+  // "klander av bodelning" won't match "bodelningsbeslut" (no word boundary),
+  // so key it explicitly.
+  "klander av bodelningsbeslut": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 17 kap. 8 §"],
+  },
+  // Återbäring av gåva — laglottsskydd, gåva likställd med testamente (ÄB 7:4).
+  "återbäring av gåva": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
+  // Generic residual civil bucket — courts file "övriga tvistemål" for disputes
+  // that don't fit a specific area.
+  "övriga tvistemål": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Rättegångsbalken 42 kap."],
+  },
   "klander av testamente": {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 14 kap."],
@@ -1759,6 +1792,25 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "tillträdesförbud": {
     sakomrade: "Brott mot frihet och frid",
     primart_lagrum: ["Lag (2021:34) om tillträdesförbud till butiker m.fl."],
+  },
+  // Överklagande av överförmyndarens beslut — FB 20 kap.
+  "överförmyndarens beslut": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 20 kap."],
+  },
+  // Konvertering/jämkning av ställföreträdarskap (god man ↔ förvaltare) — FB 11 kap.
+  "konvertering av förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap."],
+  },
+  "jämkning av ställföreträdarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap."],
+  },
+  // Äktenskapsskillnad filed as Ä (family map isn't reached for Ä).
+  "äktenskapsskillnad": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 5 kap. 1 §"],
   },
 };
 

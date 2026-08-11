@@ -373,4 +373,25 @@ describe("matchLagrum", () => {
       });
     }
   });
+
+  describe("civil / ärende / förmynderskap batch mappings", () => {
+    const cases: [string, string, string, RegExp][] = [
+      ["övriga tvistemål", "T 1-26", "Övriga tvistemål", /42 kap/],
+      ["återbäring av gåva", "T 1-26", "Arvsrätt", /7 kap\. 4 §/],
+      ["klander av bodelningsbeslut", "T 1-26", "Familjerätt", /17 kap\. 8 §/],
+      ["prövning av överförmyndarens beslut", "Ä 1-26", "Förmynderskapsrätt", /20 kap/],
+      ["konvertering av förvaltarskap till godmanskap", "Ä 1-26", "Förmynderskapsrätt", /11 kap/],
+      ["jämkning av ställföreträdarskap", "Ä 1-26", "Förmynderskapsrätt", /11 kap/],
+      ["ansökan om äktenskapsskillnad", "Ä 1-26", "Familjerätt", /5 kap\. 1 §/],
+      ["olaga yrkesmässig trafik", "B 1-26", "Övrig speciallagstiftning", /2012:210/],
+      ["nedskräpningsförseelse", "B 1-26", "Miljöbrott", /29 kap\. 7 a §/],
+    ];
+    for (const [saken, caseNumber, sakomrade, lagrumRe] of cases) {
+      it(`maps "${saken}" (${caseNumber[0]})`, () => {
+        const r = matchLagrum(saken, caseNumber);
+        expect(r.sakomrade).toBe(sakomrade);
+        expect(r.lagrum).toMatch(lagrumRe);
+      });
+    }
+  });
 });
