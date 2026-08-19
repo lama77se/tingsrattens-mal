@@ -237,4 +237,19 @@ describe("pickFromListing — pick-first courts", () => {
     expect(pick("orebro_tingsratt", pdfs, 26)).toEqual(["https://www.domstol.se/a.pdf"]);
     expect(pick("varbergs_tingsratt", [], 26)).toEqual([]);
   });
+
+  it("Södertörn takes the first listed PDF despite its off-by-one filename", () => {
+    // v.33.pdf actually holds w34's hearings, so the week arg is ignored.
+    const href =
+      "https://www.domstol.se/globalassets/filer/domstol/sodertorns_tingsratt/veckans_forhandlingar/2026/v.33.pdf";
+    expect(pick("sodertorns_tingsratt", [link(href, "v.33")], 34)).toEqual([href]);
+    expect(pick("sodertorns_tingsratt", [], 34)).toEqual([]);
+  });
+
+  it("Uppsala takes the first listed PDF despite its mangled filename", () => {
+    const href =
+      "https://www.domstol.se/globalassets/filer/domstol/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v3-4.pdf";
+    expect(pick("uppsala_tingsratt", [link(href, "v34")], 34)).toEqual([href]);
+    expect(pick("uppsala_tingsratt", [], 34)).toEqual([]);
+  });
 });
