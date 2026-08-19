@@ -17,27 +17,28 @@ import {
   ROOM_REGEX,
 } from "./extractors";
 
+// A case number can appear as a *reference* to another case inside a saken
+// phrase ("avskilt skadeståndsanspråk i mål B 7028-25 och B 4949-25"), not as a
+// new hearing. Swedish schedules introduce such references with "mål"/"mål nr"
+// (REF_LEAD); further cases in the list are joined with "och"/"samt"/comma
+// (REF_JOIN). The `\b` in REF_LEAD is load-bearing: it must NOT fire inside
+// case-type words that also end in "mål" — "Brottmål"/"Tvistemål"/"Familjemål"
+// — which legitimately sit right before a real case number in merged rows.
+// (Parenthesized references are handled separately by the paren check below.)
+const REF_LEAD = /\bm[åa]l(?:\s*nr\.?)?\s*$/i;
+const REF_JOIN = /(?:\boch|\bsamt|[,;])\s*$/i;
+
 /**
- * Check if a line's first case number match is "real" — not inside parentheses.
- * Parenthesized references like "(återvinning av tredskodom i T 14184-24)"
- * should not be treated as new hearings.
+ * Check if a line has a "real" case number — one that starts a new hearing,
+ * not a parenthesized/prose reference to another case ("...i mål T 14184-24").
  */
 function hasRealCaseNumber(line: string): RegExpMatchArray | null {
-  const match = line.match(CASE_NUMBER_REGEX);
-  if (!match || match.index === undefined) return null;
-  const before = line.substring(0, match.index);
-  const after = line.substring(match.index + match[0].length).trim();
-  const openParens = (before.match(/\(/g) || []).length;
-  const closeParens = (before.match(/\)/g) || []).length;
-  // Case number is inside unclosed parentheses
-  if (openParens > closeParens) return null;
-  // Closing paren right after case number — continuation from previous line's parens
-  if (after.startsWith(")")) return null;
-  return match;
+  return findAllRealCaseNumbers(line).length > 0 ? line.match(CASE_NUMBER_REGEX) : null;
 }
 
 /**
- * Find ALL real (non-parenthesized) case numbers on a line.
+ * Find ALL real case numbers on a line — excluding parenthesized cross-
+ * references and in-prose references introduced by "i mål ... och ...".
  * Returns array with case number text and position info.
  */
 function findAllRealCaseNumbers(
@@ -46,6 +47,7 @@ function findAllRealCaseNumbers(
   const results: Array<{ caseNumber: string; index: number; endIndex: number }> = [];
   const re = new RegExp(CASE_NUMBER_REGEX.source, "gi");
   let m;
+  let sawReference = false;
   while ((m = re.exec(line)) !== null) {
     if (m.index === undefined) continue;
     const before = line.substring(0, m.index);
@@ -54,6 +56,12 @@ function findAllRealCaseNumbers(
     const closeParens = (before.match(/\)/g) || []).length;
     if (openParens > closeParens) continue;
     if (after.startsWith(")")) continue;
+    // In-prose case reference ("...i mål B 7028-25 och B 4949-25") — the case
+    // number describes the subject, it is not a hearing of its own.
+    if (REF_LEAD.test(before) || (sawReference && REF_JOIN.test(before))) {
+      sawReference = true;
+      continue;
+    }
     results.push({
       caseNumber: m[1],
       index: m.index,

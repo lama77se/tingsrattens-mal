@@ -285,6 +285,61 @@ describe("formatStandard", () => {
     expect(result[0].saken).toContain("T 14184-24");
   });
 
+  it("treats 'i mål ... och ...' case references as saken, not new hearings (Helsingborg)", () => {
+    // w35/2026: T 970-26's saken references two other cases. The old parser
+    // spawned a phantom "B 7028-25" hearing and made T 970-26 inherit the
+    // previous hearing's saken ("grovt vapenbrott"). Rooms are glued to the
+    // saken (no space), matching the real PDF ("grovt vapenbrott12",
+    // "...B 4949-2517"), which drives the REF_LEAD path + cleanSaken deglue.
+    const text = [
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "ti 25-aug 14:30 - 16:00 Huvudförhandling",
+      "B 670-24",
+      "grovt vapenbrott12",
+      "ti 25-aug 14:30 - 16:00 Muntlig förberedelse",
+      "T 970-26",
+      "avskilt skadeståndsanspråk i mål B 7028-25 och B 4949-2517",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Helsingborgs tingsrätt", text });
+    expect(result).toHaveLength(2);
+
+    expect(result[0].caseNumber).toBe("B 670-24");
+    expect(result[0].saken).toBe("grovt vapenbrott");
+
+    expect(result[1].caseNumber).toBe("T 970-26");
+    expect(result[1].type).toBe("Muntlig förberedelse");
+    expect(result[1].saken).toBe(
+      "avskilt skadeståndsanspråk i mål B 7028-25 och B 4949-25"
+    );
+
+    // The referenced cases must NOT become their own hearings.
+    expect(result.some((h) => h.caseNumber === "B 7028-25")).toBe(false);
+    expect(result.some((h) => h.caseNumber === "B 4949-25")).toBe(false);
+  });
+
+  it("skips a joined 'och' case reference when the room is space-separated (REF_JOIN)", () => {
+    // When the room is a separate token ("... B 4949-25 17") the second
+    // referenced case number is a valid CASE_NUMBER_REGEX match, so only the
+    // "och"-join guard stops it from spawning a phantom hearing.
+    const text = [
+      "Dag Datum Förhandlingstid Typ av förhandling Målnummer Saken Sal",
+      "ti 25-aug 14:30 - 16:00 Muntlig förberedelse",
+      "T 970-26",
+      "avskilt skadeståndsanspråk i mål B 7028-25 och B 4949-25 17",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Helsingborgs tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 970-26");
+    expect(result[0].saken).toBe(
+      "avskilt skadeståndsanspråk i mål B 7028-25 och B 4949-25"
+    );
+    expect(result[0].room).toBe("Sal 17");
+    expect(result.some((h) => h.caseNumber === "B 7028-25")).toBe(false);
+    expect(result.some((h) => h.caseNumber === "B 4949-25")).toBe(false);
+  });
+
   it("splits merged PDF rows into separate hearings (Halmstad row-merge)", () => {
     // When pdfYTolerance is high, adjacent rows can merge into one line.
     // Both B 297-26 and T 3736-25 should become separate hearings.
