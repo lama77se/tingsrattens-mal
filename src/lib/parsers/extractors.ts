@@ -402,6 +402,10 @@ export function cleanSaken(text: string): string {
   // (Helsingborg's PDF puts "Sal" in a separate column that pdf-parse fuses
   // into the saken text, e.g. "misshandel1", "fordran20", "våldtäkt m.m.13").
   saken = saken.replace(/([A-Za-zÅÄÖåäö.])(\d{1,2})\s*$/, "$1").trim();
+  // Same glued-room artifact, but fused onto a trailing referenced case number
+  // instead of a word ("...i mål B 7028-25 och B 4949-2517" → "...B 4949-25").
+  // Requires a full case-number shape so a bare "T 14184-24" is left intact.
+  saken = saken.replace(/((?:PMT|FT|[TBKÄ])\s?\d{1,6}[-–—]\d{2})(\d{1,2})\s*$/i, "$1").trim();
   // Strip leading/trailing junk punctuation, but preserve trailing "." so
   // abbreviations like "m.m." survive.
   return saken
