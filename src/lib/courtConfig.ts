@@ -485,8 +485,17 @@ export const COURTS: CourtConfig[] = [
     id: "sodertorns_tingsratt",
     name: "Södertörns tingsrätt",
     formatFamily: "positional",
-    buildUrl: (week, year) =>
-      `${BASE}/sodertorns_tingsratt/veckans_forhandlingar/${year}/veckans-forhandlingar-vecka-${week}.pdf`,
+    singleUrl: true,
+    // The court switched from a fixed weekly path
+    // (.../{year}/veckans-forhandlingar-vecka-{week}.pdf) to a short
+    // "{year}/v.{n}.pdf" name whose number lags the week it covers — v.33.pdf,
+    // printed on the Friday of w33, actually holds w34's hearings — so a
+    // week-matched filename can't be reconstructed. Scrape the listing and take
+    // the single schedule PDF it links.
+    listingUrl:
+      "https://www.domstol.se/sodertorns-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "sodertalje_tingsratt",
@@ -542,14 +551,17 @@ export const COURTS: CourtConfig[] = [
     id: "uppsala_tingsratt",
     name: "Uppsala tingsrätt",
     formatFamily: "tabular",
-    // Filename style flipped from "forhandlingslista-v.-22.pdf" to
-    // "forhandlingslistav22.pdf" (no separators) around w22/2026. Try the
-    // new style first; keep the older variants as fallbacks for archived weeks.
-    buildUrl: (week) => [
-      `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslistav${week}.pdf`,
-      `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v.-${week}.pdf`,
-      `${BASE}/uppsala_tingsratt/veckans-forhandlingar/forhandlingslista-v-${week}.pdf`,
-    ],
+    singleUrl: true,
+    // Filenames are inconsistent and error-prone — the style flipped from
+    // "forhandlingslista-v.-22.pdf" to "forhandlingslistav22.pdf" (no
+    // separators) around w22/2026, and w34 was published as
+    // "forhandlingslista-v3-4.pdf" (a mangled "v34") — so no fixed pattern
+    // reliably matches. Scrape the listing and take the single schedule PDF it
+    // links.
+    listingUrl:
+      "https://www.domstol.se/uppsala-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
+    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    buildUrl: () => [],
   },
   {
     id: "vanersborgs_tingsratt",
