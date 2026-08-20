@@ -259,6 +259,7 @@
     { "name": "Batch 2026-08b T: köprättsligt fel", "saken": "köprättsligt fel", "caseNumber": "T 107-26", "sakomrade": "Köprätt", "lagrum": "Köplagen (1990:931)" },
     { "name": "Batch 2026-08b T: associationsrätt", "saken": "associationsrätt", "caseNumber": "T 108-26", "sakomrade": "Avtalsrätt", "lagrum": "Aktiebolagslagen (2005:551)" },
     { "name": "Batch 2026-08b B: överförande av verkställighet", "saken": "överförande av verkställighet", "caseNumber": "B 109-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Lag (2025:520) om internationell verkställighet i brottmål" },
-    { "name": "Batch 2026-08b B: omvandling av fängelse på livstid", "saken": "omvandling av fängelse på livstid", "caseNumber": "B 110-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Lag (2006:45) om omvandling av fängelse på livstid" }
+    { "name": "Batch 2026-08b B: omvandling av fängelse på livstid", "saken": "omvandling av fängelse på livstid", "caseNumber": "B 110-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Lag (2006:45) om omvandling av fängelse på livstid" },
+    { "name": "Batch 2026-08b B: återvinning (tredskodom, enskilt anspråk)", "saken": "återvinning i målnummer", "caseNumber": "B 111-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Rättegångsbalken 44 kap. 9 §" }
   ]
 }
