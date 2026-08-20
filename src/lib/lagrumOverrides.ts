@@ -1083,6 +1083,64 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Ekonomisk brottslighet",
     primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 7 §"],
   },
+
+  // --- Batch (2026-08): additional court saken (B) ---
+  // Varusmuggling — smuggling av vara, Smugglingslagen (2000:1225) 3 § (grov 5 §).
+  // "smuggling" substring-matchar inte "varusmuggling" (ingen ordgräns före
+  // "smuggling"), jfr narkotika-/vapensmuggling som är egna nycklar.
+  "varusmuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 3 §"],
+  },
+  "grov varusmuggling": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Smugglingslagen (2000:1225) 5 §"],
+  },
+  // Brott mot lagen om estetiska kirurgiska ingrepp och estetiska injektions-
+  // behandlingar — Lag (2021:363), straff i 13 §. Sakens " och " splittas till
+  // fragment, så nyckla de distinkta delfraserna var för sig (båda → 13 §).
+  "estetiska kirurgiska ingrepp": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: [
+      "Lag (2021:363) om estetiska kirurgiska ingrepp och estetiska injektionsbehandlingar 13 §",
+    ],
+  },
+  "estetiska injektionsbehandlingar": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: [
+      "Lag (2021:363) om estetiska kirurgiska ingrepp och estetiska injektionsbehandlingar 13 §",
+    ],
+  },
+  // Avvikande från olycksplats (smitning) — Trafikbrottslagen (1951:649) 5 §,
+  // jfr "smitning från trafikolycksplats" / "obehörigt avvikande ...".
+  "avvikande från olycksplats": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 5 §"],
+  },
+  // Brott mot lagen (1999:42) om förbud mot vissa hälsofarliga varor — straff i
+  // 4 §, samma klassificering som "olovlig hantering av lustgas". Nyckla även
+  // PDF-varianten "...hälsofarliga ämnen".
+  "brott mot lagen om förbud mot vissa hälsofarliga varor": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lag (1999:42) om förbud mot vissa hälsofarliga varor 4 §"],
+  },
+  "brott mot lagen om förbud mot vissa hälsofarliga ämnen": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Lag (1999:42) om förbud mot vissa hälsofarliga varor 4 §"],
+  },
+  // Olovlig avlyssning — BrB 4 kap. 9 a §. Bare form (cleanFragment strippar
+  // "m.m.", så den befintliga "olovlig avlyssning m.m."-nyckeln matchar aldrig).
+  "olovlig avlyssning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 9 a §"],
+  },
+  // Otillåtet antal passagerare, motordrivet fordon — Trafikförordningen
+  // (1998:1276) 4 kap. 6 § (bil får inte fler passagerare än registrerat). Saken
+  // splittas på komma, så nyckla första fragmentet.
+  "otillåtet antal passagerare": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 4 kap. 6 §"],
+  },
 };
 
 /**
@@ -1560,6 +1618,35 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "bättre rätt till hund": {
     sakomrade: "Sakrätt",
     primart_lagrum: [],
+  },
+
+  // --- Batch (2026-08): additional civil (T) saken ---
+  // Bevisupptagning åt utländsk domstol (T) — Lag (1946:816). Civil rättshjälp
+  // (svensk domstol tar upp bevis på begäran av utländsk domstol); klassas som
+  // residual tvistemål. (B-kartan har en likalydande nyckel för brottmål — men
+  // T-mål når den inte, och den citerar felaktigt 1946:817 "vid".)
+  "bevisupptagning åt utländsk domstol": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
+  },
+  // Fastställelse av hyresförhållande — nyckla "hyresförhållande" (bredare,
+  // fångar fastställelse-/fastställande-varianter). "hyra" matchar inte
+  // "hyresförhållande" (ingen ordgräns; "hyres-" ≠ "hyra").
+  "hyresförhållande": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  // Ogiltighet av testamente — Ärvdabalken 13 kap. (ogiltighetsgrunder;
+  // klanderfrist i 14 kap.), jfr "ogiltighet av testamentesförordnande".
+  "ogiltighet av testamente": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 13 kap."],
+  },
+  // Avtalsfordran — fordran grundad på avtal. "fordran" matchar inte
+  // "avtalsfordran" (ingen ordgräns före "fordran"); Fordringsrätt som "fordran".
+  "avtalsfordran": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Skuldebrevslagen (1936:81)"],
   },
 };
 

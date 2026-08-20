@@ -235,6 +235,18 @@
     { "name": "Solna B: vårdslöshet i trafik", "saken": "vårdslöshet i trafik", "caseNumber": "B 6301-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 1 §" },
     { "name": "Solna B: grov vårdslöshet i trafik (proactive)", "saken": "grov vårdslöshet i trafik", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 1 § 2 st" },
     { "name": "Solna B: brott mot ordningslagen", "saken": "brott mot ordningslagen", "caseNumber": "B 1234-25", "sakomrade": "Brott mot allmän ordning", "lagrum": "Ordningslagen (1993:1617)" },
-    { "name": "Solna B: brott mot taxitrafikförordningen", "saken": "brott mot taxitrafikförordningen", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Taxitrafikförordning (2012:238)" }
+    { "name": "Solna B: brott mot taxitrafikförordningen", "saken": "brott mot taxitrafikförordningen", "caseNumber": "B 1234-25", "sakomrade": "Trafikbrott", "lagrum": "Taxitrafikförordning (2012:238)" },
+
+    { "name": "Batch 2026-08 T: bevisupptagning åt utländsk domstol", "saken": "Bevisupptagning åt utländsk domstol", "caseNumber": "T 12-26", "sakomrade": "Övriga tvistemål", "lagrum": "Lag (1946:816) om bevisupptagning åt utländsk domstol" },
+    { "name": "Batch 2026-08 T: fastställelse av hyresförhållande", "saken": "fastställelse av hyresförhållande", "caseNumber": "T 34-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
+    { "name": "Batch 2026-08 T: ogiltighet av testamente", "saken": "ogiltighet av testamente", "caseNumber": "T 56-26", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 13 kap." },
+    { "name": "Batch 2026-08 T: avtalsfordran", "saken": "avtalsfordran", "caseNumber": "T 78-26", "sakomrade": "Fordringsrätt", "lagrum": "Skuldebrevslagen (1936:81)" },
+    { "name": "Batch 2026-08 B: varusmuggling", "saken": "varusmuggling", "caseNumber": "B 90-26", "sakomrade": "Tull- och smugglingsbrott", "lagrum": "Smugglingslagen (2000:1225) 3 §" },
+    { "name": "Batch 2026-08 B: grov varusmuggling", "saken": "grov varusmuggling", "caseNumber": "B 91-26", "sakomrade": "Tull- och smugglingsbrott", "lagrum": "Smugglingslagen (2000:1225) 5 §" },
+    { "name": "Batch 2026-08 B: estetiska ingrepp (och-split -> full)", "saken": "brott mot lagen om estetiska kirurgiska ingrepp och estetiska injektionsbehandlingar", "caseNumber": "B 92-26", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Lag (2021:363) om estetiska kirurgiska ingrepp och estetiska injektionsbehandlingar 13 §" },
+    { "name": "Batch 2026-08 B: avvikande från olycksplats", "saken": "avvikande från olycksplats", "caseNumber": "B 93-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 5 §" },
+    { "name": "Batch 2026-08 B: hälsofarliga ämnen (PDF-variant)", "saken": "brott mot lagen om förbud mot vissa hälsofarliga ämnen", "caseNumber": "B 94-26", "sakomrade": "Narkotikabrott", "lagrum": "Lag (1999:42) om förbud mot vissa hälsofarliga varor 4 §" },
+    { "name": "Batch 2026-08 B: olovlig avlyssning (bare)", "saken": "olovlig avlyssning", "caseNumber": "B 95-26", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 9 a §" },
+    { "name": "Batch 2026-08 B: otillåtet antal passagerare (komma-split)", "saken": "Otillåtet antal passagerare, motordrivet fordon", "caseNumber": "B 96-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 4 kap. 6 §" }
   ]
 }
