@@ -1156,6 +1156,14 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["Lag (2006:45) om omvandling av fängelse på livstid"],
   },
+  // Återvinning i brottmål — återvinning av tredskodom meddelad på det enskilda
+  // anspråket (skadeståndet), RB 44 kap. 9 §. Bare "återvinning" (B-routing);
+  // civilmålens "återvinning" ligger i civilLagrumOverrides. "i målnummer …" är
+  // en referens till den ursprungliga domen.
+  "återvinning": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["Rättegångsbalken 44 kap. 9 §"],
+  },
 };
 
 /**
