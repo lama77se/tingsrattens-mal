@@ -247,6 +247,18 @@
     { "name": "Batch 2026-08 B: avvikande från olycksplats", "saken": "avvikande från olycksplats", "caseNumber": "B 93-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 5 §" },
     { "name": "Batch 2026-08 B: hälsofarliga ämnen (PDF-variant)", "saken": "brott mot lagen om förbud mot vissa hälsofarliga ämnen", "caseNumber": "B 94-26", "sakomrade": "Narkotikabrott", "lagrum": "Lag (1999:42) om förbud mot vissa hälsofarliga varor 4 §" },
     { "name": "Batch 2026-08 B: olovlig avlyssning (bare)", "saken": "olovlig avlyssning", "caseNumber": "B 95-26", "sakomrade": "Brott mot frihet och frid", "lagrum": "BrB 4 kap. 9 a §" },
-    { "name": "Batch 2026-08 B: otillåtet antal passagerare (komma-split)", "saken": "Otillåtet antal passagerare, motordrivet fordon", "caseNumber": "B 96-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 4 kap. 6 §" }
+    { "name": "Batch 2026-08 B: otillåtet antal passagerare (komma-split)", "saken": "Otillåtet antal passagerare, motordrivet fordon", "caseNumber": "B 96-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 4 kap. 6 §" },
+
+    { "name": "Batch 2026-08b T: avskedande", "saken": "Avskedande", "caseNumber": "T 100-26", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80) 18 §" },
+    { "name": "Batch 2026-08b T: avskilt skadeståndsanspråk", "saken": "avskilt skadeståndsanspråk", "caseNumber": "T 101-26", "sakomrade": "Skadeståndsrätt", "lagrum": "Skadeståndslagen (1972:207)" },
+    { "name": "Batch 2026-08b T: ogiltigförklarande av uppsägning", "saken": "ogiltigförklarande av uppsägning", "caseNumber": "T 102-26", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80) 34 §" },
+    { "name": "Batch 2026-08b T: ogiltighetstalan uppsägning", "saken": "ogiltighetstalan uppsägning", "caseNumber": "T 103-26", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80) 34 §" },
+    { "name": "Batch 2026-08b T: bättre rätt till fastighet", "saken": "bättre rätt till fastighet", "caseNumber": "T 104-26", "sakomrade": "Sakrätt", "lagrum": "" },
+    { "name": "Batch 2026-08b T: jämkning av förmånstagarförordnande", "saken": "Jämkning av förmånstagarförordnande", "caseNumber": "T 105-26", "sakomrade": "Arvsrätt", "lagrum": "Försäkringsavtalslagen (2005:104) 14 kap. 7 §" },
+    { "name": "Batch 2026-08b T: redovisning av förvaltning", "saken": "Redovisning av förvaltning", "caseNumber": "T 106-26", "sakomrade": "Avtalsrätt", "lagrum": "Handelsbalken 18 kap." },
+    { "name": "Batch 2026-08b T: köprättsligt fel", "saken": "köprättsligt fel", "caseNumber": "T 107-26", "sakomrade": "Köprätt", "lagrum": "Köplagen (1990:931)" },
+    { "name": "Batch 2026-08b T: associationsrätt", "saken": "associationsrätt", "caseNumber": "T 108-26", "sakomrade": "Avtalsrätt", "lagrum": "Aktiebolagslagen (2005:551)" },
+    { "name": "Batch 2026-08b B: överförande av verkställighet", "saken": "överförande av verkställighet", "caseNumber": "B 109-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Lag (2025:520) om internationell verkställighet i brottmål" },
+    { "name": "Batch 2026-08b B: omvandling av fängelse på livstid", "saken": "omvandling av fängelse på livstid", "caseNumber": "B 110-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Lag (2006:45) om omvandling av fängelse på livstid" }
   ]
 }

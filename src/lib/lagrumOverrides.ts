@@ -1141,6 +1141,21 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276) 4 kap. 6 §"],
   },
+
+  // --- Batch (2026-08b): straffverkställighet ---
+  // Överförande av (straff)verkställighet — internationellt överförande av
+  // verkställighet av påföljd. Lag (1972:260) upphävdes 2025-07-01 och ersattes
+  // av Lag (2025:520) om internationell verkställighet i brottmål (EU-fall styrs
+  // av Lag (2015:96)). Verkställighetsfråga → Brott mot rättskipningen.
+  "överförande av verkställighet": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["Lag (2025:520) om internationell verkställighet i brottmål"],
+  },
+  // Omvandling av fängelse på livstid — Lag (2006:45) (prövas av Örebro tingsrätt).
+  "omvandling av fängelse på livstid": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["Lag (2006:45) om omvandling av fängelse på livstid"],
+  },
 };
 
 /**
@@ -1647,6 +1662,63 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "avtalsfordran": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Skuldebrevslagen (1936:81)"],
+  },
+
+  // --- Batch (2026-08b): additional civil (T) saken ---
+  // Avskedande — arbetsrättslig tvist om avsked, LAS 18 § (grunder). Den
+  // längre nyckeln "ogiltigförklaring av avskedande" (35 §) vinner på längd för
+  // den sakens; bare "avskedande" fångar tvisten om själva avskedandet.
+  "avskedande": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 18 §"],
+  },
+  // Skadeståndsanspråk (t.ex. "avskilt skadeståndsanspråk" avskilt från brottmål
+  // enligt RB 22 kap.) — Skadeståndsrätt. Bred nyckel: "skadestånd" matchar inte
+  // "skadeståndsanspråk" (ingen ordgräns efter "skadestånd").
+  "skadeståndsanspråk": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Skadeståndslagen (1972:207)"],
+  },
+  // Ogiltigförklarande av uppsägning — variant av "ogiltigförklaring av
+  // uppsägning" (LAS 34 §); egen nyckel eftersom "-förklaring" ≠ "-förklarande".
+  "ogiltigförklarande av uppsägning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 34 §"],
+  },
+  // Ogiltighetstalan om uppsägning — samma sak, annan formulering. LAS 34 §.
+  "ogiltighetstalan uppsägning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 34 §"],
+  },
+  // Bättre rätt till fastighet — sakrättslig äganderättstvist, jfr "bättre rätt
+  // till lös egendom" (inget specifikt lagrum).
+  "bättre rätt till fastighet": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
+  },
+  // Jämkning av förmånstagarförordnande — laglottsskydd vid försäkring, jämkas
+  // av dödsbo/bröstarvinge när utfallet är oskäligt. FAL (2005:104) 14 kap. 7 §.
+  // Successionsändamål → Arvsrätt (jfr "förstärkt laglottsskydd").
+  "jämkning av förmånstagarförordnande": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Försäkringsavtalslagen (2005:104) 14 kap. 7 §"],
+  },
+  // Redovisning av förvaltning — redovisningsskyldighet för den som förvaltat
+  // annans egendom (syssloman/uppdrag), Handelsbalken 18 kap.
+  "redovisning av förvaltning": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Handelsbalken 18 kap."],
+  },
+  // Köprättsligt fel — fel i vara enligt köplagen (allmän köprätt, ej konsument).
+  "köprättsligt fel": {
+    sakomrade: "Köprätt",
+    primart_lagrum: ["Köplagen (1990:931)"],
+  },
+  // Associationsrätt — bred paraplyterm (aktiebolag/föreningar). Klassas som
+  // Avtalsrätt (som övriga ABL-saken); Aktiebolagslagen som primär association.
+  "associationsrätt": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551)"],
   },
 };
 
