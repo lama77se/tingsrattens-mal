@@ -1164,6 +1164,43 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["Rättegångsbalken 44 kap. 9 §"],
   },
+
+  // --- Batch (2026-08c): corpus-discovered + user batch (B) ---
+  // Osant intygande — BrB 15 kap. 11 § (osann uppgift i intyg/urkund), jfr
+  // "osann försäkran" (15:10).
+  "osant intygande": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 11 §"],
+  },
+  // Knivlagen — PDF-saken kommer ofta som fragmentet "beträffande knivar och
+  // andra farliga föremål" (prefixet "brott mot lagen om förbud" tappas / saken
+  // splittas på " och "). Nyckla kärnfrasen så helmatchningen fångar den.
+  "knivar och andra farliga föremål": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Knivlagen (1988:254)"],
+  },
+  // Förverkande (ensamt) — talan om förverkande av egendom, BrB 36 kap. Med i
+  // FRAGMENT_EXCLUDED (lagrumMatch.ts) så det inte kapar primärbrottet i
+  // sammansatta saken ("...narkotikabrott, förverkande").
+  "förverkande": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 36 kap."],
+  },
+  // Brott mot tystnadsplikt(en) — BrB 20 kap. 3 §. Båda formerna (bestämd form
+  // "-en" saknar ordgräns mot bare "tystnadsplikt").
+  "brott mot tystnadsplikten": {
+    sakomrade: "Tjänstebrott",
+    primart_lagrum: ["BrB 20 kap. 3 §"],
+  },
+  "brott mot tystnadsplikt": {
+    sakomrade: "Tjänstebrott",
+    primart_lagrum: ["BrB 20 kap. 3 §"],
+  },
+  // Främjande av flykt — BrB 17 kap. 12 §.
+  "främjande av flykt": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 12 §"],
+  },
 };
 
 /**
@@ -1728,6 +1765,56 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Avtalsrätt",
     primart_lagrum: ["Aktiebolagslagen (2005:551)"],
   },
+
+  // --- Batch (2026-08c): corpus-discovered + user batch (T/FT) ---
+  // Övertidsersättning — arbetsrättslig löneanspråk. Ingen egen lag styr själva
+  // ersättningen (avtal/kollektivavtal); tomt lagrum, jfr "nyttjanderättsersättning".
+  "övertidsersättning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: [],
+  },
+  // Prisavdrag — köprättslig påföljd vid fel, Köplagen (1990:931) 37 § (38 § är
+  // beräkningen).
+  "prisavdrag": {
+    sakomrade: "Köprätt",
+    primart_lagrum: ["Köplagen (1990:931) 37 §"],
+  },
+  // Bättre rätt (ensamt) — sakrättslig äganderättstvist. De specifika
+  // "bättre rätt till X" vinner på längd; detta fångar bara formen.
+  "bättre rätt": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
+  },
+  // Konkurrensrätt (PMT/PMD) — Konkurrenslagen (2008:579), jfr
+  // "konkurrensskadeavgift".
+  "konkurrensrätt": {
+    sakomrade: "Konkurrensrätt",
+    primart_lagrum: ["Konkurrenslagen (2008:579)"],
+  },
+  // Lönegarantibeslut (överprövning) — Lönegarantilagen (1992:497). "lönegaranti"
+  // matchar inte "lönegarantibeslut" (ingen ordgräns efter "lönegaranti").
+  "lönegarantibeslut": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lönegarantilagen (1992:497)"],
+  },
+  // Samägande — samäganderättstvist, Samäganderättslagen (1904:48 s.1).
+  "samägande": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: ["Samäganderättslagen (1904:48 s.1)"],
+  },
+  // "åt utländsk domstol" — parsern strippar den ledande förhandlingstypen
+  // "Bevisupptagning" (se extractors HEARING_TYPES), så civil bevisupptagning åt
+  // utländsk domstol når matchern som bara "åt utländsk domstol". Lag (1946:816).
+  "åt utländsk domstol": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
+  },
+  // Skiljeförfarande (t.ex. klander av skiljedom) — Lag (1999:116) om
+  // skiljeförfarande.
+  "skiljeförfarande": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Lag (1999:116) om skiljeförfarande"],
+  },
 };
 
 /**
@@ -1974,6 +2061,33 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap."],
   },
+
+  // --- Batch (2026-08c): corpus-discovered + user batch (Ä) ---
+  // Anordnande av interimistiskt förvaltarskap — FB 11 kap. 18 § (interimistiskt
+  // beslut). "anordnande av förvaltarskap" (7 §) matchar inte pga inskjutet
+  // "interimistiskt".
+  "anordnande av interimistiskt förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 18 §"],
+  },
+  // Förordnande av bodelningsförrättare — ÄktB 17 kap. 1 §. (Saken kommer ofta
+  // med suffix ", återförvisat mål" som splittas bort på kommat.)
+  "förordnande av bodelningsförrättare": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 17 kap. 1 §"],
+  },
+  // Ansökan om bevisupptagning (Ä) — bevisning till framtida säkerhet, RB 41 kap.
+  // (Skiljeförfarande-varianten "...enligt 26 § lag (1999:116)" matchar denna
+  // nyckel först pga längd → RB 41 kap; sakområdet blir ändå rätt.)
+  "ansökan om bevisupptagning": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Rättegångsbalken 41 kap."],
+  },
+  // Överklagande av Kronofogdens beslut — utsökningsmål, UB 18 kap.
+  "överklagande av kronofogdens beslut": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
+  },
   // Äktenskapsskillnad filed as Ä (family map isn't reached for Ä).
   "äktenskapsskillnad": {
     sakomrade: "Familjerätt",
@@ -2008,6 +2122,19 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
   "edgångssammanträde": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
+  },
+
+  // --- Batch (2026-08c): corpus-discovered + user batch (K) ---
+  // Begäran om ed — edgång i konkurs (gäldenärsed), KonkL 6 kap. Jfr "edgång".
+  "begäran om ed": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
+  },
+  // Efterbevakning — bevakning av fordran efter bevakningstidens utgång, KonkL
+  // 9 kap. (Saken kommer ofta med case-ref-suffix, t.ex. "efterbevakning i k …".)
+  "efterbevakning": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 9 kap."],
   },
 };
 
