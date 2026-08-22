@@ -1179,13 +1179,6 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Vapenbrott",
     primart_lagrum: ["Knivlagen (1988:254)"],
   },
-  // Förverkande (ensamt) — talan om förverkande av egendom, BrB 36 kap. Med i
-  // FRAGMENT_EXCLUDED (lagrumMatch.ts) så det inte kapar primärbrottet i
-  // sammansatta saken ("...narkotikabrott, förverkande").
-  "förverkande": {
-    sakomrade: "Brott mot allmän verksamhet",
-    primart_lagrum: ["BrB 36 kap."],
-  },
   // Brott mot tystnadsplikt(en) — BrB 20 kap. 3 §. Båda formerna (bestämd form
   // "-en" saknar ordgräns mot bare "tystnadsplikt").
   "brott mot tystnadsplikten": {
@@ -1801,13 +1794,6 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "samägande": {
     sakomrade: "Sakrätt",
     primart_lagrum: ["Samäganderättslagen (1904:48 s.1)"],
-  },
-  // "åt utländsk domstol" — parsern strippar den ledande förhandlingstypen
-  // "Bevisupptagning" (se extractors HEARING_TYPES), så civil bevisupptagning åt
-  // utländsk domstol når matchern som bara "åt utländsk domstol". Lag (1946:816).
-  "åt utländsk domstol": {
-    sakomrade: "Övriga tvistemål",
-    primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
   },
   // Skiljeförfarande (t.ex. klander av skiljedom) — Lag (1999:116) om
   // skiljeförfarande.

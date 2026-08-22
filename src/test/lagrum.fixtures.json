@@ -264,8 +264,6 @@
 
     { "name": "Batch 2026-08c B: osant intygande", "saken": "osant intygande", "caseNumber": "B 200-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 15 kap. 11 §" },
     { "name": "Batch 2026-08c B: knivar (fragment form)", "saken": "beträffande knivar och andra farliga föremål", "caseNumber": "B 201-26", "sakomrade": "Vapenbrott", "lagrum": "Knivlagen (1988:254)" },
-    { "name": "Batch 2026-08c B: förverkande (standalone)", "saken": "förverkande", "caseNumber": "B 202-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 36 kap." },
-    { "name": "Batch 2026-08c B: förverkande NOT hijacking compound", "saken": "narkotikabrott, förverkande", "caseNumber": "B 203-26", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 1 §" },
     { "name": "Batch 2026-08c B: brott mot tystnadsplikten", "saken": "brott mot tystnadsplikten", "caseNumber": "B 204-26", "sakomrade": "Tjänstebrott", "lagrum": "BrB 20 kap. 3 §" },
     { "name": "Batch 2026-08c B: främjande av flykt", "saken": "främjande av flykt m.m.", "caseNumber": "B 205-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 12 §" },
     { "name": "Batch 2026-08c FT: övertidsersättning", "saken": "övertidsersättning", "caseNumber": "FT 206-26", "sakomrade": "Arbetsrätt", "lagrum": "" },
@@ -274,7 +272,6 @@
     { "name": "Batch 2026-08c PMT: konkurrensrätt", "saken": "konkurrensrätt", "caseNumber": "PMT 209-26", "sakomrade": "Konkurrensrätt", "lagrum": "Konkurrenslagen (2008:579)" },
     { "name": "Batch 2026-08c FT: överprövning av lönegarantibeslut", "saken": "överprövning av lönegarantibeslut", "caseNumber": "FT 210-26", "sakomrade": "Arbetsrätt", "lagrum": "Lönegarantilagen (1992:497)" },
     { "name": "Batch 2026-08c T: samägande av fastighet", "saken": "samägande av fastighet", "caseNumber": "T 211-26", "sakomrade": "Sakrätt", "lagrum": "Samäganderättslagen (1904:48 s.1)" },
-    { "name": "Batch 2026-08c T: åt utländsk domstol (stripped bevisupptagning)", "saken": "åt utländsk domstol", "caseNumber": "T 212-26", "sakomrade": "Övriga tvistemål", "lagrum": "Lag (1946:816) om bevisupptagning åt utländsk domstol" },
     { "name": "Batch 2026-08c T: skiljeförfarande", "saken": "skiljeförfarande", "caseNumber": "T 213-26", "sakomrade": "Övriga tvistemål", "lagrum": "Lag (1999:116) om skiljeförfarande" },
     { "name": "Batch 2026-08c Ä: anordnande av interimistiskt förvaltarskap", "saken": "anordnande av interimistiskt förvaltarskap", "caseNumber": "Ä 214-26", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap. 18 §" },
     { "name": "Batch 2026-08c Ä: förordnande av bodelningsförrättare (komma-split)", "saken": "förordnande av bodelningsförrättare, återförvisat mål", "caseNumber": "Ä 215-26", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 17 kap. 1 §" },
