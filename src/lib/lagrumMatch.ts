@@ -31,14 +31,15 @@ const FRAGMENT_SEPARATORS_RE = /\s*[;,/]\s*|\s+och\s+|\s+samt\s+|\s+jämte\s+/i;
 
 /**
  * Cleaned fragments that must NOT classify on their own inside a compound
- * saken. "beslag" is a coercive measure that trails real charges
- * ("…knivar och andra farliga föremål samt beslag"); as a standalone fragment
- * it would short-circuit the fragment loop and hijack the primary crime. It is
- * skipped here so such sakens fall through to the whole-saken match, while a
- * standalone "beslag" saken (no separators, so the fragment loop never runs)
- * still classifies via the fullMatch path.
+ * saken. "beslag" and "förverkande" are ancillary measures that trail real
+ * charges ("…knivar och andra farliga föremål samt beslag", "…narkotikabrott,
+ * förverkande"); as a standalone fragment either would short-circuit the
+ * fragment loop and hijack the primary crime (attaching a spurious
+ * `additional`). They are skipped here so such sakens fall through to the
+ * whole-saken match, while a standalone "beslag" / "förverkande" saken (no
+ * separators, so the fragment loop never runs) still classifies via fullMatch.
  */
-const FRAGMENT_EXCLUDED = new Set(["beslag"]);
+const FRAGMENT_EXCLUDED = new Set(["beslag", "förverkande"]);
 
 /**
  * Fuzzy normalization: lowercase, strip diacritics, collapse duplicated letters.
