@@ -1194,6 +1194,24 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 12 §"],
   },
+
+  // --- Batch (2026-08d): user batch (B) ---
+  // Typo-variant av "förseelse mot jaktlagen" ("föreseelse", extra e).
+  "föreseelse mot jaktlagen": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Jaktlagen (1987:259)"],
+  },
+  // Trunkerad variant — saken slutar vid "knivar" (fullformen ...knivar och
+  // andra farliga föremål finns redan). Knivlagen.
+  "brott mot lagen om förbud beträffande knivar": {
+    sakomrade: "Vapenbrott",
+    primart_lagrum: ["Knivlagen (1988:254)"],
+  },
+  // "angrepp på tjänsteman" — variant av "angrepp mot tjänsteman" (BrB 17:1a).
+  "angrepp på tjänsteman": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 1 a §"],
+  },
 };
 
 /**
@@ -1801,6 +1819,31 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Övriga tvistemål",
     primart_lagrum: ["Lag (1999:116) om skiljeförfarande"],
   },
+
+  // --- Batch (2026-08d): user batch (T) ---
+  // Laglottskränkning — bröstarvinges laglott kränkt via testamente; jämkning
+  // ÄB 7 kap. 3 §. (jfr "förstärkt laglottsskydd" ÄB 7:4 för gåvor.)
+  "laglottskränkning": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 3 §"],
+  },
+  // Fastställande av nyttjanderätt till parkeringsplats — nyttjanderätt till
+  // fast egendom, Jordabalken 7 kap.
+  "nyttjanderätt till parkeringsplats": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 7 kap."],
+  },
+  // Enskilt anspråk — skadeståndsanspråk i anledning av brott (RB 22 kap.),
+  // handlagt som tvistemål. Skadeståndsrätt.
+  "enskilt anspråk": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Skadeståndslagen (1972:207)"],
+  },
+  // Fel i tjänst — tjänstefel enligt konsumenttjänstlagen.
+  "fel i tjänst": {
+    sakomrade: "Konsumenträtt",
+    primart_lagrum: ["Konsumenttjänstlagen (1985:716)"],
+  },
 };
 
 /**
@@ -2071,6 +2114,37 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   },
   // Överklagande av Kronofogdens beslut — utsökningsmål, UB 18 kap.
   "överklagande av kronofogdens beslut": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
+  },
+
+  // --- Batch (2026-08d): user batch (Ä) ---
+  // Överförmyndarnämndens beslut (överklagande) — FB 20 kap., jfr
+  // "överförmyndarens beslut".
+  "överförmyndarnämndens beslut": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 20 kap."],
+  },
+  // Konvertering av godmanskap till förvaltarskap — FB 11 kap. 7 §, jfr
+  // "utökning av godmanskap till förvaltarskap".
+  "konvertering av godmanskap till förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
+  // Invändning mot verkställighet — gäldenärens invändning i utsökningsmål
+  // (fullgjort/kvittning/preskription), UB 3 kap. 21 §.
+  "invändning mot verkställighet": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 3 kap. 21 §"],
+  },
+  // Överklagande av Kronofogdemyndighetens beslut — UB 18 kap. Nyckla både
+  // korrekt form och den observerade parser-brytningen "kronofogdemyndighe tens"
+  // (mjuk radbrytning mitt i ordet, Värmland Ä 2565-26).
+  "överklagande av kronofogdemyndighetens beslut": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
+  },
+  "överklagande av kronofogdemyndighe tens beslut": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
   },
