@@ -278,6 +278,19 @@
     { "name": "Batch 2026-08c Ä: ansökan om bevisupptagning (skiljeförfarande -> RB 41)", "saken": "ansökan om bevisupptagning enligt 26 § lag (1999:116) om skiljeförfarande", "caseNumber": "Ä 216-26", "sakomrade": "Övriga tvistemål", "lagrum": "Rättegångsbalken 41 kap." },
     { "name": "Batch 2026-08c Ä: överklagande av kronofogdens beslut", "saken": "överklagande av kronofogdens beslut", "caseNumber": "Ä 217-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 18 kap." },
     { "name": "Batch 2026-08c K: begäran om ed", "saken": "begäran om ed", "caseNumber": "K 218-26", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672) 6 kap." },
-    { "name": "Batch 2026-08c K: efterbevakning", "saken": "efterbevakning i k 8749-25", "caseNumber": "K 219-26", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672) 9 kap." }
+    { "name": "Batch 2026-08c K: efterbevakning", "saken": "efterbevakning i k 8749-25", "caseNumber": "K 219-26", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672) 9 kap." },
+
+    { "name": "Batch 2026-08d B: föreseelse mot jaktlagen (typo)", "saken": "föreseelse mot jaktlagen", "caseNumber": "B 300-26", "sakomrade": "Miljöbrott", "lagrum": "Jaktlagen (1987:259)" },
+    { "name": "Batch 2026-08d B: brott mot lagen om förbud beträffande knivar (trunkerad)", "saken": "brott mot lagen om förbud beträffande knivar", "caseNumber": "B 301-26", "sakomrade": "Vapenbrott", "lagrum": "Knivlagen (1988:254)" },
+    { "name": "Batch 2026-08d B: angrepp på tjänsteman (variant)", "saken": "angrepp på tjänsteman", "caseNumber": "B 302-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 1 a §" },
+    { "name": "Batch 2026-08d Ä: överklagande av överförmyndarnämndens beslut", "saken": "överklagande av överförmyndarnämndens beslut", "caseNumber": "Ä 303-26", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 20 kap." },
+    { "name": "Batch 2026-08d Ä: konvertering av godmanskap till förvaltarskap", "saken": "konvertering av godmanskap till förvaltarskap", "caseNumber": "Ä 304-26", "sakomrade": "Förmynderskapsrätt", "lagrum": "Föräldrabalken 11 kap. 7 §" },
+    { "name": "Batch 2026-08d Ä: invändning mot verkställighet", "saken": "invändning mot verkställighet", "caseNumber": "Ä 305-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 3 kap. 21 §" },
+    { "name": "Batch 2026-08d Ä: kronofogdemyndighetens beslut (korrekt form)", "saken": "överklagande av kronofogdemyndighetens beslut", "caseNumber": "Ä 306-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 18 kap." },
+    { "name": "Batch 2026-08d Ä: kronofogdemyndighe tens (Värmland parse-split)", "saken": "överklagande av kronofogdemyndighe tens beslut", "caseNumber": "Ä 2565-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 18 kap." },
+    { "name": "Batch 2026-08d T: laglottskränkning", "saken": "laglottskränkning", "caseNumber": "T 307-26", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 7 kap. 3 §" },
+    { "name": "Batch 2026-08d T: nyttjanderätt till parkeringsplats", "saken": "fastställande av nyttjanderätt till parkeringsplats", "caseNumber": "T 308-26", "sakomrade": "Fastighetsrätt", "lagrum": "Jordabalken 7 kap." },
+    { "name": "Batch 2026-08d T: enskilt anspråk", "saken": "enskilt anspråk", "caseNumber": "T 309-26", "sakomrade": "Skadeståndsrätt", "lagrum": "Skadeståndslagen (1972:207)" },
+    { "name": "Batch 2026-08d T: fel i tjänst", "saken": "fel i tjänst", "caseNumber": "T 310-26", "sakomrade": "Konsumenträtt", "lagrum": "Konsumenttjänstlagen (1985:716)" }
   ]
 }
