@@ -291,6 +291,10 @@
     { "name": "Batch 2026-08d T: laglottskränkning", "saken": "laglottskränkning", "caseNumber": "T 307-26", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 7 kap. 3 §" },
     { "name": "Batch 2026-08d T: nyttjanderätt till parkeringsplats", "saken": "fastställande av nyttjanderätt till parkeringsplats", "caseNumber": "T 308-26", "sakomrade": "Fastighetsrätt", "lagrum": "Jordabalken 7 kap." },
     { "name": "Batch 2026-08d T: enskilt anspråk", "saken": "enskilt anspråk", "caseNumber": "T 309-26", "sakomrade": "Skadeståndsrätt", "lagrum": "Skadeståndslagen (1972:207)" },
-    { "name": "Batch 2026-08d T: fel i tjänst", "saken": "fel i tjänst", "caseNumber": "T 310-26", "sakomrade": "Konsumenträtt", "lagrum": "Konsumenttjänstlagen (1985:716)" }
+    { "name": "Batch 2026-08d T: fel i tjänst", "saken": "fel i tjänst", "caseNumber": "T 310-26", "sakomrade": "Konsumenträtt", "lagrum": "Konsumenttjänstlagen (1985:716)" },
+
+    { "name": "Batch 2026-08e B: brott mot sjölagen (no målnummer)", "saken": "brott mot sjölagen", "caseNumber": "–", "sakomrade": "Sjöfartsbrott", "lagrum": "Sjölagen (1994:1009) 20 kap." },
+    { "name": "Batch 2026-08e B: förseelse mot trafikförordningen (no målnummer)", "saken": "förseelse mot trafikförordningen", "caseNumber": "–", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276)" },
+    { "name": "Batch 2026-08e T: fel i entreprenad (no målnummer -> civil fallback)", "saken": "fel i entreprenad", "caseNumber": "–", "sakomrade": "Avtalsrätt", "lagrum": "" }
   ]
 }

@@ -1212,6 +1212,20 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["BrB 17 kap. 1 a §"],
   },
+
+  // --- Batch (2026-08e): Varberg (publicerar utan målnummer) (B) ---
+  // Brott mot sjölagen — straffbestämmelser i Sjölagen 20 kap. (sjöfylleri m.m.).
+  // Generatorn har bara långa compound-nycklar; bar form saknades.
+  "brott mot sjölagen": {
+    sakomrade: "Sjöfartsbrott",
+    primart_lagrum: ["Sjölagen (1994:1009) 20 kap."],
+  },
+  // Förseelse mot trafikförordningen — Trafikförordningen (1998:1276), jfr
+  // "brott mot trafikförordningen" / "trafikförseelse".
+  "förseelse mot trafikförordningen": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276)"],
+  },
 };
 
 /**
@@ -1843,6 +1857,14 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "fel i tjänst": {
     sakomrade: "Konsumenträtt",
     primart_lagrum: ["Konsumenttjänstlagen (1985:716)"],
+  },
+
+  // --- Batch (2026-08e): Varberg (publicerar utan målnummer) (T) ---
+  // Fel i entreprenad — entreprenadtvist, styrs av standardavtal (AB 04/ABT 06),
+  // ingen egen lag → tomt lagrum (jfr "nyttjanderättsersättning"). Avtalsrätt.
+  "fel i entreprenad": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: [],
   },
 };
 
