@@ -295,6 +295,10 @@
 
     { "name": "Batch 2026-08e B: brott mot sjölagen (no målnummer)", "saken": "brott mot sjölagen", "caseNumber": "–", "sakomrade": "Sjöfartsbrott", "lagrum": "Sjölagen (1994:1009) 20 kap." },
     { "name": "Batch 2026-08e B: förseelse mot trafikförordningen (no målnummer)", "saken": "förseelse mot trafikförordningen", "caseNumber": "–", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276)" },
-    { "name": "Batch 2026-08e T: fel i entreprenad (no målnummer -> civil fallback)", "saken": "fel i entreprenad", "caseNumber": "–", "sakomrade": "Avtalsrätt", "lagrum": "" }
+    { "name": "Batch 2026-08e T: fel i entreprenad (no målnummer -> civil fallback)", "saken": "fel i entreprenad", "caseNumber": "–", "sakomrade": "Avtalsrätt", "lagrum": "" },
+
+    { "name": "Batch 2026-08f B: undanröjande skyddstillsyn (utan av)", "saken": "undanröjande skyddstillsyn", "caseNumber": "B 400-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 28 kap. 9 §" },
+    { "name": "Batch 2026-08f B: bötesförvandling", "saken": "bötesförvandling", "caseNumber": "B 401-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Bötesverkställighetslagen (1979:189) 15 §" },
+    { "name": "Batch 2026-08f T: förverkande av arrenderätt", "saken": "förverkande av arrenderätt", "caseNumber": "T 402-26", "sakomrade": "Arrenderätt", "lagrum": "Jordabalken 8 kap. 23 §" }
   ]
 }

@@ -1226,6 +1226,19 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Trafikbrott",
     primart_lagrum: ["Trafikförordningen (1998:1276)"],
   },
+
+  // --- Batch (2026-08f): user batch (B) ---
+  // Variant utan "av" av "undanröjande av skyddstillsyn" (BrB 28 kap. 9 §).
+  "undanröjande skyddstillsyn": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 28 kap. 9 §"],
+  },
+  // Bötesförvandling (= förvandling av böter) — Bötesverkställighetslagen 15 §,
+  // jfr "förvandling av böter".
+  "bötesförvandling": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["Bötesverkställighetslagen (1979:189) 15 §"],
+  },
 };
 
 /**
@@ -1865,6 +1878,13 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "fel i entreprenad": {
     sakomrade: "Avtalsrätt",
     primart_lagrum: [],
+  },
+
+  // --- Batch (2026-08f): user batch (T) ---
+  // Förverkande av arrenderätt — grunder i Jordabalken 8 kap. 23 §.
+  "förverkande av arrenderätt": {
+    sakomrade: "Arrenderätt",
+    primart_lagrum: ["Jordabalken 8 kap. 23 §"],
   },
 };
 
