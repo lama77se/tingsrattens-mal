@@ -325,4 +325,42 @@ describe("formatGavle", () => {
       expect(result[0].room).toBe("");
     });
   });
+
+  describe("V4 single-line glued format (2026-09+)", () => {
+    it("parses a fully glued line with no separators", () => {
+      const text = "ti2026-09-0109:00 - 10:00B 5094-25bidragsbrott";
+      const result = formatGavle.parse({ courtName: "Gävle tingsrätt", text });
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        date: "2026-09-01",
+        time: "09:00 - 10:00",
+        caseNumber: "B 5094-25",
+        saken: "bidragsbrott",
+        room: "",
+        type: "Huvudförhandling",
+      });
+    });
+
+    it("handles a short case number", () => {
+      const text = "må2026-09-0711:30 - 12:00B 251-26brott mot lagen om förbud";
+      const result = formatGavle.parse({ courtName: "Test", text });
+      expect(result).toHaveLength(1);
+      expect(result[0].caseNumber).toBe("B 251-26");
+      expect(result[0].saken).toBe("brott mot lagen om förbud");
+    });
+
+    it("parses multiple consecutive glued lines", () => {
+      const text = [
+        "ti2026-09-0109:00 - 10:00B 5094-25bidragsbrott",
+        "ti2026-09-0110:00 - 12:00B 4912-25olaga hot",
+      ].join("\n");
+      const result = formatGavle.parse({ courtName: "Test", text });
+      expect(result).toHaveLength(2);
+      expect(result.map((h) => h.caseNumber)).toEqual([
+        "B 5094-25",
+        "B 4912-25",
+      ]);
+      expect(result.map((h) => h.saken)).toEqual(["bidragsbrott", "olaga hot"]);
+    });
+  });
 });
