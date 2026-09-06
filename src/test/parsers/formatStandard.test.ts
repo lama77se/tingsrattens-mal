@@ -285,6 +285,32 @@ describe("formatStandard", () => {
     expect(result[0].saken).toContain("T 14184-24");
   });
 
+  it("treats a bare 'i <case>' reference (no 'mål') as saken, not a new hearing (Attunda)", () => {
+    // w37/2026: T 5326-26's saken references an earlier case's default
+    // judgment ("återvinning av tredskodom i T1184-26"), glued with no space
+    // and with NO "mål" keyword — unlike the parenthesized cross-reference
+    // test above. Before the fix this spawned a phantom "T1184-26" hearing
+    // with saken "(ref 598181)" and made T 5326-26 inherit the PREVIOUS
+    // hearing's saken via the same-time-slot fallback.
+    const text = [
+      "07-sep",
+      "13:00 - 15:00 Muntlig förberedelse",
+      "T 3833-26",
+      "upplösning av partnerskap med frågor om vårdnad, boende/ och umgängeTingssal 13",
+      "13:00 - 15:00 Muntlig förberedelse",
+      "T 5326-26",
+      "återvinning av tredskodom i T1184-26 (ref 598181)Tingssal 14",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Attunda tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].caseNumber).toBe("T 3833-26");
+    expect(result[0].saken).toContain("upplösning av partnerskap");
+    expect(result[1].caseNumber).toBe("T 5326-26");
+    expect(result[1].saken).toContain("återvinning av tredskodom i T1184-26");
+    expect(result[1].saken).toContain("598181");
+  });
+
   it("treats 'i mål ... och ...' case references as saken, not new hearings (Helsingborg)", () => {
     // w35/2026: T 970-26's saken references two other cases. The old parser
     // spawned a phantom "B 7028-25" hearing and made T 970-26 inherit the

@@ -288,6 +288,26 @@ describe("formatPositional", () => {
     expect(hearings.map((h) => h.caseNumber)).toEqual(["T 170-26", "B 1390-26"]);
   });
 
+  it("Linköping regression: forward-merges a saken pushed entirely onto its own row", () => {
+    // The saken cell is completely empty on the hearing's own row (the case
+    // number is immediately followed by the Sal column), and the real saken
+    // text — a self-contained parenthetical, not a "closing" continuation of
+    // an open paren — sits on the very next physical row.
+    const text = build([
+      `ti${TAB}2026-08-18${TAB}10:00 - 12:00${TAB}Muntlig förberedelse${TAB}T 3157-26${TAB}Sal 8`,
+      `(återvinning tredskodom T 142-26)`,
+      `ti${TAB}2026-08-18${TAB}10:00 - 12:00${TAB}Muntlig förberedelse${TAB}T 3526-26${TAB}vårdnad mm${TAB}Sal 2`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "T 3157-26",
+      room: "Sal 8",
+      saken: "(återvinning tredskodom T 142-26)",
+    });
+    expect(hearings[1].caseNumber).toBe("T 3526-26");
+  });
+
   it("Eskilstuna: completes a time range whose end wraps to the next row", () => {
     // Eskilstuna stacks the time range vertically: the start ("09:00 -") sits
     // on the hearing row and the end ("16:00") wraps to the next physical row,
