@@ -1291,6 +1291,27 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Narkotikabrott",
     primart_lagrum: ["Narkotikastrafflagen (1968:64) 2 §"],
   },
+
+  // --- Batch (2026-09d): user batch (B) ---
+  // Skyddande av brottsling — BrB 17 kap. 11 §.
+  "skyddande av brottsling": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 17 kap. 11 §"],
+  },
+  // Brott mot lagen om fordons registrering och användning — Lag (2019:370),
+  // straffbestämmelser i 8 kap. (t.ex. brukande av oregistrerat/oförsäkrat fordon).
+  "brott mot lagen om fordons registrering och användning": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Lag (2019:370) om fordons registrering och användning"],
+  },
+  // Bötesomvandling — variant (omvänd ordföljd) av "omvandling av böter",
+  // Bötesverkställighetslagen 15 §. Sakomrade följer den nyckeln (inte
+  // "bötesförvandling", som av misstag klassades som Brott mot rättskipningen
+  // i en tidigare batch).
+  "bötesomvandling": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Bötesverkställighetslagen (1979:189) 15 §"],
+  },
 };
 
 /**
@@ -2014,6 +2035,36 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 20 kap. 6 §"],
   },
+
+  // --- Batch (2026-09d): user batch (T/FT) ---
+  // Fastställelse av överlåtelse genom gåva — gåvolagen, jfr
+  // "ogiltigförklaring av gåvobrev".
+  "fastställelse av överlåtelse genom gåva": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Lag (1936:83) angående vissa utfästelser om gåva"],
+  },
+  // Utlämna pantbrev — inteckningshavarens skyldighet att lämna ut pantbrevet,
+  // JB 6 kap.
+  "utlämna pantbrev": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 6 kap."],
+  },
+  // Hyresnedsättning och ersättning för olägenheter — saken splittas på " och
+  // " (FRAGMENT_SEPARATORS_RE), så båda leden nycklas separat.
+  "hyresnedsättning": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap. 11 §"],
+  },
+  "ersättning för olägenheter": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap. 16 §"],
+  },
+  // Klander av föreningsstämmobeslut — ekonomiska föreningar, jfr "klander av
+  // bolagsstämmobeslut" (ABL). Lag (2018:672) om ekonomiska föreningar 6 kap.
+  "klander av föreningsstämmobeslut": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Lag (2018:672) om ekonomiska föreningar 6 kap."],
+  },
 };
 
 /**
@@ -2101,6 +2152,15 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   "förordnande av särskild vårdnadshavare": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
+  },
+
+  // --- Batch (2026-09d): user batch (T, falls through to family vocabulary) ---
+  // Moderskap — mothership-fastställelse, jfr "faderskap". Saken kommer ofta
+  // med schemaläggningsprefix ("Eventuellt huvudförhandling moderskap");
+  // bar nyckel fångar den via substrängsmatchning.
+  "moderskap": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 1 kap."],
   },
 };
 
@@ -2359,6 +2419,27 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 4 kap."],
   },
+
+  // --- Batch (2026-09d): user batch (Ä) ---
+  // Barns boende — variant av familjekartans "boende" (FB 6 kap. 14 a §);
+  // family map isn't reached for Ä.
+  "barns boende": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 14 a §"],
+  },
+  // Skuldsanering (bar nyckel) — själva skuldsaneringsärendet (till skillnad
+  // från "överklagan av beslut om skuldsanering"), Skuldsaneringslagen.
+  "skuldsanering": {
+    sakomrade: "Skuldsanering",
+    primart_lagrum: ["Skuldsaneringslagen (2016:675)"],
+  },
+  // Överklagad verkställighet — överklagande av Kronofogdens
+  // verkställighetsåtgärd, UB 18 kap. Jfr "invändning mot verkställighet" /
+  // "överklagande av kronofogdens beslut".
+  "överklagad verkställighet": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
+  },
 };
 
 /**
@@ -2409,6 +2490,14 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
   "ansökan om ed": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
+  },
+
+  // --- Batch (2026-09d): user batch (K) ---
+  // Ansökan staten — konkursansökan där staten (t.ex. Skatteverket) är
+  // sökande borgenär, jfr "ansökan om konkurs" / "konkursansökan".
+  "ansökan staten": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 2 kap."],
   },
 };
 
