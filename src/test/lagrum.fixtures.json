@@ -331,6 +331,19 @@
     { "name": "Batch 2026-09c B: hindrande av trafik", "saken": "hindrande av trafik", "caseNumber": "B 510-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 3 kap. 1 §" },
     { "name": "Batch 2026-09c B: brott mot lagen om skydd mot olyckor", "saken": "brott mot lagen om skydd mot olyckor", "caseNumber": "B 511-26", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Lag (2003:778) om skydd mot olyckor 10 kap." },
     { "name": "Batch 2026-09c B: sexuellt utnyttjande av barn (bare)", "saken": "sexuellt utnyttjande av barn", "caseNumber": "B 512-26", "sakomrade": "Sexualbrott", "lagrum": "BrB 6 kap. 5 §" },
-    { "name": "Batch 2026-09c B: narkotika (ringa)", "saken": "narkotika (ringa)", "caseNumber": "B 513-26", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 2 §" }
+    { "name": "Batch 2026-09c B: narkotika (ringa)", "saken": "narkotika (ringa)", "caseNumber": "B 513-26", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 2 §" },
+
+    { "name": "Batch 2026-09d K: ansökan staten", "saken": "ansökan staten", "caseNumber": "K 514-26", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672) 2 kap." },
+    { "name": "Batch 2026-09d Ä: barns boende", "saken": "barns boende", "caseNumber": "Ä 515-26", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 6 kap. 14 a §" },
+    { "name": "Batch 2026-09d T: fastställelse av överlåtelse genom gåva", "saken": "fastställelse av överlåtelse genom gåva", "caseNumber": "T 516-26", "sakomrade": "Avtalsrätt", "lagrum": "Lag (1936:83) angående vissa utfästelser om gåva" },
+    { "name": "Batch 2026-09d B: skyddande av brottsling", "saken": "skyddande av brottsling", "caseNumber": "B 517-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 17 kap. 11 §" },
+    { "name": "Batch 2026-09d T: eventuellt huvudförhandling moderskap (substring)", "saken": "eventuellt huvudförhandling moderskap", "caseNumber": "T 518-26", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 1 kap." },
+    { "name": "Batch 2026-09d B: brott mot lagen om fordons registrering och användning", "saken": "brott mot lagen om fordons registrering och användning", "caseNumber": "B 519-26", "sakomrade": "Trafikbrott", "lagrum": "Lag (2019:370) om fordons registrering och användning" },
+    { "name": "Batch 2026-09d T: utlämna pantbrev", "saken": "utlämna pantbrev", "caseNumber": "T 520-26", "sakomrade": "Fastighetsrätt", "lagrum": "Jordabalken 6 kap." },
+    { "name": "Batch 2026-09d FT: hyresnedsättning och ersättning för olägenheter (fragment split)", "saken": "hyresnedsättning och ersättning för olägenheter", "caseNumber": "FT 521-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap. 11 §", "joinedLagrum": "Jordabalken 12 kap. 11 §; Jordabalken 12 kap. 16 §" },
+    { "name": "Batch 2026-09d T: klander av föreningsstämmobeslut", "saken": "klander av föreningsstämmobeslut", "caseNumber": "T 522-26", "sakomrade": "Avtalsrätt", "lagrum": "Lag (2018:672) om ekonomiska föreningar 6 kap." },
+    { "name": "Batch 2026-09d B: bötesomvandling", "saken": "bötesomvandling", "caseNumber": "B 523-26", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Bötesverkställighetslagen (1979:189) 15 §" },
+    { "name": "Batch 2026-09d Ä: skuldsanering (bare)", "saken": "skuldsanering", "caseNumber": "Ä 524-26", "sakomrade": "Skuldsanering", "lagrum": "Skuldsaneringslagen (2016:675)" },
+    { "name": "Batch 2026-09d Ä: överklagad verkställighet", "saken": "överklagad verkställighet", "caseNumber": "Ä 525-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 18 kap." }
   ]
 }
