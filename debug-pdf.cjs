@@ -65,6 +65,7 @@ const COURT_MAP = {
   varmlands: { name: "Värmlands tingsrätt", format: "positional" },
   vastmanlands: { name: "Västmanlands tingsrätt", format: "tabular" },
   vaxjo: { name: "Växjö tingsrätt", format: "tabular" },
+  ystads: { name: "Ystads tingsrätt", format: "schema" },
   angermanlands: { name: "Ångermanlands tingsrätt", format: "positional" },
   orebro: { name: "Örebro tingsrätt", format: "tabular" },
 };
