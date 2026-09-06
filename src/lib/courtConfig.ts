@@ -628,10 +628,9 @@ export const COURTS: CourtConfig[] = [
   {
     id: "ystads_tingsratt",
     name: "Ystads tingsrätt",
-    formatFamily: "standard",
-    disabled: true,
-    note: "Publicerar ej veckans förhandlingar online. Beställs via e-post.",
-    buildUrl: () => "",
+    formatFamily: "schema",
+    buildUrl: (week) =>
+      `${BASE}/ystads_tingsratt/veckans-forhandlingar/forhandlingar-v-${week}.pdf`,
   },
   {
     id: "angermanlands_tingsratt",
