@@ -1239,6 +1239,32 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["Bötesverkställighetslagen (1979:189) 15 §"],
   },
+
+  // --- Batch (2026-09): user batch (B) ---
+  // Smitning från olycksplats — variant utan "trafik" av
+  // "smitning från trafikolycksplats" (Trafikbrottslagen 5 §).
+  "smitning från olycksplats": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikbrottslagen (1951:649) 5 §"],
+  },
+  // Förverkande — bar nyckel, jfr "talan om förverkande" / "självständigt
+  // förverkande" (BrB 36 kap.).
+  "förverkande": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["BrB 36 kap."],
+  },
+  // Brukande av osann urkund — BrB 15 kap. 12 §, samma brott som "missbruk av
+  // urkund" (senare/äldre benämning för samma paragraf).
+  "brukande av osann urkund": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 15 kap. 12 §"],
+  },
+  // Brott mot aktiebolagslagen — generisk ABL-överträdelse, ingen specifik
+  // paragraf angiven i saken.
+  "brott mot aktiebolagslagen": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Aktiebolagslagen (2005:551)"],
+  },
 };
 
 /**
@@ -1886,6 +1912,37 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arrenderätt",
     primart_lagrum: ["Jordabalken 8 kap. 23 §"],
   },
+
+  // --- Batch (2026-09): user batch (T) ---
+  // Personligt ansvar för aktiebolags företrädare — medansvar vid kapitalbrist,
+  // ABL 25 kap. 18-19 §§. Skadeståndsrätt, jfr "skadestånd enligt aktiebolagslagen".
+  "personligt ansvar för aktiebolags företrädare": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 25 kap. 18-19 §§"],
+  },
+  // Bodelningslikvid — betalning (vederlag) enligt bodelning, ÄktB 11 kap.
+  "bodelningslikvid": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 11 kap."],
+  },
+  // Begäran om rättslig hjälp (T) — civilrättslig bevisupptagning åt utländsk
+  // domstol, Lag (1946:816). B-kartan har samma nyckel men avser brottmål
+  // (Lag 2000:562) — T-mål når inte den.
+  "begäran om rättslig hjälp": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
+  },
+  // Stavningsvariant "entrepenad" (utan andra "r") av "fel i entreprenad".
+  "fel i entrepenad": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: [],
+  },
+  // Felaktig uppsägning — saklig grund saknades, LAS 7 §. Jfr
+  // "ogiltigförklaring av uppsägning" (34 §, själva ogiltighetstalan).
+  "felaktig uppsägning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 7 §"],
+  },
 };
 
 /**
@@ -2194,6 +2251,26 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "äktenskapsskillnad": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Äktenskapsbalken 5 kap. 1 §"],
+  },
+
+  // --- Batch (2026-09): user batch (Ä) ---
+  // Överklagan av beslut i parkeringsärende — samma sak som "överklagande av
+  // parkeringsärende", annan formulering ("beslut i" inskjutet).
+  "överklagan av beslut i parkeringsärende": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
+  // Överklagan av beslut om skuldsanering — Kronofogdens beslut överklagas till
+  // tingsrätten, Skuldsaneringslagen 22 §.
+  "överklagan av beslut om skuldsanering": {
+    sakomrade: "Skuldsanering",
+    primart_lagrum: ["Skuldsaneringslagen (2016:675) 22 §"],
+  },
+  // Kvarsittningsrätt — äldre/alternativ term för "kvarboenderätt" (rätten att
+  // bo kvar i makarnas bostad under betänketid/till bodelning), ÄktB 14 kap. 7 §.
+  "kvarsittningsrätt": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Äktenskapsbalken 14 kap. 7 §"],
   },
 };
 
