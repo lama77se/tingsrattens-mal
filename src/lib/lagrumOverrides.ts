@@ -1265,6 +1265,32 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Ekonomisk brottslighet",
     primart_lagrum: ["Aktiebolagslagen (2005:551)"],
   },
+
+  // --- Batch (2026-09c): user batch (B) ---
+  // Hindrande av trafik — förares allmänna aktsamhetsplikt att inte onödigtvis
+  // hindra eller störa annan trafik, Trafikförordningen 3 kap. 1 §.
+  "hindrande av trafik": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276) 3 kap. 1 §"],
+  },
+  // Brott mot lagen om skydd mot olyckor — straffbestämmelser i LSO 10 kap.
+  "brott mot lagen om skydd mot olyckor": {
+    sakomrade: "Övrig speciallagstiftning",
+    primart_lagrum: ["Lag (2003:778) om skydd mot olyckor 10 kap."],
+  },
+  // Sexuellt utnyttjande av barn — bar variant av den BrÅ-genererade
+  // sammansatta nyckeln "sexuellt utnyttjande av barn, sexuellt övergrepp mot
+  // barn" (som kräver båda leden), BrB 6 kap. 5 §.
+  "sexuellt utnyttjande av barn": {
+    sakomrade: "Sexualbrott",
+    primart_lagrum: ["BrB 6 kap. 5 §"],
+    alternativa_lagrum: ["BrB 6 kap. 6 §"],
+  },
+  // Narkotika (ringa) — variant av "ringa narkotikabrott".
+  "narkotika (ringa)": {
+    sakomrade: "Narkotikabrott",
+    primart_lagrum: ["Narkotikastrafflagen (1968:64) 2 §"],
+  },
 };
 
 /**
@@ -1943,6 +1969,51 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Lagen om anställningsskydd (1982:80) 7 §"],
   },
+
+  // --- Batch (2026-09b): user batch (T) ---
+  // Ansökan om rättslig hjälp — stavningsvariant "ansökan" (i st. för
+  // "begäran") av civil rättslig hjälp/bevisupptagning, Lag (1946:816).
+  "ansökan om rättslig hjälp": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
+  },
+  // Fastställande av samboskap — fastställelsetalan om att samboförhållande
+  // föreligger/förelegat, Sambolagen (2003:376).
+  "fastställande av samboskap": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Sambolagen (2003:376)"],
+  },
+  // Begäran om utfående av handlingar — edition av skriftligt bevis,
+  // RB 38 kap. 2 §.
+  "begäran om utfående av handlingar": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Rättegångsbalken 38 kap. 2 §"],
+  },
+  // Hyresersättning — ersättning för nyttjande av lägenhet, jfr "hyresfordran".
+  "hyresersättning": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  // Upphovsrättsintrång — PMT-mål (Patent- och marknadsdomstolen vid Stockholms
+  // tingsrätt) routar till case-type "T" (caseTypeFromCaseNumber). "upphovsrätt"
+  // matchar inte (ingen ordgräns före "sintrång").
+  "upphovsrättsintrång": {
+    sakomrade: "Immaterialrätt",
+    primart_lagrum: ["Upphovsrättslagen (1960:729)"],
+  },
+
+  // --- Batch (2026-09c): user batch (T) ---
+  // Tvist om avtal — generisk avtalstvist, jfr "hävning av avtal".
+  "tvist om avtal": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Avtalslagen (1915:218)"],
+  },
+  // Begäran om bouppteckningsed — dödsbodelägares ed på bouppteckningens
+  // riktighet, ÄB 20 kap. 6 §.
+  "begäran om bouppteckningsed": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 20 kap. 6 §"],
+  },
 };
 
 /**
@@ -2021,6 +2092,15 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   "ogiltighet av äktenskapsförord": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Äktenskapsbalken 7 kap. 3 §"],
+  },
+
+  // --- Batch (2026-09c): user batch (T, falls through to family vocabulary) ---
+  // Förordnande av särskild vårdnadshavare — samma sak som "särskilt förordnad
+  // vårdnadshavare" (FB 6 kap. 10 §), annan ordföljd. Filed as T by some courts,
+  // vilket når familjekartan (se indexesForCaseType i lagrumMatch.ts).
+  "förordnande av särskild vårdnadshavare": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
   },
 };
 
@@ -2272,6 +2352,13 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Äktenskapsbalken 14 kap. 7 §"],
   },
+
+  // --- Batch (2026-09c): user batch (Ä) ---
+  // Adoption filed as Ä (family map isn't reached for Ä), jfr "äktenskapsskillnad".
+  "adoption": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 4 kap."],
+  },
 };
 
 /**
@@ -2314,6 +2401,14 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
   "efterbevakning": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Konkurslagen (1987:672) 9 kap."],
+  },
+
+  // --- Batch (2026-09b): user batch (K) ---
+  // Ansökan om ed — stavningsvariant "ansökan" (i st. för "begäran") av
+  // edgång i konkurs, KonkL 6 kap. Jfr "begäran om ed" / "edgång".
+  "ansökan om ed": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 6 kap."],
   },
 };
 
