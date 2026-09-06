@@ -478,8 +478,30 @@ export const formatTabular: ParserStrategy = {
       // the PDF case column, e.g., "misshandel B 2327-24" after room stripping)
       saken = extractTrailingCases(saken, caseNumbers);
 
+      // Kristianstad's PDF generator occasionally flushes the trailing
+      // Saken/Sal column content for the LAST hearing on a page into the
+      // START of the NEXT page's text — after its header block and any
+      // date-continuation "(dag X/Y)" markers, but BEFORE that page's own
+      // first hearing row. Only cross the page boundary when this hearing
+      // has no saken yet (one that already found its own on the same page
+      // must not reach across for more) and what follows the header block
+      // isn't itself the next page's own hearing.
+      let continuationStart = i + 1;
+      if (!saken && HEADER_REGEX.test(lines[continuationStart] || "")) {
+        let k = continuationStart;
+        while (
+          k < lines.length &&
+          (HEADER_REGEX.test(lines[k]) || DATE_ONLY_REGEX.test(lines[k]) || DAG_REGEX.test(lines[k]))
+        ) {
+          k++;
+        }
+        if (k < lines.length && !isContinuationBreak(lines[k])) {
+          continuationStart = k;
+        }
+      }
+
       // Always check subsequent lines for continuation text
-      for (let j = i + 1; j < lines.length; j++) {
+      for (let j = continuationStart; j < lines.length; j++) {
         let nextLine = lines[j];
         if (isContinuationBreak(nextLine)) break;
         // Strip (dag X/Y) annotations in continuation — but keep processing

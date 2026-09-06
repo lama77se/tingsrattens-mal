@@ -2232,4 +2232,62 @@ describe("formatTabular", () => {
     expect(friday!.saken).toBe("misshandel");
     expect(friday!.room).toBe("Sal 16");
   });
+
+  it("Kristianstad regression: recovers a saken pushed onto the next page (no case numbers, no room on the same page)", () => {
+    // Kristianstad's PDF generator flushes the trailing Saken/Sal content for
+    // the LAST hearing on a page into the START of the next page's text —
+    // after the repeated title/notice/column-header block and any date-
+    // continuation "(dag X/Y)" markers, but BEFORE that page's own first
+    // hearing. Before the fix, the type-only row (nothing after
+    // "Huvudförhandling" on its own page) ended up with an empty saken.
+    const text = [
+      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
+      "må2026-09-0709:00 - 12:00Huvudförhandling",
+      "",
+      "Förhandlingar i Kristianstads tingsrätt 2026-09-07-2026-09-21, listan skapades 2026-09-04",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
+      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
+      "2026-09-10",
+      "(dag 3/30)",
+      "grov misshandel m.mSal 6",
+      "ti2026-09-1510:00 - 10:45Huvudförhandlingringa narkotikabrottSal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Kristianstads tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({
+      date: "2026-09-07",
+      time: "09:00 - 12:00",
+      type: "Huvudförhandling",
+      saken: "grov misshandel m.m",
+      room: "Sal 6",
+    });
+    expect(result[1]).toMatchObject({
+      date: "2026-09-15",
+      type: "Huvudförhandling",
+      saken: "ringa narkotikabrott",
+      room: "Sal 2",
+    });
+  });
+
+  it("Kristianstad regression: does not cross a page boundary to steal the next page's own hearing", () => {
+    // When a hearing genuinely has no saken anywhere (nothing follows on its
+    // own page, and what follows the next page's header is straight into a
+    // dated hearing row), the empty saken must stay empty rather than
+    // swallowing the next page's first hearing's text.
+    const text = [
+      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
+      "ti2026-09-0813:00 - 15:00Huvudförhandling",
+      "",
+      "Förhandlingar i Kristianstads tingsrätt 2026-09-07-2026-09-21, listan skapades 2026-09-04",
+      "Listan är preliminär. Förhandlingar kan ställas in med kort varsel och andra kan tillkomma.",
+      "DagDatumFörhandlingstidTyp av förhandlingSakenSal",
+      "ti2026-09-0910:00 - 10:45Huvudförhandlingringa narkotikabrottSal 2",
+    ].join("\n");
+
+    const result = formatTabular.parse({ courtName: "Kristianstads tingsrätt", text });
+    expect(result).toHaveLength(2);
+    expect(result[0].saken).toBe("");
+    expect(result[1].saken).toBe("ringa narkotikabrott");
+  });
 });
