@@ -204,20 +204,30 @@ export const formatPositional: ParserStrategy = {
 
         if (rawCaseMatch) {
           // Bare-alias or paren-ref line. Fold the closing-paren case into the
-          // previous saken when the saken has an open paren; otherwise drop
-          // (bare-alias case numbers aren't currently linked back as aliases).
+          // previous saken when the saken has an open paren, OR when the
+          // previous hearing's saken cell is otherwise known to need a
+          // continuation row (empty cell, wrapped cell, no right anchor) —
+          // e.g. Linköping: "T 3157-26 [empty saken] Sal 8" followed by
+          // "(återvinning tredskodom T 142-26)" on its own row, a
+          // self-contained parenthetical that isn't "closing" anything but IS
+          // the missing saken text. Otherwise drop (bare-alias case numbers
+          // aren't currently linked back as aliases).
           const afterCase = line.substring(
             (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
           );
           if (
-            afterCase.startsWith(")") &&
-            hasOpenContinuation(rawSakenAcc[lastIdx])
+            (afterCase.startsWith(")") &&
+              hasOpenContinuation(rawSakenAcc[lastIdx])) ||
+            expectsContinuation[lastIdx] ||
+            lacksRightAnchor[lastIdx] ||
+            sakenWrapped[lastIdx]
           ) {
             const trimmed = line.replace(/\t+/g, " ").trim();
             const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
             rawSakenAcc[lastIdx] = merged;
             hearings[lastIdx].saken = cleanSaken(merged);
             expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+            sakenWrapped[lastIdx] = false;
           }
           continue;
         }
@@ -337,8 +347,11 @@ export const formatPositional: ParserStrategy = {
       expectsContinuation.push(hasOpenContinuation(rawSaken));
       lacksRightAnchor.push(!room && !location);
       // Only meaningful when a right anchor WAS found (otherwise lacksRightAnchor
-      // already handles the merge); a trailing-space cell with a Sal means wrap.
-      sakenWrapped.push(cellWrapped && (!!room || !!location));
+      // already handles the merge); a trailing-space cell means a wrap, and a
+      // completely EMPTY cell (Linköping: the saken text is pushed entirely
+      // onto its own continuation row, e.g. "T 3157-26 [nothing] Sal 8" then
+      // "(återvinning tredskodom T 142-26)" below it) also means wrap.
+      sakenWrapped.push((cellWrapped || rawSaken.length === 0) && (!!room || !!location));
       needsEndTime.push(openTime);
     }
 
