@@ -1312,6 +1312,15 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Övrig speciallagstiftning",
     primart_lagrum: ["Bötesverkställighetslagen (1979:189) 15 §"],
   },
+
+  // --- Batch (2026-09e): user batch (B) ---
+  // Återförvisat mål — saken ger ingen information om det underliggande
+  // brottet (målet har återförvisats från hovrätten); tomt lagrum för att
+  // inte missleda, jfr "grovt brott".
+  "återförvisat mål": {
+    sakomrade: "Övriga brott",
+    primart_lagrum: [],
+  },
 };
 
 /**
@@ -2064,6 +2073,31 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "klander av föreningsstämmobeslut": {
     sakomrade: "Avtalsrätt",
     primart_lagrum: ["Lag (2018:672) om ekonomiska föreningar 6 kap."],
+  },
+
+  // --- Batch (2026-09e): user batch (T/FT) ---
+  // Inlösen/överlåtelse av aktier — saken splittas på "/" (FRAGMENT_SEPARATORS_RE),
+  // så båda leden nycklas separat.
+  // "inlösen" antas gälla tvångsinlösen av minoritetsaktier, ABL 22 kap.
+  "inlösen": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 22 kap."],
+  },
+  // Överlåtelse av aktier — generisk aktieöverlåtelsetvist, inget eget lagrum.
+  "överlåtelse av aktier": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: [],
+  },
+  // Återbetalning av deposition — antas gälla hyresdeposition (vanlig FT-tvist
+  // om återbetalning efter hyresförhållandets upphörande), JB 12 kap.
+  "återbetalning av deposition": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
+  },
+  // Lokalhyra — hyra av lokal (ej bostad), JB 12 kap.
+  "lokalhyra": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Jordabalken 12 kap."],
   },
 };
 
