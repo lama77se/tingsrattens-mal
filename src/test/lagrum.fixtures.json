@@ -299,6 +299,21 @@
 
     { "name": "Batch 2026-08f B: undanröjande skyddstillsyn (utan av)", "saken": "undanröjande skyddstillsyn", "caseNumber": "B 400-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 28 kap. 9 §" },
     { "name": "Batch 2026-08f B: bötesförvandling", "saken": "bötesförvandling", "caseNumber": "B 401-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "Bötesverkställighetslagen (1979:189) 15 §" },
-    { "name": "Batch 2026-08f T: förverkande av arrenderätt", "saken": "förverkande av arrenderätt", "caseNumber": "T 402-26", "sakomrade": "Arrenderätt", "lagrum": "Jordabalken 8 kap. 23 §" }
+    { "name": "Batch 2026-08f T: förverkande av arrenderätt", "saken": "förverkande av arrenderätt", "caseNumber": "T 402-26", "sakomrade": "Arrenderätt", "lagrum": "Jordabalken 8 kap. 23 §" },
+
+    { "name": "Batch 2026-09 B: smitning från olycksplats (utan trafik)", "saken": "smitning från olycksplats", "caseNumber": "B 403-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikbrottslagen (1951:649) 5 §" },
+    { "name": "Batch 2026-09 B: förverkande (bar nyckel)", "saken": "förverkande", "caseNumber": "B 404-26", "sakomrade": "Brott mot allmän verksamhet", "lagrum": "BrB 36 kap." },
+    { "name": "Batch 2026-09 B: brukande av osann urkund", "saken": "brukande av osann urkund", "caseNumber": "B 405-26", "sakomrade": "Brott mot rättskipningen", "lagrum": "BrB 15 kap. 12 §" },
+    { "name": "Batch 2026-09 B: brott mot aktiebolagslagen", "saken": "brott mot aktiebolagslagen", "caseNumber": "B 406-26", "sakomrade": "Ekonomisk brottslighet", "lagrum": "Aktiebolagslagen (2005:551)" },
+
+    { "name": "Batch 2026-09 T: personligt ansvar för aktiebolags företrädare", "saken": "personligt ansvar för aktiebolags företrädare", "caseNumber": "T 407-26", "sakomrade": "Skadeståndsrätt", "lagrum": "Aktiebolagslagen (2005:551) 25 kap. 18-19 §§" },
+    { "name": "Batch 2026-09 T: bodelningslikvid", "saken": "bodelningslikvid", "caseNumber": "T 408-26", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 11 kap." },
+    { "name": "Batch 2026-09 T: begäran om rättslig hjälp", "saken": "begäran om rättslig hjälp", "caseNumber": "T 409-26", "sakomrade": "Övriga tvistemål", "lagrum": "Lag (1946:816) om bevisupptagning åt utländsk domstol" },
+    { "name": "Batch 2026-09 T: fel i entrepenad (typo)", "saken": "fel i entrepenad", "caseNumber": "T 410-26", "sakomrade": "Avtalsrätt", "lagrum": "" },
+    { "name": "Batch 2026-09 T: felaktig uppsägning", "saken": "felaktig uppsägning", "caseNumber": "T 411-26", "sakomrade": "Arbetsrätt", "lagrum": "Lagen om anställningsskydd (1982:80) 7 §" },
+
+    { "name": "Batch 2026-09 Ä: överklagan av beslut i parkeringsärende", "saken": "överklagan av beslut i parkeringsärende", "caseNumber": "Ä 412-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" },
+    { "name": "Batch 2026-09 Ä: överklagan av beslut om skuldsanering", "saken": "överklagan av beslut om skuldsanering", "caseNumber": "Ä 413-26", "sakomrade": "Skuldsanering", "lagrum": "Skuldsaneringslagen (2016:675) 22 §" },
+    { "name": "Batch 2026-09 Ä: kvarsittningsrätt", "saken": "kvarsittningsrätt", "caseNumber": "Ä 414-26", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 14 kap. 7 §" }
   ]
 }

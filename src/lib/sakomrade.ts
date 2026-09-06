@@ -67,6 +67,7 @@ export const SAKOMRADEN = [
   "Arvsrätt",
   "Förmynderskapsrätt",
   "Konkursrätt",
+  "Skuldsanering",
 ] as const;
 
 export type Sakomrade = (typeof SAKOMRADEN)[number];
