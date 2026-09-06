@@ -314,6 +314,23 @@
 
     { "name": "Batch 2026-09 Ä: överklagan av beslut i parkeringsärende", "saken": "överklagan av beslut i parkeringsärende", "caseNumber": "Ä 412-26", "sakomrade": "Fordringsrätt", "lagrum": "Lag (1976:206) om felparkeringsavgift" },
     { "name": "Batch 2026-09 Ä: överklagan av beslut om skuldsanering", "saken": "överklagan av beslut om skuldsanering", "caseNumber": "Ä 413-26", "sakomrade": "Skuldsanering", "lagrum": "Skuldsaneringslagen (2016:675) 22 §" },
-    { "name": "Batch 2026-09 Ä: kvarsittningsrätt", "saken": "kvarsittningsrätt", "caseNumber": "Ä 414-26", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 14 kap. 7 §" }
+    { "name": "Batch 2026-09 Ä: kvarsittningsrätt", "saken": "kvarsittningsrätt", "caseNumber": "Ä 414-26", "sakomrade": "Familjerätt", "lagrum": "Äktenskapsbalken 14 kap. 7 §" },
+
+    { "name": "Batch 2026-09b K: ansökan om ed", "saken": "ansökan om ed", "caseNumber": "K 500-26", "sakomrade": "Konkursrätt", "lagrum": "Konkurslagen (1987:672) 6 kap." },
+    { "name": "Batch 2026-09b T: ansökan om rättslig hjälp", "saken": "ansökan om rättslig hjälp", "caseNumber": "T 501-26", "sakomrade": "Övriga tvistemål", "lagrum": "Lag (1946:816) om bevisupptagning åt utländsk domstol" },
+    { "name": "Batch 2026-09b T: fastställande av samboskap", "saken": "fastställande av samboskap", "caseNumber": "T 502-26", "sakomrade": "Familjerätt", "lagrum": "Sambolagen (2003:376)" },
+    { "name": "Batch 2026-09b T: begäran om utfående av handlingar", "saken": "begäran om utfående av handlingar", "caseNumber": "T 503-26", "sakomrade": "Övriga tvistemål", "lagrum": "Rättegångsbalken 38 kap. 2 §" },
+    { "name": "Batch 2026-09b T: hyresersättning", "saken": "hyresersättning", "caseNumber": "T 504-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
+    { "name": "Batch 2026-09b PMT: upphovsrättsintrång (Stockholm PMT routes to T)", "saken": "upphovsrättsintrång", "caseNumber": "PMT 505-26", "sakomrade": "Immaterialrätt", "lagrum": "Upphovsrättslagen (1960:729)" },
+
+    { "name": "Batch 2026-09c Ä: adoption", "saken": "adoption", "caseNumber": "Ä 506-26", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 4 kap." },
+    { "name": "Batch 2026-09c T: förordnande av särskild vårdnadshavare (family fallthrough)", "saken": "förordnande av särskild vårdnadshavare", "caseNumber": "T 507-26", "sakomrade": "Familjerätt", "lagrum": "Föräldrabalken 6 kap. 10 §" },
+    { "name": "Batch 2026-09c T: tvist om avtal", "saken": "tvist om avtal", "caseNumber": "T 508-26", "sakomrade": "Avtalsrätt", "lagrum": "Avtalslagen (1915:218)" },
+    { "name": "Batch 2026-09c T: begäran om bouppteckningsed", "saken": "begäran om bouppteckningsed", "caseNumber": "T 509-26", "sakomrade": "Arvsrätt", "lagrum": "Ärvdabalken 20 kap. 6 §" },
+
+    { "name": "Batch 2026-09c B: hindrande av trafik", "saken": "hindrande av trafik", "caseNumber": "B 510-26", "sakomrade": "Trafikbrott", "lagrum": "Trafikförordningen (1998:1276) 3 kap. 1 §" },
+    { "name": "Batch 2026-09c B: brott mot lagen om skydd mot olyckor", "saken": "brott mot lagen om skydd mot olyckor", "caseNumber": "B 511-26", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Lag (2003:778) om skydd mot olyckor 10 kap." },
+    { "name": "Batch 2026-09c B: sexuellt utnyttjande av barn (bare)", "saken": "sexuellt utnyttjande av barn", "caseNumber": "B 512-26", "sakomrade": "Sexualbrott", "lagrum": "BrB 6 kap. 5 §" },
+    { "name": "Batch 2026-09c B: narkotika (ringa)", "saken": "narkotika (ringa)", "caseNumber": "B 513-26", "sakomrade": "Narkotikabrott", "lagrum": "Narkotikastrafflagen (1968:64) 2 §" }
   ]
 }
