@@ -344,6 +344,11 @@
     { "name": "Batch 2026-09d T: klander av föreningsstämmobeslut", "saken": "klander av föreningsstämmobeslut", "caseNumber": "T 522-26", "sakomrade": "Avtalsrätt", "lagrum": "Lag (2018:672) om ekonomiska föreningar 6 kap." },
     { "name": "Batch 2026-09d B: bötesomvandling", "saken": "bötesomvandling", "caseNumber": "B 523-26", "sakomrade": "Övrig speciallagstiftning", "lagrum": "Bötesverkställighetslagen (1979:189) 15 §" },
     { "name": "Batch 2026-09d Ä: skuldsanering (bare)", "saken": "skuldsanering", "caseNumber": "Ä 524-26", "sakomrade": "Skuldsanering", "lagrum": "Skuldsaneringslagen (2016:675)" },
-    { "name": "Batch 2026-09d Ä: överklagad verkställighet", "saken": "överklagad verkställighet", "caseNumber": "Ä 525-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 18 kap." }
+    { "name": "Batch 2026-09d Ä: överklagad verkställighet", "saken": "överklagad verkställighet", "caseNumber": "Ä 525-26", "sakomrade": "Fordringsrätt", "lagrum": "Utsökningsbalken (1981:774) 18 kap." },
+
+    { "name": "Batch 2026-09e T: inlösen/överlåtelse av aktier (fragment split on /)", "saken": "inlösen/överlåtelse av aktier", "caseNumber": "T 526-26", "sakomrade": "Avtalsrätt", "lagrum": "Aktiebolagslagen (2005:551) 22 kap.", "joinedLagrum": "Aktiebolagslagen (2005:551) 22 kap." },
+    { "name": "Batch 2026-09e FT: återbetalning av deposition", "saken": "återbetalning av deposition", "caseNumber": "FT 527-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." },
+    { "name": "Batch 2026-09e B: återförvisat mål", "saken": "återförvisat mål", "caseNumber": "B 528-26", "sakomrade": "Övriga brott", "lagrum": "" },
+    { "name": "Batch 2026-09e T: lokalhyra", "saken": "lokalhyra", "caseNumber": "T 529-26", "sakomrade": "Hyresrätt", "lagrum": "Jordabalken 12 kap." }
   ]
 }
