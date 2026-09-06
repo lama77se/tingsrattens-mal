@@ -259,6 +259,35 @@ describe("formatPositional", () => {
     expect(hearings[0].externalCourt).toBeUndefined();
   });
 
+  it("Uddevalla regression: drops a garbled row glued from two pages' rows at the same Y-coordinate", () => {
+    // Uddevalla's PDF repeats T 170-26's row as a stray "continuing case"
+    // banner at a page break; the Y-grouped renderer glues it with an
+    // unrelated row from the next page's table into one corrupted line
+    // (glued day codes, glued dates/times, glued case# text, glued saken).
+    // The corrupted row has no case# left in the saken column and no
+    // resolvable end time; it must not surface as a bogus extra hearing.
+    const text = build([
+      `må${TAB}2026-08-31${TAB}09:00 - 12:00${TAB}Muntlig förberedelse${TAB}T 170-26${TAB}fordran${TAB}Sal 6`,
+      `måon${TAB}2026-09-02 2026-08-3109:00 - 12:0009:00 - 16:00${TAB}Muntlig förberedelseHuvudförhandling${TAB}T 170-26${TAB}fordranmisshandel m m${TAB}Sal 6Sal 7`,
+      `on${TAB}2026-09-02${TAB}10:00 - 10:45${TAB}Huvudförhandling${TAB}B 1390-26${TAB}penningtvättsbrott${TAB}Sal 2`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Uddevalla tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings.map((h) => h.caseNumber)).toEqual(["T 170-26", "B 1390-26"]);
+    expect(hearings[0].saken).toBe("fordran");
+  });
+
+  it("Uddevalla regression: drops an exact-duplicate row repeated across a page break", () => {
+    const text = build([
+      `må${TAB}2026-08-31${TAB}09:00 - 12:00${TAB}Muntlig förberedelse${TAB}T 170-26${TAB}fordran${TAB}Sal 6`,
+      `on${TAB}2026-09-02${TAB}10:00 - 10:45${TAB}Huvudförhandling${TAB}B 1390-26${TAB}penningtvättsbrott${TAB}Sal 2`,
+      `må${TAB}2026-08-31${TAB}09:00 - 12:00${TAB}Muntlig förberedelse${TAB}T 170-26${TAB}fordran${TAB}Sal 6`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Uddevalla tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings.map((h) => h.caseNumber)).toEqual(["T 170-26", "B 1390-26"]);
+  });
+
   it("Eskilstuna: completes a time range whose end wraps to the next row", () => {
     // Eskilstuna stacks the time range vertically: the start ("09:00 -") sits
     // on the hearing row and the end ("16:00") wraps to the next physical row,
