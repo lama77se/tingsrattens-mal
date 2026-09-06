@@ -342,6 +342,26 @@ export const formatPositional: ParserStrategy = {
       needsEndTime.push(openTime);
     }
 
-    return hearings;
+    // Drop hearings whose half-open time range ("09:00 -") never found its end
+    // time on a continuation row. In practice this only happens when the row
+    // itself is corrupted — e.g. Uddevalla's PDF occasionally repeats an
+    // already-listed case as a stray row that lands on the same Y-coordinate
+    // as an unrelated row on the next page, and the Y-grouped renderer glues
+    // the two into one garbled line (glued case# from row A, glued/mangled
+    // saken from both rows, no resolvable end time). A dangling open time is
+    // never useful to show, so drop the whole hearing rather than display it.
+    const complete = hearings.filter((h) => !/-\s*$/.test(h.time));
+
+    // Some courts' PDFs (Uddevalla) repeat a row verbatim across page breaks
+    // (apparently a "continuing case" banner carried onto the next page). A
+    // real case can't be scheduled twice for the exact same date/time/room, so
+    // an exact repeat is always this artifact — collapse to the first copy.
+    const seen = new Set<string>();
+    return complete.filter((h) => {
+      const key = `${h.date}|${h.time}|${h.caseNumber}|${h.saken}|${h.room}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   },
 };
