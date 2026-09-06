@@ -18,6 +18,9 @@ import type { ParserStrategy, RawHearing, ParserContext } from "./types";
  *   Torsdag 4 juni 2026                    ← Swedish weekday + date
  *   09:00–10:00 | B 1964-26 | Brott mot trafikförordningen
  *   10:00–11:15 | B 2002-26 | Ringa stöld
+ *
+ * V4 (2026-09+, single-line, fully glued, no room):
+ *   ti2026-09-0109:00 - 10:00B 5094-25bidragsbrott
  */
 
 const DAY_ABBREVS = "må|ti|on|to|fr|lö|sö";
@@ -51,11 +54,18 @@ const V3_DATE_RE = new RegExp(
 const V3_HEARING_RE =
   /^(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s*\|\s*([^|]+?)\s*\|\s*(.+)$/;
 
-/** Anchor line with end time on the SAME line (old format). */
+/**
+ * Anchor line with end time on the SAME line (old format, and V4).
+ * The end time is followed by `(?!\d)` rather than `\b`, since V4 glues the
+ * case number directly onto the end time with no separator (e.g. "10:00B 5094-25...").
+ */
 const INLINE_ANCHOR_RE = new RegExp(
-  `(?:(?:${DAY_ABBREVS})\\s*)?(\\d{4}-\\d{2}-\\d{2})\\s*(\\d{1,2}:\\d{2})\\s*[-–—]\\s*(\\d{1,2}:\\d{2})\\b`,
+  `(?:(?:${DAY_ABBREVS})\\s*)?(\\d{4}-\\d{2}-\\d{2})\\s*(\\d{1,2}:\\d{2})\\s*[-–—]\\s*(\\d{1,2}:\\d{2})(?!\\d)`,
   "i"
 );
+
+/** V4: case number glued directly to the following saken, e.g. "B 5094-25bidragsbrott". */
+const CASE_AND_SAKEN_RE = /^([A-ZÅÄÖ]+\s+\d+\s*-\s*\d{2})(?!\d)\s*(.*)$/i;
 
 /** Anchor line with end time on a FOLLOWING line (new format): dash is at end. */
 const TRAILING_ANCHOR_RE = new RegExp(
@@ -153,11 +163,19 @@ function parse(ctx: ParserContext): RawHearing[] {
       const endTime = inline[3];
       const afterIdx = (inline.index ?? 0) + inline[0].length;
       const after = line.substring(afterIdx).trim();
-      const { saken, room } = extractSakenAndRoom(after);
+
+      // V4: case number glued directly onto the following saken text.
+      const caseMatch = after.match(CASE_AND_SAKEN_RE);
+      const caseNumber = caseMatch
+        ? caseMatch[1].replace(/\s+/g, " ").trim()
+        : "";
+      const rest = caseMatch ? caseMatch[2] : after;
+
+      const { saken, room } = extractSakenAndRoom(rest);
       hearings.push({
         date,
         time: `${startTime} - ${endTime}`,
-        caseNumber: "",
+        caseNumber,
         type: "Huvudförhandling",
         room,
         saken,
