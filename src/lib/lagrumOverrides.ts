@@ -1321,6 +1321,21 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Övriga brott",
     primart_lagrum: [],
   },
+
+  // --- Batch (2026-09f): user batch (B) ---
+  // Olovlig förflyttning av punktskattepliktiga varor — samma lagstiftning
+  // som "olovlig befattning med punktskattepliktiga varor", Lag (1998:506).
+  "olovlig förflyttning av punktskattepliktiga varor": {
+    sakomrade: "Tull- och smugglingsbrott",
+    primart_lagrum: ["Lag (1998:506) om punktskattekontroll av transporter m.m."],
+  },
+  // Förvandling av viten — trolig felbenämning/variant av "utdömande av vite"
+  // (viten "förvandlas" inte till fängelse enligt svensk rätt, till skillnad
+  // från böter); klassificerad likadant, Lag (1985:206) om viten.
+  "förvandling av viten": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (1985:206) om viten"],
+  },
 };
 
 /**
@@ -2099,6 +2114,36 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Jordabalken 12 kap."],
   },
+
+  // --- Batch (2026-09f): user batch (T) ---
+  // Dold samäganderätt — rättspraxis (NJA 1980 s. 705 m.fl.), analog
+  // tillämpning av samäganderättsliga principer; inget eget lagrum, jfr
+  // "äganderätt till lös egendom" och "bättre rätt".
+  "dold samäganderätt": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
+  },
+  // Fastställelse (bar nyckel) — fastställelsetalan utan angiven
+  // bakomliggande rättsfråga, RB 13 kap. 2 §. "fastställelsetalan" matchar
+  // inte den kortare formen (ordgräns saknas).
+  "fastställelse": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Rättegångsbalken 13 kap. 2 §"],
+  },
+  // Fullgörelse av fastighetsköp — fullgörelsetalan avseende köp av fast
+  // egendom, jfr "köp av fast egendom" (JB 4 kap.) och "fullgörelsetalan"
+  // (RB 13:1, generisk).
+  "fullgörelse av fastighetsköp": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 4 kap."],
+  },
+  // Kränkning av det förstärkta laglottsskyddet — samma sak som "förstärkt
+  // laglottsskydd" (ÄB 7:4, gåva likställd med testamente) men i böjd form
+  // som inte substrängsmatchar den kortare nyckeln.
+  "kränkning av det förstärkta laglottsskyddet": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
+  },
 };
 
 /**
@@ -2128,6 +2173,12 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   },
   // Särskilt förordnad vårdnadshavare — FB 6 kap. 10 §
   "särskilt förordnad vårdnadshavare": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
+  },
+  // Grammatiskt inkorrekt variant ("särskild" i st. för "särskilt") som
+  // förekommer i vissa domstolslistor.
+  "särskild förordnad vårdnadshavare": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
   },
@@ -2473,6 +2524,35 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "överklagad verkställighet": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Utsökningsbalken (1981:774) 18 kap."],
+  },
+
+  // --- Batch (2026-09e): user batch (Ä) ---
+  // Jämkning av godmanskap — ändring av godmanskapets omfattning, FB 11:23
+  // (samma paragraf som "jämkning av förvaltarskap" täcker båda formerna).
+  "jämkning av godmanskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 23 §"],
+  },
+  // Försäljning av fastighet — vanligen ansökan om tvångsförsäljning genom
+  // gode man enligt samäganderättslagen, jfr "försäljning enligt lagen om
+  // samäganderätt".
+  "försäljning av fastighet": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: ["Samäganderättslagen (1904:48 s.1) 6 §"],
+  },
+  // Jämkning av godmanskap till förvaltarskap — samma sak som "utökning av
+  // godmanskap till förvaltarskap" / "konvertering av godmanskap till
+  // förvaltarskap", annan ordföljd, FB 11:7.
+  "jämkning av godmanskap till förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
+  // Rättslig hjälp åt utländsk domstol (Ä) — civilrättslig bevisupptagning,
+  // Lag (1946:816). B-kartan har samma nyckel men avser brottmål (Lag
+  // 2000:562); Ä-mål når inte den kartan.
+  "rättslig hjälp åt utländsk domstol": {
+    sakomrade: "Övriga tvistemål",
+    primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
   },
 };
 
