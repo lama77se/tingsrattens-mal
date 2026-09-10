@@ -1336,6 +1336,18 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän verksamhet",
     primart_lagrum: ["Lag (1985:206) om viten"],
   },
+
+  // --- Batch (2026-09g): user batch (B) ---
+  // Företagsspioneri — Lag (2018:558) om företagshemligheter 26 §
+  // (ersatte motsvarande straffbestämmelse i gamla FHL).
+  "företagsspioneri": {
+    sakomrade: "Immaterialrättsbrott",
+    primart_lagrum: ["Lag (2018:558) om företagshemligheter 26 §"],
+  },
+  "grovt företagsspioneri": {
+    sakomrade: "Immaterialrättsbrott",
+    primart_lagrum: ["Lag (2018:558) om företagshemligheter 26 § 2 st"],
+  },
 };
 
 /**
@@ -2144,6 +2156,44 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken 7 kap. 4 §"],
   },
+
+  // --- Batch (2026-09g): user batch (T) ---
+  // Fullgörelse av avtal — fullgörelsetalan avseende avtal i allmänhet, jfr
+  // "hävning av avtal" / "tvist om avtal" och "fullgörelse av fastighetsköp".
+  "fullgörelse av avtal": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Avtalslagen (1915:218)"],
+  },
+  // Avtalsbrott — generisk kontraktsbrottstvist, jfr "tvist om avtal".
+  "avtalsbrott": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Avtalslagen (1915:218)"],
+  },
+  // Arbetsrättslig tvist — adjektivform av "arbetsrättsligt mål".
+  "arbetsrättslig tvist": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
+  },
+  // Pension — tvist om tjänstepension/avtalspension i arbetsrättslig
+  // kontext (jfr "arbetsrättslig tvist; pension"), Lag (1967:531) om
+  // tryggande av pensionsutfästelse m.m.
+  "pension": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lag (1967:531) om tryggande av pensionsutfästelse m.m."],
+  },
+  // Bristtäckningsansvar enligt ABL — personligt betalningsansvar för
+  // styrelseledamöter/aktieägare vid kapitalbrist, ABL 25 kap. 18-19 §§,
+  // jfr "personligt ansvar för aktiebolags företrädare".
+  "bristtäckningsansvar enligt abl": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Aktiebolagslagen (2005:551) 25 kap. 18-19 §§"],
+  },
+  // Ersättning för intrång genom inkräktning på annans mark — utomobligatoriskt
+  // skadestånd för olovligt nyttjande/intrång på fastighet, Skadeståndslagen.
+  "ersättning för intrång genom inkräktning på annans mark": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Skadeståndslagen (1972:207) 2 kap. 1 §"],
+  },
 };
 
 /**
@@ -2612,6 +2662,21 @@ export const konkursLagrumOverrides: Record<string, LagrumEntry> = {
   "ansökan staten": {
     sakomrade: "Konkursrätt",
     primart_lagrum: ["Konkurslagen (1987:672) 2 kap."],
+  },
+
+  // --- Batch (2026-09g): user batch (K) ---
+  // Ansökan annan borgenär — konkursansökan där en annan borgenär än staten
+  // (t.ex. leverantör/långivare) är sökande, jfr "ansökan staten".
+  "ansökan annan borgenär": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: ["Konkurslagen (1987:672) 2 kap."],
+  },
+  // Återförvisat mål (K) — saken ger ingen information om det underliggande
+  // konkursärendet (målet har återförvisats från hovrätten); tomt lagrum för
+  // att inte missleda, jfr B-kartans samma nyckel.
+  "återförvisat mål": {
+    sakomrade: "Konkursrätt",
+    primart_lagrum: [],
   },
 };
 
