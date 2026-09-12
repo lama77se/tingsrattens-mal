@@ -2604,6 +2604,23 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Övriga tvistemål",
     primart_lagrum: ["Lag (1946:816) om bevisupptagning åt utländsk domstol"],
   },
+
+  // --- Batch (2026-09h): user batch (Ä) ---
+  // Överflyttning av barn enligt Haagkonventionen — 1980 års Haagkonvention
+  // om internationella bortföranden av barn, implementerad genom Lag
+  // (1989:14).
+  "överflyttning av barn enligt haagkonventionen": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: [
+      "Lag (1989:14) om erkännande och verkställighet av utländska vårdnadsavgöranden m.m. och om överflyttning av barn",
+    ],
+  },
+  // Ansökan om förvaltarskap — ansökningsformen av "anordnande av
+  // förvaltarskap", FB 11 kap. 7 §.
+  "ansökan om förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
 };
 
 /**
