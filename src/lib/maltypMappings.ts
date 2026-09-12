@@ -13,6 +13,15 @@ const tingsrattPrefixes: Record<string, string> = {
   Ä: "Ärende",
   F: "Familjemål",
   Ö: "Övriga ärenden",
+  // Patent- och marknadsdomstolen (PMD, vid Stockholms tingsrätt) — särskild
+  // domstol för patent-, varumärkes-, mönster-, upphovsrätts-, konkurrens- och
+  // marknadsföringsrättsliga mål. Målnummerprefixen kombinerar "PM" med den
+  // vanliga måltypsbeteckningen; lagrumMatch.ts routar redan dessa till sin
+  // "mor"-måltyp (PMT → T, PMFT → FT, PMÄ → Ä, PMB → B) för lagrumsökning.
+  PMT: "Patent- och marknadsdomstolens tvistemål",
+  PMFT: "Patent- och marknadsdomstolens förenklade tvistemål",
+  PMÄ: "Patent- och marknadsdomstolens ärenden",
+  PMB: "Patent- och marknadsdomstolens brottmål",
 };
 
 // Sort keys longest-first so "FT" is tested before "F"

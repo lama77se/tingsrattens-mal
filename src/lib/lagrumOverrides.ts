@@ -2194,6 +2194,15 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Skadeståndsrätt",
     primart_lagrum: ["Skadeståndslagen (1972:207) 2 kap. 1 §"],
   },
+
+  // --- Batch (2026-09i): user batch (PMT, routar via case-type "T") ---
+  // Otillbörlig marknadsföring — Patent- och marknadsdomstolens tvistemål
+  // (PMT), Marknadsföringslagen (2008:486). Egen sakomrade "Marknadsföringsrätt"
+  // (distinkt från "Konkurrensrätt", som avser Konkurrenslagen).
+  "otillbörlig marknadsföring": {
+    sakomrade: "Marknadsföringsrätt",
+    primart_lagrum: ["Marknadsföringslagen (2008:486)"],
+  },
 };
 
 /**

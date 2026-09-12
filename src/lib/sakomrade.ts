@@ -61,6 +61,7 @@ export const SAKOMRADEN = [
   "Arrenderätt",
   "Immaterialrätt",
   "Konkurrensrätt",
+  "Marknadsföringsrätt",
   "Övriga tvistemål",
   // Family / ärenden / konkurs
   "Familjerätt",
