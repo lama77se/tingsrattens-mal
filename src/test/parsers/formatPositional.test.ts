@@ -337,4 +337,54 @@ describe("formatPositional", () => {
       room: "Sal 4",
     });
   });
+
+  it("Eskilstuna regression: drops co-defendant rows carrying a wrapped room/court fragment instead of surfacing them as bogus hearings", () => {
+    // A joint multi-day trial lists each of its 5 co-defendants' case# on its
+    // own row; the "Attunda tingsrätt" room cell — taller than one row — gets
+    // scattered by the Y-grouped renderer across those rows ("B 678-23
+    // tingsrätt", "B 3155-25 -", "B 3610-25 Tingssal", "B 3677-25 11",
+    // "B 4402-25 Attunda", then a final bare "tingsrätt" row). None of that
+    // is real saken text: the alias rows must not become their own hearings,
+    // and "Attunda" must not linger on the parent hearing's saken once the
+    // wrapped "tingsrätt" that would have completed "Attunda tingsrätt"
+    // arrives on a later row.
+    const text = build([
+      `Datum${TAB}Tid${TAB}Mötestyp${TAB}Målnummer${TAB}Saken${TAB}Lokal`,
+      `ti${TAB}2026-09-22${TAB}09:30 -${TAB}Huvudförhandling${TAB}B 3923-25${TAB}grovt narkotikabrott mm${TAB}Attunda`,
+      `(dag 1/18)${TAB}16:30${TAB}B 678-23${TAB}tingsrätt`,
+      `B 3155-25${TAB}-`,
+      `B 3610-25${TAB}Tingssal`,
+      `B 3677-25${TAB}11`,
+      `B 4402-25${TAB}Attunda`,
+      "tingsrätt",
+      `ti${TAB}2026-09-22${TAB}10:00 - 12:00${TAB}Muntlig förberedelse${TAB}T 1131-26${TAB}fordran${TAB}Sal 1`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eskilstuna tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings.map((h) => h.caseNumber)).toEqual(["B 3923-25", "T 1131-26"]);
+    expect(hearings[0]).toMatchObject({
+      time: "09:30 - 16:30",
+      saken: "grovt narkotikabrott mm",
+    });
+  });
+
+  it("Eskilstuna regression: a clean (dag X/Y) end-time completion row does not glue its own case# onto the parent hearing's saken", () => {
+    // Once the co-defendants' room-fragment lines run out (later days of the
+    // same 18-day trial), the "(dag X/Y) <endtime> <case#>" row is a genuine
+    // bare alias — but it must still only complete the end time, not merge
+    // "(dag 5/18) B 678-23" onto the parent's saken.
+    const text = build([
+      `må${TAB}2026-09-28${TAB}09:00 -${TAB}Huvudförhandling${TAB}B 3923-25${TAB}grovt narkotikabrott mm${TAB}Sal 3`,
+      `(dag 5/18)${TAB}16:00${TAB}B 678-23`,
+      "B 3155-25",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eskilstuna tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "B 3923-25",
+      time: "09:00 - 16:00",
+      saken: "grovt narkotikabrott mm",
+      room: "Sal 3",
+    });
+  });
 });
