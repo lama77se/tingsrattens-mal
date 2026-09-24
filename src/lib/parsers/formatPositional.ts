@@ -98,6 +98,40 @@ function isContinuationCandidate(line: string): boolean {
   return true;
 }
 
+/**
+ * Splits a wrap/alias row into tab-separated segments and drops the ones that
+ * are never meaningful saken text on their own: a "(dag X/Y)" multi-day
+ * annotation, a type-column wrap completion, a bare wrapped end-time, or a
+ * bare "tingsrätt(en)" location-cell tail (all Eskilstuna/Värmland column-
+ * wrap artefacts — see the callers for concrete examples).
+ *
+ * `dropBareCaseNumber` additionally drops a segment that is ENTIRELY a case
+ * number with nothing else in it — a co-defendant's own case# riding along
+ * on a "(dag X/Y) <endtime> <case#>" row, not a meaningful saken reference.
+ * It must stay false for the case-number-as-saken-reference merge (Linköping:
+ * "(återvinning tredskodom T 142-26)" — the case# there is prose content, not
+ * a standalone segment, so this flag doesn't affect it either way).
+ */
+function filterNoiseSegments(line: string, dropBareCaseNumber: boolean): string {
+  const segments = line
+    .split(/\t+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  const kept: string[] = [];
+  for (const seg of segments) {
+    if (DAG_ANNOTATION_RE.test(seg)) continue;
+    if (TYPE_WRAP_COMPLETION_RE.test(seg)) continue;
+    if (BARE_TIME_RE.test(seg)) continue; // wrapped end-time (Eskilstuna)
+    // Bare "tingsrätt"/"tingsrätten" — the tail of a court-name room/
+    // location cell ("Attunda" + "tingsrätt") wrapped onto its own row,
+    // never meaningful saken text on its own (Eskilstuna).
+    if (/^tingsrätt(en)?$/i.test(seg)) continue;
+    if (dropBareCaseNumber && new RegExp(`^${CASE_NUMBER_REGEX.source}$`, "i").test(seg)) continue;
+    kept.push(seg);
+  }
+  return kept.join(" ");
+}
+
 export const formatPositional: ParserStrategy = {
   name: "Positional",
   formatFamily: "positional",
@@ -165,6 +199,51 @@ export const formatPositional: ParserStrategy = {
       const timeMatch = line.match(TIME_RANGE_RE);
       const typeMatchEarly = line.match(HEARING_TYPE_RE);
 
+      // Co-defendant case# row carrying a room-cell wrap fragment, for a
+      // previous hearing whose Sal/location is still unresolved (Eskilstuna:
+      // a joint multi-day trial lists each defendant's case# on its own row,
+      // and the multi-line "Attunda tingsrätt" room cell — taller than one
+      // row — gets scattered by the Y-grouped renderer across those rows:
+      // "(dag 1/18)\t16:30\tB 678-23\ttingsrätt" / "B 3155-25\t-" /
+      // "B 3610-25\tTingssal" / "B 3677-25\t11" / "B 4402-25\tAttunda").
+      // Unlike the plain bare-alias case below (Halmstad, where the previous
+      // hearing's Sal is already resolved and the alias row has nothing
+      // trailing it), the previous hearing here is NOT yet complete, so
+      // whatever trails the case# is room noise, not a new saken — complete
+      // a still-open time range from it if possible, then drop the row
+      // entirely rather than surface it as a bogus hearing or merge its
+      // noise into the real hearing's saken.
+      if (rawCaseMatch && !timeMatch && !typeMatchEarly) {
+        const lastIdx = hearings.length - 1;
+        if (lastIdx >= 0 && lacksRightAnchor[lastIdx]) {
+          if (needsEndTime[lastIdx]) {
+            const endMatch = line.match(/\b(\d{1,2}[:.]\d{2})\b/);
+            if (endMatch) {
+              hearings[lastIdx].time = hearings[lastIdx].time.replace(
+                /-\s*$/,
+                `- ${endMatch[1].replace(".", ":")}`
+              );
+              needsEndTime[lastIdx] = false;
+            }
+          }
+          // When the fragment trailing this row's case# is exactly
+          // "tingsrätt(en)", it's completing a court-name wrap whose first
+          // half ("Attunda") already leaked onto the previous hearing's own
+          // saken cell (no Sal/external-court match was possible at push
+          // time, since "tingsrätt" hadn't arrived yet). Re-run cleanSaken
+          // with it appended so the trailing-court-name strip can now remove
+          // "Attunda tingsrätt" from saken.
+          const afterCase = line
+            .substring((rawCaseMatch.index ?? 0) + rawCaseMatch[0].length)
+            .trim();
+          if (/^tingsrätt(en)?$/i.test(afterCase)) {
+            const merged = `${rawSakenAcc[lastIdx]} ${afterCase}`.trim();
+            hearings[lastIdx].saken = cleanSaken(merged);
+          }
+          continue;
+        }
+      }
+
       // Filter out false-positive case-number matches:
       // (a) Paren reference — "...återvinning av tredskodom i T 1234-25)"
       //     The case# is part of an in-saken parenthesised reference, NOT a
@@ -215,18 +294,31 @@ export const formatPositional: ParserStrategy = {
           const afterCase = line.substring(
             (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
           );
+          const isParenClose =
+            afterCase.startsWith(")") &&
+            hasOpenContinuation(rawSakenAcc[lastIdx]);
           if (
-            (afterCase.startsWith(")") &&
-              hasOpenContinuation(rawSakenAcc[lastIdx])) ||
+            isParenClose ||
             expectsContinuation[lastIdx] ||
             lacksRightAnchor[lastIdx] ||
             sakenWrapped[lastIdx]
           ) {
-            const trimmed = line.replace(/\t+/g, " ").trim();
-            const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
-            rawSakenAcc[lastIdx] = merged;
-            hearings[lastIdx].saken = cleanSaken(merged);
-            expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+            // Paren-close: the case# is meaningful reference prose inside the
+            // parenthetical (Linköping: "(återvinning tredskodom T 142-26)")
+            // — keep the whole line. Otherwise this is a bare co-defendant
+            // alias row that may carry "(dag X/Y)"/time noise ahead of its
+            // own case# (Eskilstuna: "(dag 5/18)\t16:00\tB 678-23") — filter
+            // that noise (and the alias's own case#) out before merging, so
+            // it doesn't get glued onto the real hearing's saken.
+            const trimmed = isParenClose
+              ? line.replace(/\t+/g, " ").trim()
+              : filterNoiseSegments(line, true);
+            if (trimmed) {
+              const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
+              rawSakenAcc[lastIdx] = merged;
+              hearings[lastIdx].saken = cleanSaken(merged);
+              expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+            }
             sakenWrapped[lastIdx] = false;
           }
           continue;
@@ -235,20 +327,8 @@ export const formatPositional: ParserStrategy = {
         // Pure continuation row (no case#, no time). Strip annotation and
         // type-wrap-completion segments before deciding whether to merge into
         // the previous saken.
-        const segments = line
-          .split(/\t+/)
-          .map((s) => s.trim())
-          .filter((s) => s.length > 0);
-        const kept: string[] = [];
-        for (const seg of segments) {
-          if (DAG_ANNOTATION_RE.test(seg)) continue;
-          if (TYPE_WRAP_COMPLETION_RE.test(seg)) continue;
-          if (BARE_TIME_RE.test(seg)) continue; // wrapped end-time (Eskilstuna)
-          kept.push(seg);
-        }
-        if (kept.length === 0) continue;
-
-        const filteredLine = kept.join(" ");
+        const filteredLine = filterNoiseSegments(line, false);
+        if (!filteredLine) continue;
         if (
           isContinuationCandidate(filteredLine) &&
           (expectsContinuation[lastIdx] || lacksRightAnchor[lastIdx] || sakenWrapped[lastIdx])
