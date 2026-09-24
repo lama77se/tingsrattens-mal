@@ -1348,6 +1348,19 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Immaterialrättsbrott",
     primart_lagrum: ["Lag (2018:558) om företagshemligheter 26 § 2 st"],
   },
+
+  // --- Batch (2026-09j): user batch (B) ---
+  // Åt utländsk domstol — kortform av "rättslig hjälp åt utländsk domstol"
+  // (brottmål), Lag (2000:562).
+  "åt utländsk domstol": {
+    sakomrade: "Brott mot allmän verksamhet",
+    primart_lagrum: ["Lag (2000:562) om internationell rättslig hjälp i brottmål"],
+  },
+  // Störande av förrättning eller sammankomst — BrB 16 kap. 4 §.
+  "störande av allmän sammankomst": {
+    sakomrade: "Brott mot allmän ordning",
+    primart_lagrum: ["BrB 16 kap. 4 §"],
+  },
 };
 
 /**
@@ -2203,6 +2216,20 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Marknadsföringsrätt",
     primart_lagrum: ["Marknadsföringslagen (2008:486)"],
   },
+
+  // --- Batch (2026-09j): user batch (T) ---
+  // Ogiltigförklaring av testamente — samma sak som "ogiltighet av
+  // testamente" (klandertalan), annan ordform, ÄB 13 kap. (klanderfrist 14 kap.).
+  "ogiltigförklaring av testamente": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken 13 kap."],
+  },
+  // Uppsägning av bankkonto — generisk banktvist, jfr "rätt till bankkonto"
+  // (inget eget lagrum; styrs av avtal/allmänna villkor).
+  "uppsägning av bankkonto": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: [],
+  },
 };
 
 /**
@@ -2629,6 +2656,30 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "ansökan om förvaltarskap": {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
+
+  // --- Batch (2026-09i): user batch (Ä) ---
+  // Ansökan om förvaltare — samma sak som "förordnande av förvaltare" /
+  // "ansökan om förvaltarskap", annan ordföljd (person i st. för -skap).
+  "ansökan om förvaltare": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
+  // Umgänge filed as Ä (family map isn't reached for Ä), jfr "vårdnad" /
+  // "barns boende".
+  "umgänge": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 15 §"],
+  },
+  // Erkännande av utländskt förvaltarskap — autonoma internationellt
+  // privaträttsliga bestämmelser om förmynderskap/förvaltarskap finns i 5 kap.
+  // 1904 års lag (i väntan på att Sverige tillträder 2000 års Haagkonvention
+  // om skydd för vuxna).
+  "erkännande av utländskt förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: [
+      "Lag (1904:26 s.1) om vissa internationella rättsförhållanden rörande äktenskap och förmynderskap 5 kap.",
+    ],
   },
 };
 
