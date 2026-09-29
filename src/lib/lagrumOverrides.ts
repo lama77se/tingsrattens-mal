@@ -1361,6 +1361,28 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot allmän ordning",
     primart_lagrum: ["BrB 16 kap. 4 §"],
   },
+
+  // --- Batch (2026-09k): user batch (B) ---
+  // Brukande av falskt värde-/kontrollmärke — BrB 14 kap. (bruk av förfalskat
+  // värde-/kontrollmärke, t.ex. frimärke eller kontrollstämpel); specifik
+  // paragraf inte tillräckligt säkert verifierad för att pinnas, så tomt
+  // lagrum faller tillbaka på kapitelreferensen via sakomradeDefaultLagrum.
+  "brukande av falskt värde-/kontrollmärke": {
+    sakomrade: "Förfalskningsbrott",
+    primart_lagrum: [],
+  },
+  // Felstavad variant ("avslyssning" med extra 's') av "olovlig avlyssning".
+  "olovlig avslyssning": {
+    sakomrade: "Brott mot frihet och frid",
+    primart_lagrum: ["BrB 4 kap. 9 a §"],
+  },
+  // Brott mot lagen om tobaksfria nikotinprodukter — Lag (2022:1257).
+  // Generatorns bara "lag om tobaksfria nikotinprodukter" (utan "en") matchar
+  // inte "lagen om ...", och pekar dessutom felaktigt på Tobakslagen.
+  "brott mot lagen om tobaksfria nikotinprodukter": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Lag (2022:1257) om tobaksfria nikotinprodukter"],
+  },
 };
 
 /**
@@ -2229,6 +2251,51 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "uppsägning av bankkonto": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: [],
+  },
+
+  // --- Batch (2026-09k): user batch (T) ---
+  // Återbetalning av felaktiga uttag — condictio indebiti (obehörig
+  // vinst/misstagsbetalning), allmänna förmögenhetsrättsliga principer utan
+  // egen lagfäst grund.
+  "återbetalning av felaktiga uttag": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: [],
+  },
+  // Transporträtt enligt Förordningen (EG) nr 261/2004 — flygpassagerares
+  // rätt till ersättning/assistans vid nekad ombordstigning, inställd flight
+  // eller kraftig försening. Egen sakomrade "Transporträtt" (distinkt från
+  // Konsumenträtt, då förordningen gäller oavsett om resenären är konsument).
+  "transporträtt enligt förordningen (eg) nr 261/2004": {
+    sakomrade: "Transporträtt",
+    primart_lagrum: [
+      "Europaparlamentets och rådets förordning (EG) nr 261/2004",
+    ],
+  },
+  // Hävande av föräldraskap — könsneutral efterföljare till "hävande av
+  // faderskap", FB 3 kap. (jfr "faderskap"/"moderskap" FB 1 kap. för
+  // fastställande).
+  "hävande av föräldraskap": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 3 kap."],
+  },
+  // Ersättningsanspråk enligt frihetsberövandelagen — statens skadestånds-
+  // ansvar för felaktiga frihetsberövanden/tvångsmedel i brottmål.
+  "ersättningsanspråk enligt lagen (1998:714) om ersättning vid frihetsberövande och andra tvångsåtgärder": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: [
+      "Lag (1998:714) om ersättning vid frihetsberövanden och andra tvångsåtgärder",
+    ],
+  },
+  // Trafikskadeersättning — obligatorisk trafikförsäkring, Trafikskadelagen.
+  "trafikskadeersättning": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Trafikskadelagen (1975:1410)"],
+  },
+  // Förverkande av bostadsrätt — motsvarigheten till "förverkande av
+  // hyresrätt" (JB 12:42) för bostadsrättshavare, BRL 7 kap.
+  "förverkande av bostadsrätt": {
+    sakomrade: "Hyresrätt",
+    primart_lagrum: ["Bostadsrättslagen (1991:614) 7 kap."],
   },
 };
 
