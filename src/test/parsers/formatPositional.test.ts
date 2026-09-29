@@ -387,4 +387,47 @@ describe("formatPositional", () => {
       room: "Sal 3",
     });
   });
+
+  it("Eksjö regression: merges a saken cell that wraps across more than two physical rows", () => {
+    // Eksjö's PDF has no Målnummer column and word-wraps a long saken across
+    // as many physical rows as it needs, with only the very first line
+    // properly gapped before Sal — each row after that carries the wrap
+    // signal that would previously have been cleared after just one merge,
+    // silently dropping everything past the second line.
+    const text = build([
+      `Dag${TAB}Datum${TAB}Tid${TAB}Mötestyp${TAB}Saken${TAB}Sal`,
+      `må${TAB}2026-09-28 09:00 - 16:00${TAB}Huvudförhandling${TAB}brott mot lagen om ${TAB}Sal 3`,
+      "brandfarliga och",
+      "explosiva varor,",
+      "grovt brott, m.m.",
+      `må${TAB}2026-09-28 09:45 - 10:30${TAB}Huvudförhandling${TAB}ringa bedrägeri${TAB}Sal 1`,
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(hearings).toHaveLength(2);
+    expect(hearings[0]).toMatchObject({
+      time: "09:00 - 16:00",
+      saken: "brott mot lagen om brandfarliga och explosiva varor, grovt brott, m.m.",
+      room: "Sal 3",
+    });
+    expect(hearings[1].saken).toBe("ringa bedrägeri");
+  });
+
+  it("Eksjö regression: completes a word cut off mid-stream by a glued Sal column with no inserted space", () => {
+    // The saken cell runs right up against the Sal column with zero gap —
+    // the Y-grouped renderer never got a chance to insert a tab, because the
+    // word itself was cut off by the column width ("hastighetsöverträd" +
+    // "Sal 1" glued, completing on the next row with "else"). A normal
+    // word-boundary space-join would wrongly produce "hastighetsöverträd
+    // else" instead of "hastighetsöverträdelse".
+    const text = build([
+      `må${TAB}2026-09-28 11:15 - 12:00${TAB}Huvudförhandling${TAB}hastighetsöverträdSal 1`,
+      "else",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0]).toMatchObject({
+      saken: "hastighetsöverträdelse",
+      room: "Sal 1",
+    });
+  });
 });
