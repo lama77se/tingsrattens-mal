@@ -174,6 +174,13 @@ export const formatPositional: ParserStrategy = {
     // next physical row, even though this row HAS a right anchor (Linköping:
     // "…farliga \tSal 7" + "föremål"). Lets that continuation merge.
     const sakenWrapped: boolean[] = [];
+    // Per-hearing flag: true when the Sal column was welded directly onto the
+    // saken cell with zero gap (SAL_GLUED_RE, not SAL_RE) — the word itself
+    // was very likely cut off mid-stream by the column width, with no space
+    // before whatever comes next (Eksjö: "hastighetsöverträdSal 1" + "else"
+    // completes "hastighetsöverträdelse"). Consumed by exactly one merge,
+    // then cleared, so later continuation words still get a normal space.
+    const sakenGluedNoSpace: boolean[] = [];
     let currentDate = "";
 
     for (let i = 0; i < lines.length; i++) {
@@ -333,7 +340,13 @@ export const formatPositional: ParserStrategy = {
           isContinuationCandidate(filteredLine) &&
           (expectsContinuation[lastIdx] || lacksRightAnchor[lastIdx] || sakenWrapped[lastIdx])
         ) {
-          const merged = (rawSakenAcc[lastIdx] + " " + filteredLine).trim();
+          // A glued-Sal cell was almost certainly cut off mid-word (Eksjö:
+          // "hastighetsöverträd" + "else" = "hastighetsöverträdelse") — join
+          // with no space for exactly this one completion, then fall back to
+          // normal word-boundary spacing for anything further.
+          const joiner = sakenGluedNoSpace[lastIdx] ? "" : " ";
+          sakenGluedNoSpace[lastIdx] = false;
+          const merged = (rawSakenAcc[lastIdx] + joiner + filteredLine).trim();
           rawSakenAcc[lastIdx] = merged;
           hearings[lastIdx].saken = cleanSaken(merged);
           // Continue accumulating if the merged saken still ends with a comma
@@ -341,9 +354,14 @@ export const formatPositional: ParserStrategy = {
           // "...tvist (återvinning av\ntredskodom i T 1234-25)" — the second
           // line closes the paren and matches as a continuation too).
           expectsContinuation[lastIdx] = hasOpenContinuation(merged);
-          // The wrap tail has been consumed; don't keep merging further rows on
-          // the strength of the trailing-space signal alone.
-          sakenWrapped[lastIdx] = false;
+          // Deliberately NOT resetting sakenWrapped here: some courts' saken
+          // cells wrap across more than two physical rows with no per-line
+          // signal beyond "this is still just plain continuation text" (Eksjö:
+          // a cell can wrap 3+ times, e.g. "grovt" / "barnpornografibrot" /
+          // "t m m"). Any row that could end the chain — a real hearing row,
+          // a new case#, a dag-annotation — takes a different code path or
+          // gets filtered above, so staying armed here only keeps consuming
+          // rows that are themselves confirmed plain continuation text.
         }
         continue;
       }
@@ -378,7 +396,16 @@ export const formatPositional: ParserStrategy = {
       let segmentEnd = line.length;
       let room = "";
       let location: string | undefined;
-      const salMatch = line.match(SAL_RE) ?? line.match(SAL_GLUED_RE);
+      const directSalMatch = line.match(SAL_RE);
+      const salMatch = directSalMatch ?? line.match(SAL_GLUED_RE);
+      // Did the Sal column only resolve via the glued fallback (no gap at all
+      // before "Sal")? A cell that legitimately ends there almost always has
+      // a proper gap; when it's welded on with zero separation, the saken
+      // text most likely ran out of column width mid-word and the renderer's
+      // gap-based tab insertion never got a chance to fire — the true tail
+      // is on the next physical row with no trailing-whitespace signal on
+      // this one to say so (Eksjö: "hastighetsöverträdSal 1" + "else").
+      const sakenRanIntoGluedSal = !directSalMatch && !!salMatch;
       if (salMatch) {
         const salIdx = line.indexOf(salMatch[0], segmentStart);
         if (salIdx > segmentStart) {
@@ -431,7 +458,11 @@ export const formatPositional: ParserStrategy = {
       // completely EMPTY cell (Linköping: the saken text is pushed entirely
       // onto its own continuation row, e.g. "T 3157-26 [nothing] Sal 8" then
       // "(återvinning tredskodom T 142-26)" below it) also means wrap.
-      sakenWrapped.push((cellWrapped || rawSaken.length === 0) && (!!room || !!location));
+      sakenWrapped.push(
+        (cellWrapped || rawSaken.length === 0 || sakenRanIntoGluedSal) &&
+          (!!room || !!location)
+      );
+      sakenGluedNoSpace.push(sakenRanIntoGluedSal && !cellWrapped && rawSaken.length > 0);
       needsEndTime.push(openTime);
     }
 
