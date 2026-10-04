@@ -11,7 +11,7 @@ import {
 /**
  * Regex matching a case number at the start of text (B, T, FT, K, M, F, Ä prefixes).
  */
-const CASE_AT_START_REGEX = /^((?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
+const CASE_AT_START_REGEX = /^((?:PMFT|PMT|PMÄ|PMB|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\b/i;
 
 /**
  * Regex matching a hearing line: YYYY-MM-DD HH:MM - HH:MM [<rest>]
@@ -198,7 +198,7 @@ function extractTrailingCases(saken: string, cases: string[]): string {
   const trailingFound: string[] = [];
   // Iteratively strip case numbers from the end of the text
   while (true) {
-    const m = s.match(/\s+((?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i);
+    const m = s.match(/\s+((?:PMFT|PMT|PMÄ|PMB|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2})\s*$/i);
     if (!m) break;
     trailingFound.unshift(m[1]); // prepend to maintain left-to-right order
     s = s.substring(0, m.index!).trim();
@@ -270,7 +270,7 @@ export const formatTabular: ParserStrategy = {
           // reassemble the split case number: "B 4624 - saken" + "25" → "B 4624-25 saken"
           if (cont[4]) {
             rest = rest.replace(
-              /((?:PMT|FT|[TBKMFÄ])\s?\d{1,6})\s*-\s*/i,
+              /((?:PMFT|PMT|PMÄ|PMB|FT|[TBKMFÄ])\s?\d{1,6})\s*-\s*/i,
               `$1-${cont[4]} `
             );
           }
@@ -292,7 +292,7 @@ export const formatTabular: ParserStrategy = {
             let rest = m[4];
             // Reassemble split case number
             rest = rest.replace(
-              /((?:PMT|FT|[TBKMFÄ])\s?\d{1,6})\s*-\s*/i,
+              /((?:PMFT|PMT|PMÄ|PMB|FT|[TBKMFÄ])\s?\d{1,6})\s*-\s*/i,
               `$1-${caseYear} `
             );
             // Append any extra text from line 2 (e.g. "24)" from split parenthetical)
@@ -452,7 +452,7 @@ export const formatTabular: ParserStrategy = {
       // the second case number "B 3694-24" but the number wrapped to a new line.
       let pendingCasePrefix = "";
       if (caseNumbers.length > 0) {
-        const lonePrefixMatch = afterCase.match(/^((?:PMT|FT|[TBKMFÄ]))\s+(?!\d)/i);
+        const lonePrefixMatch = afterCase.match(/^((?:PMFT|PMT|PMÄ|PMB|FT|[TBKMFÄ]))\s+(?!\d)/i);
         if (lonePrefixMatch) {
           pendingCasePrefix = lonePrefixMatch[1].toUpperCase();
           afterCase = afterCase.substring(lonePrefixMatch[0].length).trim();
@@ -698,7 +698,7 @@ export const formatTabular: ParserStrategy = {
       // Case numbers inside parentheses are kept (case references like
       // "återvinning av mål FT 1065-25").
       {
-        const embeddedCaseRegex = /(?<!\w)(?:PMT|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2}(?!\d)/gi;
+        const embeddedCaseRegex = /(?<!\w)(?:PMFT|PMT|PMÄ|PMB|FT|[TBKMFÄ])\s?\d{1,6}[-–—]\d{2}(?!\d)/gi;
         const toStrip: { start: number; end: number }[] = [];
         let ecMatch;
         while ((ecMatch = embeddedCaseRegex.exec(saken)) !== null) {

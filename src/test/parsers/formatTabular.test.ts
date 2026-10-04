@@ -377,6 +377,34 @@ describe("formatTabular", () => {
     expect(result[0].saken).toBe("anordnande av förvaltarskap");
   });
 
+  it("regression: extracts PMB/PMÄ/PMFT case numbers (Patent- och marknadsdomstolen)", () => {
+    // CASE_NUMBER_REGEX only special-cased "PMT" (and "FT") as multi-letter
+    // prefixes; "PMB 13528-25" fell through to the single-letter class
+    // [TBKMFÄ], where the negative lookbehind blocking a preceding letter
+    // ("M" in "PMB") then rejected the match entirely — leaving caseNumber
+    // empty and the whole case number sitting inside saken instead
+    // (Stockholms tingsrätt).
+    const text = [
+      "to 2026-10-01 09:15 - 16:30 Huvudförhandling (dag 1/4) PMB 13528-25 grovt varumärkesbrott m.m. Sal 37",
+      "to 2026-10-01 09:15 - 11:00 Sammanträde PMÄ 8348-25 konkurrensskadeavgift Sal 5",
+      "to 2026-10-01 13:00 - 15:00 Muntlig förberedelse PMFT 100-26 fordran Sal 6",
+    ].join("\n");
+    const result = formatTabular.parse({ courtName: "Stockholms tingsrätt", text });
+    expect(result).toHaveLength(3);
+    expect(result[0]).toMatchObject({
+      caseNumber: "PMB 13528-25",
+      saken: "grovt varumärkesbrott m.m",
+    });
+    expect(result[1]).toMatchObject({
+      caseNumber: "PMÄ 8348-25",
+      saken: "konkurrensskadeavgift",
+    });
+    expect(result[2]).toMatchObject({
+      caseNumber: "PMFT 100-26",
+      saken: "fordran",
+    });
+  });
+
   it("handles Linköping multi-line with (dag X/Y) and case number", () => {
     const text = [
       "må 2026-02-16",
