@@ -1383,6 +1383,16 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Alkohol- och punktskattebrott",
     primart_lagrum: ["Lag (2022:1257) om tobaksfria nikotinprodukter"],
   },
+
+  // --- Batch (2026-10): user batch (B) ---
+  // Grov oredlighet mot borgenär — generatorns "oredlighet mot borgenärer"
+  // (plural) matchar inte singularformen "borgenär"; samma bara
+  // kapitelreferens som den generade nyckeln (specifik paragraf för den
+  // grova graden inte tillräckligt säkert verifierad).
+  "grov oredlighet mot borgenär": {
+    sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
+    primart_lagrum: ["BrB 11 kap."],
+  },
 };
 
 /**
@@ -1708,6 +1718,27 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
   "brott mot mbl": {
     sakomrade: "Arbetsrätt",
     primart_lagrum: ["Medbestämmandelagen (1976:580) 54 §"],
+  },
+  // Brott mot medbestämmandelagen — utskriven form av "brott mot mbl".
+  "brott mot medbestämmandelagen": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Medbestämmandelagen (1976:580) 54 §"],
+  },
+  // Brott mot LAS — Lagen om anställningsskydd, generisk överträdelse.
+  "brott mot las": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80)"],
+  },
+  // Föreningsrättskränkning — kränkning av föreningsrätten, MBL 7-8 §§.
+  "föreningsrättskränkning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Medbestämmandelagen (1976:580) 8 §"],
+  },
+  // Immateriella tjänster — generisk tvist om tjänst utan fysiskt
+  // leveransobjekt (t.ex. konsult-/digitala tjänster), ingen egen lag.
+  "immateriella tjänster": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Avtalslagen (1915:218)"],
   },
   // Diskriminering — Diskrimineringslagen (typically arbetsrättslig kontext)
   "diskriminering": {
@@ -2297,6 +2328,15 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Hyresrätt",
     primart_lagrum: ["Bostadsrättslagen (1991:614) 7 kap."],
   },
+
+  // --- Batch (2026-10): user batch (T) ---
+  // Rätt till arv enligt testamente — fastställelsetalan om arvsrätt grundad
+  // på testamente, jfr "dödsbodelägare" (bar ÄB-referens, inget mer
+  // specifikt kapitel passar generellt).
+  "rätt till arv enligt testamente": {
+    sakomrade: "Arvsrätt",
+    primart_lagrum: ["Ärvdabalken"],
+  },
 };
 
 /**
@@ -2388,6 +2428,13 @@ export const familyLagrumOverrides: Record<string, LagrumEntry> = {
   // vårdnadshavare" (FB 6 kap. 10 §), annan ordföljd. Filed as T by some courts,
   // vilket når familjekartan (se indexesForCaseType i lagrumMatch.ts).
   "förordnande av särskild vårdnadshavare": {
+    sakomrade: "Familjerätt",
+    primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
+  },
+  // Förordnande av tillfällig vårdnadshavare — interimistisk variant av
+  // samma institut (FB 6 kap. 10 §); svensk rätt har inget separat lagrum
+  // för en "tillfällig" vårdnadshavare som sådan.
+  "förordnande av tillfällig vårdnadshavare": {
     sakomrade: "Familjerätt",
     primart_lagrum: ["Föräldrabalken 6 kap. 10 §"],
   },
@@ -2747,6 +2794,15 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: [
       "Lag (1904:26 s.1) om vissa internationella rättsförhållanden rörande äktenskap och förmynderskap 5 kap.",
     ],
+  },
+
+  // --- Batch (2026-10): user batch (Ä) ---
+  // Överklagat beslut i felparkeringsärende — samma sak som "överklagan av
+  // beslut i parkeringsärende", annan ordform ("överklagat" i st. för
+  // "överklagan av") och "felparkeringsärende" i st. för "parkeringsärende".
+  "överklagat beslut i felparkeringsärende": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
   },
 };
 
