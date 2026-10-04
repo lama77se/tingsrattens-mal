@@ -311,6 +311,27 @@ describe("formatStandard", () => {
     expect(result[1].saken).toContain("598181");
   });
 
+  it("treats a 'tredskodom <case>' reference with no 'i' as saken, not a new hearing (Borås)", () => {
+    // v40-41/2026: T 2181-26's saken references T 744-26's default judgment
+    // but drops the "i" that the Attunda phrasing above has ("återvinning av
+    // tredskodom T 744-26 (dödsbo)", not "...tredskodom i T 744-26..."). Before
+    // the fix this spawned a phantom "T 744-26" hearing with saken "(dödsbo)"
+    // and left T 2181-26 itself with an empty saken.
+    const text = [
+      "28-sep",
+      "10:00 - 12:00 Muntlig förberedelse",
+      "T 2181-26",
+      "klander av testamente; återvinning av tredskodom T 744-26 (dödsbo)Sal 2",
+    ].join("\n");
+
+    const result = formatStandard.parse({ courtName: "Borås tingsrätt", text });
+    expect(result).toHaveLength(1);
+    expect(result[0].caseNumber).toBe("T 2181-26");
+    expect(result[0].saken).toContain("klander av testamente");
+    expect(result[0].saken).toContain("T 744-26");
+    expect(result[0].saken).toContain("dödsbo");
+  });
+
   it("treats 'i mål ... och ...' case references as saken, not new hearings (Helsingborg)", () => {
     // w35/2026: T 970-26's saken references two other cases. The old parser
     // spawned a phantom "B 7028-25" hearing and made T 970-26 inherit the

@@ -23,12 +23,16 @@ import {
 // or a bare "i" (Attunda: "återvinning av tredskodom i T1184-26 (ref 598181)"
 // — no "mål", and the parenthesized "(ref ...)" sits AFTER the case number so
 // the paren-based check below never sees it) (REF_LEAD); further cases in the
-// list are joined with "och"/"samt"/comma (REF_JOIN). The `\b` in REF_LEAD is
-// load-bearing: it must NOT fire inside case-type words that also end in
-// "mål" — "Brottmål"/"Tvistemål"/"Familjemål" — which legitimately sit right
-// before a real case number in merged rows.
+// list are joined with "och"/"samt"/comma (REF_JOIN). Borås drops the "i"
+// entirely ("klander av testamente; återvinning av tredskodom T 744-26
+// (dödsbo)"), so "tredskodom" itself is also a lead-in — without it, "T
+// 744-26" reads as a genuine new hearing, swallowing "(dödsbo)" as its own
+// saken while leaving the real hearing (T 2181-26) empty. The `\b` in
+// REF_LEAD is load-bearing: it must NOT fire inside case-type words that also
+// end in "mål" — "Brottmål"/"Tvistemål"/"Familjemål" — which legitimately sit
+// right before a real case number in merged rows.
 // (Parenthesized references are handled separately by the paren check below.)
-const REF_LEAD = /\b(?:i|m[åa]l(?:\s*nr\.?)?)\s*$/i;
+const REF_LEAD = /\b(?:i|tredskodom|m[åa]l(?:\s*nr\.?)?)\s*$/i;
 const REF_JOIN = /(?:\boch|\bsamt|[,;])\s*$/i;
 
 /**
