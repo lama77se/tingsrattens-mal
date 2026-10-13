@@ -32,6 +32,26 @@ export interface CourtConfig {
 
 const BASE = "https://www.domstol.se/globalassets/filer/domstol";
 
+/**
+ * Resolves a matched week (or week-range) regex capture into {lo, hi}.
+ *
+ * A multi-week bundle's href sometimes concatenates both week numbers with
+ * no separator at all — Linköping's "v4142.pdf" for weeks 41-42, even though
+ * the listing page's human-readable link text still spells it "vecka
+ * 41-42" with a dash. Regexes written expecting that dash (`0*(\d+)(?:-0*
+ * (\d+))?`) then capture the whole run as one group with no second group,
+ * reading "4142" as a single (impossible) 4-digit week and filtering every
+ * PDF out. Swedish ISO weeks never reach 3 digits, so a lone 4-digit capture
+ * is always such a squished pair — split it into its two halves instead.
+ */
+export function weekRangeFromMatch(m: RegExpExecArray): { lo: number; hi: number } {
+  if (!m[2] && m[1].length === 4) {
+    return { lo: Number(m[1].slice(0, 2)), hi: Number(m[1].slice(2)) };
+  }
+  const lo = Number(m[1]);
+  return { lo, hi: m[2] ? Number(m[2]) : lo };
+}
+
 export const COURTS: CourtConfig[] = [
   {
     id: "alingsas_tingsratt",
@@ -108,8 +128,7 @@ export const COURTS: CourtConfig[] = [
             /vecka-0*(\d{1,2})(?:-0*(\d{1,2}))?-\d{4}-/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -131,8 +150,7 @@ export const COURTS: CourtConfig[] = [
             /vecka-0*(\d+)(?:-0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -181,8 +199,7 @@ export const COURTS: CourtConfig[] = [
             /-v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -325,8 +342,7 @@ export const COURTS: CourtConfig[] = [
             /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -360,8 +376,7 @@ export const COURTS: CourtConfig[] = [
             /vecka-0*(\d+)(?:-och-0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*(?:-|och)\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -386,8 +401,7 @@ export const COURTS: CourtConfig[] = [
             /block\/(?:vecka-)?0*(\d+)(?:-0*(\d+))?(?:-ny)?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -474,8 +488,7 @@ export const COURTS: CourtConfig[] = [
             /-v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -580,8 +593,7 @@ export const COURTS: CourtConfig[] = [
             /\/v\.?-?0*(\d+)(?:\s*-\s*0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bv\.?\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
@@ -604,8 +616,7 @@ export const COURTS: CourtConfig[] = [
             /vecka-0*(\d+)(?:-0*(\d+))?\.pdf/i.exec(p.href) ||
             /\bvecka\s*0*(\d+)(?:\s*-\s*0*(\d+))?/i.exec(p.text);
           if (!m) return false;
-          const lo = Number(m[1]);
-          const hi = m[2] ? Number(m[2]) : lo;
+          const { lo, hi } = weekRangeFromMatch(m);
           return week >= lo && week <= hi;
         })
         .map((p) => p.href),
