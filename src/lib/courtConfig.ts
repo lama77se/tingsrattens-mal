@@ -52,6 +52,25 @@ export function weekRangeFromMatch(m: RegExpExecArray): { lo: number; hi: number
   return { lo, hi: m[2] ? Number(m[2]) : lo };
 }
 
+/**
+ * Picks the hearing-schedule PDF from a scraped listing page for courts that
+ * assume there is exactly one relevant PDF on the page (`pdfs[0]`). That
+ * assumption breaks the moment the page also links an unrelated PDF — Gävle's
+ * "aktuellt" page started linking a school-visit ("studiebesök") brochure
+ * ABOVE the actual "Förhandlingar ... sal 5" schedule, so `pdfs[0]` picked
+ * the brochure and the court showed 0 hearings even though the real PDF
+ * parsed fine on its own. Every one of these courts' schedule PDFs has
+ * "förhandling" somewhere in its link text (verified against each court's
+ * live listing page), so prefer a link whose text contains it; fall back to
+ * the previous behaviour (plain first link) if none match, so a page that
+ * only has the one expected PDF — or unexpectedly different wording — still
+ * works exactly as before.
+ */
+export function pickHearingPdf(pdfs: ScrapedPdfLink[]): string | null {
+  const match = pdfs.find((p) => /förhandling/i.test(p.text));
+  return match?.href ?? pdfs[0]?.href ?? null;
+}
+
 export const COURTS: CourtConfig[] = [
   {
     id: "alingsas_tingsratt",
@@ -273,7 +292,7 @@ export const COURTS: CourtConfig[] = [
     // so we scrape the listing page rather than guess.
     listingUrl:
       "https://www.domstol.se/gavle-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    pickFromListing: (pdfs) => pickHearingPdf(pdfs),
     buildUrl: () => [],
   },
   {
@@ -322,7 +341,7 @@ export const COURTS: CourtConfig[] = [
     // so we scrape the listing page rather than guess.
     listingUrl:
       "https://www.domstol.se/kristianstads-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    pickFromListing: (pdfs) => pickHearingPdf(pdfs),
     buildUrl: () => [],
   },
   {
@@ -507,7 +526,7 @@ export const COURTS: CourtConfig[] = [
     // the single schedule PDF it links.
     listingUrl:
       "https://www.domstol.se/sodertorns-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    pickFromListing: (pdfs) => pickHearingPdf(pdfs),
     buildUrl: () => [],
   },
   {
@@ -557,7 +576,7 @@ export const COURTS: CourtConfig[] = [
     // take the one PDF it links rather than guessing the range.
     listingUrl:
       "https://www.domstol.se/varbergs-tingsratt/om-tingsratten/aktuellt/forhandlingsschema/",
-    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    pickFromListing: (pdfs) => pickHearingPdf(pdfs),
     buildUrl: () => [],
   },
   {
@@ -573,7 +592,7 @@ export const COURTS: CourtConfig[] = [
     // links.
     listingUrl:
       "https://www.domstol.se/uppsala-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    pickFromListing: (pdfs) => pickHearingPdf(pdfs),
     buildUrl: () => [],
   },
   {
@@ -671,7 +690,7 @@ export const COURTS: CourtConfig[] = [
     // week), so scrape the listing page and take the one PDF it links.
     listingUrl:
       "https://www.domstol.se/orebro-tingsratt/om-tingsratten/aktuellt/veckans-forhandlingar/",
-    pickFromListing: (pdfs) => pdfs[0]?.href ?? null,
+    pickFromListing: (pdfs) => pickHearingPdf(pdfs),
     buildUrl: () => [],
   },
   {
