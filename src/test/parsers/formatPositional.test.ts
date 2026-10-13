@@ -430,4 +430,41 @@ describe("formatPositional", () => {
       room: "Sal 1",
     });
   });
+
+  it("Eksjö regression: a single-letter continuation line is not dropped", () => {
+    // "kroppsskada m" wraps a trailing "m" ("m.m.") onto its own physical
+    // row — a single character. isContinuationCandidate used to require at
+    // least 2 characters, silently dropping it and leaving the saken one
+    // "m" short.
+    const text = build([
+      `må${TAB}2026-09-28 13:30 - 15:30${TAB}Huvudförhandling${TAB}vållande till ${TAB}Sal 1`,
+      "kroppsskada m",
+      "m",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0].saken).toBe("vållande till kroppsskada m m");
+  });
+
+  it("Eksjö regression: reconstructs a hearing type cut off by its last letter and glued to saken", () => {
+    // The column-width cutoff ate "Häktningsförhandling"'s trailing "g" and
+    // glued what's left straight onto the saken text with no separator at
+    // all ("Häktningsförhandlinmisshandel"). HEARING_TYPE_RE can't match the
+    // incomplete word, so the type fell back to generic "Förhandling" and
+    // the saken kept the truncated type as a prefix. The truncated prefix is
+    // unique among the known types, so it's recoverable without needing the
+    // orphan "g" completion row (which gets filtered as noise anyway, same
+    // as any other type-column wrap).
+    const text = build([
+      `ti${TAB}2026-09-29 14:00 - 14:45${TAB}Häktningsförhandlinmisshandel${TAB}Sal 3`,
+      "g",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Eksjö tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0]).toMatchObject({
+      type: "Häktningsförhandling",
+      saken: "misshandel",
+      room: "Sal 3",
+    });
+  });
 });
