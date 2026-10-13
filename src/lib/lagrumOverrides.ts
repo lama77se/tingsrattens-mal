@@ -1393,6 +1393,58 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot borgenärer / ekonomisk brottslighet",
     primart_lagrum: ["BrB 11 kap."],
   },
+
+  // --- Batch (2026-10b): user batch (B / PMB) ---
+  // Framkallande av fara för annan — BrB 3 kap. 9 §. Generatorns
+  // compound-nycklar ("...för arbetstagare" / "...i trafiken och övriga
+  // fall") matchar inte den bara formen.
+  "framkallande av fara för annan": {
+    sakomrade: "Brott mot liv och hälsa",
+    primart_lagrum: ["BrB 3 kap. 9 §"],
+  },
+  // Grovt penningsbrott — trolig felstavning/hopdragning av "grovt
+  // penningtvättsbrott" (mellanledet "tvätt" bortfallet).
+  "grovt penningsbrott": {
+    sakomrade: "Ekonomisk brottslighet",
+    primart_lagrum: ["Lagen (2014:307) om straff för penningtvättsbrott 5 §"],
+  },
+  // Brott mot lagen om foder och animaliska biprodukter — Lag (2006:805).
+  "brott mot lagen om foder och animaliska biprodukter": {
+    sakomrade: "Miljöbrott",
+    primart_lagrum: ["Lag (2006:805) om foder och animaliska biprodukter"],
+  },
+  // Grovt svindleri — BrB 9 kap. 9 § (grundbrott och grov grad i samma
+  // paragraf).
+  "grovt svindleri": {
+    sakomrade: "Förmögenhetsbrott",
+    primart_lagrum: ["BrB 9 kap. 9 §"],
+  },
+  // Grovt varumärkesbrott (PMB, routar via case-type "B") — Varumärkeslagen
+  // 8 kap. 1 §. 8 kap. 2 § (tidigare den grova graden) upphörde att gälla
+  // genom SFS 2024:866; grundbrott och grov grad regleras nu i samma
+  // paragraf, jfr "varumärkesintrång".
+  "grovt varumärkesbrott": {
+    sakomrade: "Immaterialrättsbrott",
+    primart_lagrum: ["Varumärkeslagen (2010:1877) 8 kap. 1 §"],
+  },
+  // Krav på återbäring — enskilt anspråk om återbäring av egendom/belopp
+  // inom ramen för ett brottmål, allmänna förmögenhetsrättsliga principer.
+  "krav på återbäring": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Skadeståndslagen (1972:207)"],
+  },
+  // Rödljuskörning — Trafikförordningen (1998:1276).
+  "rödljuskörning": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Trafikförordningen (1998:1276)"],
+  },
+  // Brott mot förordningen om fordons registrering och användning —
+  // Förordning (2019:383), jfr "brott mot lagen om fordons registrering och
+  // användning" (Lag 2019:370, samma sakfråga, annan författningstyp).
+  "brott mot förordningen om fordons registrering och användning": {
+    sakomrade: "Trafikbrott",
+    primart_lagrum: ["Förordning (2019:383) om fordons registrering och användning"],
+  },
 };
 
 /**
@@ -2337,6 +2389,53 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Arvsrätt",
     primart_lagrum: ["Ärvdabalken"],
   },
+
+  // --- Batch (2026-10b): user batch (T/FT/PMT) ---
+  // Återbetalning av lån — generiskt låneåterbetalningskrav, Skuldebrevslagen.
+  "återbetalning av lån": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Skuldebrevslagen (1936:81)"],
+  },
+  // Utgivande av egendom — vindikationstalan, jfr "äganderätt till lös
+  // egendom" / "bättre rätt" (inget eget lagrum).
+  "utgivande av egendom": {
+    sakomrade: "Sakrätt",
+    primart_lagrum: [],
+  },
+  // Diskrimineringsersättning — Diskrimineringslagen 5 kap. (påföljder),
+  // jfr "överträdelse av diskrimineringslagen".
+  "diskrimineringsersättning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Diskrimineringslagen (2008:567) 5 kap."],
+  },
+  // Ogiltig uppsägning — själva ogiltighetstalan, annan ordform av
+  // "ogiltigförklaring av uppsägning" (LAS 34 §). Jfr "felaktig uppsägning"
+  // (7 §, grunden saklig grund saknas).
+  "ogiltig uppsägning": {
+    sakomrade: "Arbetsrätt",
+    primart_lagrum: ["Lagen om anställningsskydd (1982:80) 34 §"],
+  },
+  // Fel i köpt vara — generiskt köprättsligt fel, jfr "köprättsligt fel".
+  "fel i köpt vara": {
+    sakomrade: "Köprätt",
+    primart_lagrum: ["Köplagen (1990:931)"],
+  },
+  // Trafikskada (bar form) — jfr "trafikskadeersättning", Trafikskadelagen.
+  "trafikskada": {
+    sakomrade: "Skadeståndsrätt",
+    primart_lagrum: ["Trafikskadelagen (1975:1410)"],
+  },
+  // Vitesförbud (PMT) — förbud vid vite enligt Marknadsföringslagen 26 §.
+  "vitesförbud": {
+    sakomrade: "Marknadsföringsrätt",
+    primart_lagrum: ["Marknadsföringslagen (2008:486) 26 §"],
+  },
+  // Ogiltigförklaring av patent (PMT) — Patentlagen 7 kap. (ogiltigförklaring
+  // och överföring av patent).
+  "ogiltigförklaring av patent": {
+    sakomrade: "Immaterialrätt",
+    primart_lagrum: ["Patentlagen (1967:837) 7 kap."],
+  },
 };
 
 /**
@@ -2803,6 +2902,26 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   "överklagat beslut i felparkeringsärende": {
     sakomrade: "Fordringsrätt",
     primart_lagrum: ["Lag (1976:206) om felparkeringsavgift"],
+  },
+
+  // --- Batch (2026-10b): user batch (Ä) ---
+  // Överklagande av övervakningsnämndens beslut — utskriven form av
+  // "övervakningsnämnd" (skyddstillsyn/villkorlig frigivning), BrB 37:11.
+  "överklagande av övervakningsnämndens beslut": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 37 kap. 11 §"],
+  },
+  // Upphörande av förvaltare — personfokuserad ordform av "upphörande av
+  // förvaltarskap", FB 11 kap. 19 §.
+  "upphörande av förvaltare": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 19 §"],
+  },
+  // Exekutiv försäljning av lös egendom — Kronofogdens försäljning av utmätt
+  // lös egendom, UB 8 kap., jfr "utmätning" (18 kap., överklagande av beslut).
+  "exekutiv försäljning av lös egendom": {
+    sakomrade: "Fordringsrätt",
+    primart_lagrum: ["Utsökningsbalken (1981:774) 8 kap."],
   },
 };
 
