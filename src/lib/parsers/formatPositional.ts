@@ -51,6 +51,27 @@ const EXTERNAL_COURT_AT_END_RE = /([A-ZÅÄÖ][a-zåäö]+\s+tingsrätt)\s*$/;
 // "Edgångssmtr" = Edgångssammanträde abbreviated; normalize to canonical form.
 const HEARING_TYPE_RE =
   /(Huvudförhandling|Muntlig förberedelse|Konkursförhandling|Häktningsförhandling|Edgångssmtr|Edgångssammanträde|Sammanträde|Förhandling)/i;
+// Fallback for a type word cut off by exactly its last letter and glued
+// directly onto the next column with no separator at all (Eksjö:
+// "Häktningsförhandlinmisshandel" — the renderer's column-width cutoff ate
+// the trailing "g", and the orphan completion row ("g") that would
+// otherwise restore it gets filtered as noise, same as a normal type-column
+// wrap). Each truncated prefix is unique among the HEARING_TYPE_RE
+// alternatives, so the type is already unambiguous without that letter;
+// only tried when HEARING_TYPE_RE itself didn't match. The lookahead
+// requires the cut to run straight into another letter — a clean word
+// boundary there would have let the full word match already.
+const HEARING_TYPE_TRUNCATED_RE =
+  /\b(Huvudförhandlin|Muntlig förberedels|Konkursförhandlin|Häktningsförhandlin|Edgångssammanträd|Sammanträd|Förhandlin)(?=[a-zåäö])/i;
+const HEARING_TYPE_TRUNCATED_MAP: Record<string, string> = {
+  huvudförhandlin: "Huvudförhandling",
+  "muntlig förberedels": "Muntlig förberedelse",
+  konkursförhandlin: "Konkursförhandling",
+  häktningsförhandlin: "Häktningsförhandling",
+  edgångssammanträd: "Edgångssammanträde",
+  sammanträd: "Sammanträde",
+  förhandlin: "Förhandling",
+};
 const WEEKDAY_RE = /^(må|ti|on|to|fr|lö|sö)\b/i;
 // "(dag X/Y)" — multi-day hearing annotation; never part of the saken cell.
 const DAG_ANNOTATION_RE = /^\(dag\s+\d+\/\d+\)$/i;
@@ -88,7 +109,15 @@ function hasOpenContinuation(rawSaken: string): boolean {
 }
 
 function isContinuationCandidate(line: string): boolean {
-  if (!line || line.length < 2) return false;
+  // No minimum length: a continuation can legitimately be a single letter
+  // completing a word that got cut off mid-stream by the column width
+  // (Eksjö: "trafikförordninge" + "n" = "trafikförordningen",
+  // "kroppsskada m" + "m" = "kroppsskada m m"). Its only caller already runs
+  // the line through filterNoiseSegments first, which strips the known
+  // noise patterns (dag-annotations, type-wrap artifacts, bare times,
+  // "tingsrätt") that a length floor would otherwise have been guarding
+  // against, so nothing else here relies on one.
+  if (!line) return false;
   if (CASE_NUMBER_REGEX.test(line)) return false;
   if (ISO_DATE_RE.test(line)) return false;
   if (SHORT_DATE_REGEX.test(line)) return false;
@@ -382,13 +411,26 @@ export const formatPositional: ParserStrategy = {
       }
 
       const typeMatch = line.match(HEARING_TYPE_RE);
-      const type = typeMatch ? normalizeType(typeMatch[1]) : "Förhandling";
+      let type = typeMatch ? normalizeType(typeMatch[1]) : "Förhandling";
+      let typeMatchEnd = typeMatch
+        ? (typeMatch.index ?? 0) + typeMatch[0].length
+        : null;
+      if (!typeMatch) {
+        const truncatedType = line.match(HEARING_TYPE_TRUNCATED_RE);
+        const fullType =
+          truncatedType &&
+          HEARING_TYPE_TRUNCATED_MAP[truncatedType[1].toLowerCase()];
+        if (truncatedType && fullType) {
+          type = fullType;
+          typeMatchEnd = (truncatedType.index ?? 0) + truncatedType[0].length;
+        }
+      }
 
       // Saken sits between (the last of case#/type/time) and the Sal column.
       // Pick the right-most "left-anchor" column we matched.
       const leftAnchors: number[] = [];
       if (caseMatch) leftAnchors.push((caseMatch.index ?? 0) + caseMatch[0].length);
-      if (typeMatch) leftAnchors.push((typeMatch.index ?? 0) + typeMatch[0].length);
+      if (typeMatchEnd !== null) leftAnchors.push(typeMatchEnd);
       if (timeMatch) leftAnchors.push((timeMatch.index ?? 0) + timeMatch[0].length);
       const segmentStart = leftAnchors.length > 0 ? Math.max(...leftAnchors) : 0;
 
