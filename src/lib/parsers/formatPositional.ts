@@ -211,6 +211,17 @@ export const formatPositional: ParserStrategy = {
     // then cleared, so later continuation words still get a normal space.
     const sakenGluedNoSpace: boolean[] = [];
     let currentDate = "";
+    // An orphan continuation-candidate line that didn't merge into the
+    // previous hearing (it wasn't expecting more saken text) is held here in
+    // case the NEXT hearing row turns out to have a completely empty saken
+    // cell. The Y-grouped renderer vertically centers a long wrapped saken
+    // cell around the row's own Y-coordinate, so a 3-line wrap puts its FIRST
+    // line on the physical row ABOVE the data row, the row itself carries
+    // only the other columns (empty saken), and the LAST line lands below
+    // (Linköping: "undanröjande av villkorlig dom med" / B 238-26 row /
+    // "samhällstjänst"). Scoped to the single next row so it can never leak
+    // into an unrelated later hearing.
+    let pendingBeforeFragment = "";
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -303,61 +314,62 @@ export const formatPositional: ParserStrategy = {
       // Without either it's continuation/noise.
       if (!caseMatch && !timeMatch) {
         const lastIdx = hearings.length - 1;
-        if (lastIdx < 0) continue;
 
-        // Complete a half-open time range whose end time wrapped to this row.
-        if (needsEndTime[lastIdx]) {
-          const endMatch = line.match(/\b(\d{1,2}[:.]\d{2})\b/);
-          if (endMatch) {
-            hearings[lastIdx].time = hearings[lastIdx].time.replace(
-              /-\s*$/,
-              `- ${endMatch[1].replace(".", ":")}`
-            );
-            needsEndTime[lastIdx] = false;
-          }
-        }
-
-        if (rawCaseMatch) {
-          // Bare-alias or paren-ref line. Fold the closing-paren case into the
-          // previous saken when the saken has an open paren, OR when the
-          // previous hearing's saken cell is otherwise known to need a
-          // continuation row (empty cell, wrapped cell, no right anchor) —
-          // e.g. Linköping: "T 3157-26 [empty saken] Sal 8" followed by
-          // "(återvinning tredskodom T 142-26)" on its own row, a
-          // self-contained parenthetical that isn't "closing" anything but IS
-          // the missing saken text. Otherwise drop (bare-alias case numbers
-          // aren't currently linked back as aliases).
-          const afterCase = line.substring(
-            (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
-          );
-          const isParenClose =
-            afterCase.startsWith(")") &&
-            hasOpenContinuation(rawSakenAcc[lastIdx]);
-          if (
-            isParenClose ||
-            expectsContinuation[lastIdx] ||
-            lacksRightAnchor[lastIdx] ||
-            sakenWrapped[lastIdx]
-          ) {
-            // Paren-close: the case# is meaningful reference prose inside the
-            // parenthetical (Linköping: "(återvinning tredskodom T 142-26)")
-            // — keep the whole line. Otherwise this is a bare co-defendant
-            // alias row that may carry "(dag X/Y)"/time noise ahead of its
-            // own case# (Eskilstuna: "(dag 5/18)\t16:00\tB 678-23") — filter
-            // that noise (and the alias's own case#) out before merging, so
-            // it doesn't get glued onto the real hearing's saken.
-            const trimmed = isParenClose
-              ? line.replace(/\t+/g, " ").trim()
-              : filterNoiseSegments(line, true);
-            if (trimmed) {
-              const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
-              rawSakenAcc[lastIdx] = merged;
-              hearings[lastIdx].saken = cleanSaken(merged);
-              expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+        if (lastIdx >= 0) {
+          // Complete a half-open time range whose end time wrapped to this row.
+          if (needsEndTime[lastIdx]) {
+            const endMatch = line.match(/\b(\d{1,2}[:.]\d{2})\b/);
+            if (endMatch) {
+              hearings[lastIdx].time = hearings[lastIdx].time.replace(
+                /-\s*$/,
+                `- ${endMatch[1].replace(".", ":")}`
+              );
+              needsEndTime[lastIdx] = false;
             }
-            sakenWrapped[lastIdx] = false;
           }
-          continue;
+
+          if (rawCaseMatch) {
+            // Bare-alias or paren-ref line. Fold the closing-paren case into the
+            // previous saken when the saken has an open paren, OR when the
+            // previous hearing's saken cell is otherwise known to need a
+            // continuation row (empty cell, wrapped cell, no right anchor) —
+            // e.g. Linköping: "T 3157-26 [empty saken] Sal 8" followed by
+            // "(återvinning tredskodom T 142-26)" on its own row, a
+            // self-contained parenthetical that isn't "closing" anything but IS
+            // the missing saken text. Otherwise drop (bare-alias case numbers
+            // aren't currently linked back as aliases).
+            const afterCase = line.substring(
+              (rawCaseMatch.index ?? 0) + rawCaseMatch[0].length
+            );
+            const isParenClose =
+              afterCase.startsWith(")") &&
+              hasOpenContinuation(rawSakenAcc[lastIdx]);
+            if (
+              isParenClose ||
+              expectsContinuation[lastIdx] ||
+              lacksRightAnchor[lastIdx] ||
+              sakenWrapped[lastIdx]
+            ) {
+              // Paren-close: the case# is meaningful reference prose inside the
+              // parenthetical (Linköping: "(återvinning tredskodom T 142-26)")
+              // — keep the whole line. Otherwise this is a bare co-defendant
+              // alias row that may carry "(dag X/Y)"/time noise ahead of its
+              // own case# (Eskilstuna: "(dag 5/18)\t16:00\tB 678-23") — filter
+              // that noise (and the alias's own case#) out before merging, so
+              // it doesn't get glued onto the real hearing's saken.
+              const trimmed = isParenClose
+                ? line.replace(/\t+/g, " ").trim()
+                : filterNoiseSegments(line, true);
+              if (trimmed) {
+                const merged = (rawSakenAcc[lastIdx] + " " + trimmed).trim();
+                rawSakenAcc[lastIdx] = merged;
+                hearings[lastIdx].saken = cleanSaken(merged);
+                expectsContinuation[lastIdx] = hasOpenContinuation(merged);
+              }
+              sakenWrapped[lastIdx] = false;
+            }
+            continue;
+          }
         }
 
         // Pure continuation row (no case#, no time). Strip annotation and
@@ -366,6 +378,7 @@ export const formatPositional: ParserStrategy = {
         const filteredLine = filterNoiseSegments(line, false);
         if (!filteredLine) continue;
         if (
+          lastIdx >= 0 &&
           isContinuationCandidate(filteredLine) &&
           (expectsContinuation[lastIdx] || lacksRightAnchor[lastIdx] || sakenWrapped[lastIdx])
         ) {
@@ -391,6 +404,13 @@ export const formatPositional: ParserStrategy = {
           // a new case#, a dag-annotation — takes a different code path or
           // gets filtered above, so staying armed here only keeps consuming
           // rows that are themselves confirmed plain continuation text.
+        } else if (isContinuationCandidate(filteredLine)) {
+          // The previous hearing isn't expecting more saken text, so this
+          // orphan line isn't its continuation — hold it for the NEXT hearing
+          // row instead, in case that row's own saken cell comes up empty.
+          pendingBeforeFragment = pendingBeforeFragment
+            ? `${pendingBeforeFragment} ${filteredLine}`
+            : filteredLine;
         }
         continue;
       }
@@ -474,7 +494,11 @@ export const formatPositional: ParserStrategy = {
       // Did the cell end with whitespace before the column break (Sal)? That
       // signals a wrapped cell whose tail is on the next physical row.
       const cellWrapped = /\s$/.test(sakenCell.replace(/\t+$/, ""));
-      const rawSaken = sakenCell.replace(/\t+/g, " ").trim();
+      const sakenFromCell = sakenCell.replace(/\t+/g, " ").trim();
+      // An empty cell here means the saken text was pushed entirely off this
+      // row — claim a fragment left behind by the row above, if there is one.
+      const rawSaken = sakenFromCell || pendingBeforeFragment;
+      pendingBeforeFragment = "";
       const saken = cleanSaken(rawSaken);
 
       // Drop rows that yielded no meaningful content (e.g. stray time-only
@@ -499,12 +523,15 @@ export const formatPositional: ParserStrategy = {
       // already handles the merge); a trailing-space cell means a wrap, and a
       // completely EMPTY cell (Linköping: the saken text is pushed entirely
       // onto its own continuation row, e.g. "T 3157-26 [nothing] Sal 8" then
-      // "(återvinning tredskodom T 142-26)" below it) also means wrap.
+      // "(återvinning tredskodom T 142-26)" below it) also means wrap. Use
+      // the cell's own (pre-buffer) emptiness here, not the merged rawSaken —
+      // a claimed pendingBeforeFragment still leaves this row expecting its
+      // own continuation on the row below.
       sakenWrapped.push(
-        (cellWrapped || rawSaken.length === 0 || sakenRanIntoGluedSal) &&
+        (cellWrapped || sakenFromCell.length === 0 || sakenRanIntoGluedSal) &&
           (!!room || !!location)
       );
-      sakenGluedNoSpace.push(sakenRanIntoGluedSal && !cellWrapped && rawSaken.length > 0);
+      sakenGluedNoSpace.push(sakenRanIntoGluedSal && !cellWrapped && sakenFromCell.length > 0);
       needsEndTime.push(openTime);
     }
 

@@ -467,4 +467,46 @@ describe("formatPositional", () => {
       room: "Sal 3",
     });
   });
+
+  it("Linköping regression: recovers a saken cell split before AND after an empty hearing row", () => {
+    // The Y-grouped renderer vertically centers a long wrapped saken cell
+    // around the row's own Y-coordinate: the first line lands on the
+    // physical row ABOVE the data row, the data row's own saken cell comes
+    // up empty, and the last line lands on the row below. Previously only
+    // the "after" line was recovered — the row above was silently dropped as
+    // an orphan with nothing to attach to, producing just "samhällstjänst"
+    // instead of the full "undanröjande av villkorlig dom med samhällstjänst".
+    const text = build([
+      "undanröjande av villkorlig dom med",
+      `on${TAB}2026-10-07 11:00 - 11:45${TAB}Sammanträde${TAB}B 238-26${TAB}Sal 11`,
+      "samhällstjänst",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "B 238-26",
+      saken: "undanröjande av villkorlig dom med samhällstjänst",
+      room: "Sal 11",
+    });
+  });
+
+  it("Linköping regression: a type-column wrap line directly above a row does NOT leak into that row's saken", () => {
+    // "Muntlig förberedelse och" / "ev hf" wraps the TYPE column (too long
+    // for its width), not the saken column — the row in between has its own
+    // non-empty saken ("fordran"). The before-fragment buffer must only be
+    // claimed by a row whose own saken cell is empty, or this would wrongly
+    // glue the type-wrap text onto an unrelated saken.
+    const text = build([
+      "Muntlig förberedelse och",
+      `on${TAB}2026-10-14 10:00 - 12:00${TAB}FT 3233-26${TAB}fordran${TAB}Sal 8`,
+      "ev hf",
+    ]);
+    const hearings = formatPositional.parse({ courtName: "Linköpings tingsrätt", text });
+    expect(hearings).toHaveLength(1);
+    expect(hearings[0]).toMatchObject({
+      caseNumber: "FT 3233-26",
+      saken: "fordran",
+      room: "Sal 8",
+    });
+  });
 });
