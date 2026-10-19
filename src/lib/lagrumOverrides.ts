@@ -38,6 +38,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["BrB 27 kap. 6 §"],
   },
+  "undanröjande av samhällstjänst": {
+    sakomrade: "Brott mot rättskipningen",
+    primart_lagrum: ["BrB 27 kap. 6 §"],
+  },
   "förverkande av villkorligt medgiven frihet": {
     sakomrade: "Brott mot rättskipningen",
     primart_lagrum: ["BrB 34 kap. 5 §"],
@@ -1383,6 +1387,10 @@ export const lagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Alkohol- och punktskattebrott",
     primart_lagrum: ["Lag (2022:1257) om tobaksfria nikotinprodukter"],
   },
+  "olovlig försäljning av tobaksfria nikotinprodukter": {
+    sakomrade: "Alkohol- och punktskattebrott",
+    primart_lagrum: ["Lag (2022:1257) om tobaksfria nikotinprodukter"],
+  },
 
   // --- Batch (2026-10): user batch (B) ---
   // Grov oredlighet mot borgenär — generatorns "oredlighet mot borgenärer"
@@ -1578,6 +1586,10 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: ["Jordabalken 12 kap."],
   },
   "fel i fastighet": {
+    sakomrade: "Fastighetsrätt",
+    primart_lagrum: ["Jordabalken 4 kap. 19 §"],
+  },
+  "fel vid köp av fastighet": {
     sakomrade: "Fastighetsrätt",
     primart_lagrum: ["Jordabalken 4 kap. 19 §"],
   },
@@ -1812,6 +1824,10 @@ export const civilLagrumOverrides: Record<string, LagrumEntry> = {
     primart_lagrum: ["Försäkringsavtalslagen (2005:104)"],
   },
   "försäkringsersättning": {
+    sakomrade: "Avtalsrätt",
+    primart_lagrum: ["Försäkringsavtalslagen (2005:104)"],
+  },
+  "rätt till försäkring": {
     sakomrade: "Avtalsrätt",
     primart_lagrum: ["Försäkringsavtalslagen (2005:104)"],
   },
@@ -2572,6 +2588,10 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
   },
+  "ansökan om god man och förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
+  },
   "utökning av godmanskap till förvaltarskap": {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap. 7 §"],
@@ -2628,6 +2648,10 @@ export const arendenLagrumOverrides: Record<string, LagrumEntry> = {
   },
   // Jämkning av förvaltarskap — FB 11 kap. 23 § (förvaltaruppdragets omfattning)
   "jämkning av förvaltarskap": {
+    sakomrade: "Förmynderskapsrätt",
+    primart_lagrum: ["Föräldrabalken 11 kap. 23 §"],
+  },
+  "utvidgande av förvaltarskap": {
     sakomrade: "Förmynderskapsrätt",
     primart_lagrum: ["Föräldrabalken 11 kap. 23 §"],
   },
