@@ -488,8 +488,11 @@ export const COURTS: CourtConfig[] = [
     id: "sundsvalls_tingsratt",
     name: "Sundsvalls tingsrätt",
     formatFamily: "tabular",
-    buildUrl: (week) =>
-      `${BASE}/sundsvalls_tingsratt/block/v.-${week}.pdf`,
+    singleUrl: true,
+    // Per-week block/v.-{week}.pdf files 404 as of w44/2026; the court now
+    // overwrites a single veckansforhandlingar.pdf each week.
+    buildUrl: () =>
+      `${BASE}/sundsvalls_tingsratt/block/veckans-forhandlingar/veckansforhandlingar.pdf`,
   },
   {
     id: "uddevalla_tingsratt",
